@@ -1,9 +1,132 @@
+/* eslint-disable @next/next/no-img-element */
 import Image from 'next/image';
 import Link from 'next/link';
-import openseaLogo from '../assets/openseaLogo.svg';
 import { AiOutlineSearch } from 'react-icons/ai';
 import { CgProfile } from 'react-icons/cg';
-import { MdOutlineAccountBalanceWallet } from 'react-icons/md';
+import {
+    MdOutlineAccountBalanceWallet,
+    MdFavoriteBorder,
+    MdPerson,
+    MdVisibility,
+    MdGridOn,
+    MdSettings,
+    MdLogout,
+} from 'react-icons/md';
+import SvgLogo from '../assets/icons/index';
+
+const categories = [
+    {
+        id: 0,
+        title: 'All NFTs',
+        link: '/assets',
+        icon: SvgLogo.AllnftsLogo,
+    },
+    {
+        id: 1,
+        title: 'Art',
+        link: 'category/art',
+        icon: SvgLogo.ArtLogo,
+    },
+    {
+        id: 2,
+        title: 'Collectibles',
+        link: 'category/collectibles',
+        icon: SvgLogo.CollectiblesLogo,
+    },
+    {
+        id: 3,
+        title: 'Domain Names',
+        link: 'category/domain-names',
+        icon: SvgLogo.DomainLogo,
+    },
+    {
+        id: 4,
+        title: 'Music',
+        link: 'category/music',
+        icon: SvgLogo.MusicLogo,
+    },
+    {
+        id: 5,
+        title: 'Photography',
+        link: 'category/photography',
+        icon: SvgLogo.PhotographyLogo,
+    },
+    {
+        id: 6,
+        title: 'Sports',
+        link: 'category/sports',
+        icon: SvgLogo.SportsLogo,
+    },
+];
+
+const stats = [
+    {
+        id: 0,
+        title: 'Rankings',
+        link: '/rankings',
+    },
+    {
+        id: 1,
+        title: 'Activity',
+        link: '/activity',
+    },
+];
+
+const resources = [
+    {
+        id: 0,
+        title: 'Help Center',
+        link: '/',
+    },
+    {
+        id: 1,
+        title: 'Plaform Status',
+        link: '/',
+    },
+    {
+        id: 2,
+        title: 'Gas-Free Marketplace',
+        link: '/',
+    },
+    {
+        id: 3,
+        title: 'Docs',
+        link: '/',
+    },
+];
+
+const accounts = [
+    {
+        id: 0,
+        title: 'Profile',
+        link: '/profile',
+        icon: <MdPerson className="text-2xl text-[#8a939b]" />,
+    },
+    {
+        id: 1,
+        title: 'Favorites',
+        link: '/favorites',
+        icon: <MdFavoriteBorder className="text-2xl text-[#8a939b]" />,
+    },
+    {
+        id: 2,
+        title: 'Watchlist',
+        link: '/my-watchlist',
+        icon: <MdVisibility className="text-2xl text-[#8a939b]" />,
+    },
+    {
+        id: 3,
+        title: 'My Collections',
+        link: '/collections',
+        icon: <MdGridOn className="text-2xl text-[#8a939b]" />,
+    },
+    {
+        id: 4,
+        title: 'Settings',
+        link: '/account/settings',
+        icon: <MdSettings className="text-2xl text-[#8a939b]" />,
+    },
+];
 
 const style = {
     wrapper: `bg-[#04111d] w-screen px-[1.2rem] py-[0.8rem] flex `,
@@ -24,7 +147,7 @@ const Header = () => {
                 <Link href="/">
                     <a className="flex h-full items-center">
                         <Image
-                            src={openseaLogo}
+                            src={SvgLogo.OpenseaLogo}
                             height={40}
                             width={40}
                             alt="Logo"
@@ -46,26 +169,112 @@ const Header = () => {
             </div>
             <ul className="flex">
                 <div className="flex items-center">
-                    <li className="h-full">
-                        <Link href="/">
+                    <li className="h-full group">
+                        <Link href="/explore-collections">
                             <a className="flex items-center h-full px-5 font-bold text-[#c8cacd] hover:text-white">
                                 Explore
                             </a>
                         </Link>
+                        <div
+                            className="opacity-0 group-hover:opacity-100 group-hover:z-10 absolute top-[72px] -z-10"
+                            style={{
+                                transition: 'all 0.4s ease-in-out',
+                            }}
+                        >
+                            <ul className="bg-[#262b2f] rounded-b-[10px] overflow-hidden">
+                                {categories.map(category => (
+                                    <li
+                                        className="w-[220px] h-14 hover:bg-[#1e2225]
+                                        "
+                                        style={{
+                                            transition: 'all 0.25s ease-in-out',
+                                        }}
+                                        key={category.id}
+                                    >
+                                        <Link href={category.link}>
+                                            <a className="flex items-center w-full h-full pl-4 text-[#e5e8eb] text-base font-semibold">
+                                                <img
+                                                    className="h-6 w-6 "
+                                                    src={category.icon.src}
+                                                    alt=""
+                                                />
+                                                <span className="pl-2">
+                                                    {category.title}
+                                                </span>
+                                            </a>
+                                        </Link>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
                     </li>
-                    <li className="h-full">
+                    <li className="h-full group">
                         <Link href="/">
                             <a className="flex items-center h-full px-5 font-bold text-[#c8cacd] hover:text-white">
                                 Stats
                             </a>
                         </Link>
+                        <div
+                            className="opacity-0 group-hover:opacity-100 group-hover:z-10 absolute top-[72px] -z-10"
+                            style={{
+                                transition: 'all 0.4s ease-in-out',
+                            }}
+                        >
+                            <ul className="bg-[#262b2f] rounded-b-[10px] overflow-hidden">
+                                {stats.map(stat => (
+                                    <li
+                                        className="w-[220px] h-14 hover:bg-[#1e2225]
+                                        "
+                                        style={{
+                                            transition: 'all 0.25s ease-in-out',
+                                        }}
+                                        key={stat.id}
+                                    >
+                                        <Link href={stat.link}>
+                                            <a className="flex items-center w-full h-full pl-4 text-[#e5e8eb] text-base font-semibold">
+                                                <span className="pl-2">
+                                                    {stat.title}
+                                                </span>
+                                            </a>
+                                        </Link>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
                     </li>
-                    <li className="h-full">
+                    <li className="h-full group">
                         <Link href="/">
                             <a className="flex items-center h-full px-5 font-bold text-[#c8cacd] hover:text-white">
                                 Resources
                             </a>
                         </Link>
+                        <div
+                            className="opacity-0 group-hover:opacity-100 group-hover:z-10 absolute top-[72px] -z-10"
+                            style={{
+                                transition: 'all 0.4s ease-in-out',
+                            }}
+                        >
+                            <ul className="bg-[#262b2f] rounded-b-[10px] overflow-hidden">
+                                {resources.map(resource => (
+                                    <li
+                                        className="w-[230px] h-14 hover:bg-[#1e2225]
+                                        "
+                                        style={{
+                                            transition: 'all 0.25s ease-in-out',
+                                        }}
+                                        key={resource.id}
+                                    >
+                                        <Link href={resource.link}>
+                                            <a className="flex items-center w-full h-full pl-4 text-[#e5e8eb] text-base font-semibold">
+                                                <span className="pl-2">
+                                                    {resource.title}
+                                                </span>
+                                            </a>
+                                        </Link>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
                     </li>
                     <li className="h-full">
                         <Link href="/">
@@ -76,12 +285,40 @@ const Header = () => {
                     </li>
                 </div>
                 <div className="flex">
-                    <li>
+                    <li className="group">
                         <Link href="/">
                             <a className="flex items-center text-3xl h-full px-5 font-bold text-[#8a939b] hover:text-white">
                                 <CgProfile />
                             </a>
                         </Link>
+                        <div
+                            className="opacity-0 group-hover:opacity-100 group-hover:z-10 absolute top-[72px] right-[72px] -z-10"
+                            style={{
+                                transition: 'all 0.4s ease-in-out',
+                            }}
+                        >
+                            <ul className="bg-[#262b2f] rounded-b-[10px] overflow-hidden">
+                                {accounts.map(account => (
+                                    <li
+                                        className="w-[220px] h-14 hover:bg-[#1e2225]
+                                        "
+                                        style={{
+                                            transition: 'all 0.25s ease-in-out',
+                                        }}
+                                        key={account.id}
+                                    >
+                                        <Link href={account.link}>
+                                            <a className="flex items-center w-full h-full pl-4 text-[#e5e8eb] text-base font-semibold">
+                                                {account.icon}
+                                                <span className="pl-6">
+                                                    {account.title}
+                                                </span>
+                                            </a>
+                                        </Link>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
                     </li>
                     <li>
                         <button className=" text-[32px] h-full px-5 font-bold text-[#8a939b] hover:text-white">
