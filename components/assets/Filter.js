@@ -27,7 +27,49 @@ const categories = [
 
 function Filter() {
     return (
-        <div className=" w-1/4">
+        <div className="h-[calc(100vh-72px)] w-1/4 overflow-y-scroll sticky top-[72px]">
+            <div className="collapse collapse-arrow">
+                <input
+                    type="checkbox"
+                    className="hover:bg-black hover:rounded-md z-50"
+                />
+                <div className="collapse-title font-semibold text-white h-12 pl-[10px] ">
+                    Status
+                </div>
+
+                <div className="collapse-content pl-0">
+                    <ul>
+                        <li className="h-12 px-[10px] flex justify-between items-center cursor-pointer hover:bg-[#35384033] hover:rounded-md">
+                            <p className="text-white">Buy Now</p>
+                            <input
+                                type="checkbox"
+                                className="checkbox  h-[24px] w-[24px] rounded-[6px] outline-none"
+                            />
+                        </li>
+                        <li className="h-12 px-[10px] flex justify-between items-center cursor-pointer hover:bg-[#35384033] hover:rounded-md">
+                            <p className="text-white">On Auction</p>
+                            <input
+                                type="checkbox"
+                                className="checkbox  h-[24px] w-[24px] rounded-[6px] outline-none"
+                            />
+                        </li>
+                        <li className="h-12 px-[10px] flex justify-between items-center cursor-pointer hover:bg-[#35384033] hover:rounded-md">
+                            <p className="text-white">New</p>
+                            <input
+                                type="checkbox"
+                                className="checkbox  h-[24px] w-[24px] rounded-[6px] outline-none"
+                            />
+                        </li>
+                        <li className="h-12 px-[10px] flex justify-between items-center cursor-pointer hover:bg-[#35384033] hover:rounded-md">
+                            <p className="text-white">Has Offers</p>
+                            <input
+                                type="checkbox"
+                                className="checkbox  h-[24px] w-[24px] rounded-[6px] outline-none"
+                            />
+                        </li>
+                    </ul>
+                </div>
+            </div>
             <div className="collapse collapse-arrow">
                 <input
                     type="checkbox"

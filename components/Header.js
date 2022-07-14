@@ -142,7 +142,7 @@ const style = {
 
 const Header = () => {
     return (
-        <nav className="flex bg-[#04111d] h-[72px]  top-0 left-0 w-full z-10">
+        <nav className="flex bg-[#04111d] h-[72px] left-0 w-full z-10 sticky top-0">
             <div className="h-full pr-6 px-4">
                 <Link href="/">
                     <a className="flex h-full items-center">
@@ -175,12 +175,7 @@ const Header = () => {
                                 Explore
                             </a>
                         </Link>
-                        <div
-                            className="opacity-0 group-hover:opacity-100 group-hover:z-10 absolute top-[72px] -z-10"
-                            style={{
-                                transition: 'all 0.4s ease-in-out',
-                            }}
-                        >
+                        <div className="absolute top-[72px] hidden group-hover:block group-hover:animate-fadein">
                             <ul className="bg-[#262b2f] rounded-b-[10px] overflow-hidden">
                                 {categories.map(category => (
                                     <li
@@ -214,12 +209,7 @@ const Header = () => {
                                 Stats
                             </a>
                         </Link>
-                        <div
-                            className="opacity-0 group-hover:opacity-100 group-hover:z-10 absolute top-[72px] -z-10"
-                            style={{
-                                transition: 'all 0.4s ease-in-out',
-                            }}
-                        >
+                        <div className="absolute top-[72px] hidden group-hover:block group-hover:animate-fadein">
                             <ul className="bg-[#262b2f] rounded-b-[10px] overflow-hidden">
                                 {stats.map(stat => (
                                     <li
@@ -248,12 +238,7 @@ const Header = () => {
                                 Resources
                             </a>
                         </Link>
-                        <div
-                            className="opacity-0 group-hover:opacity-100 group-hover:z-10 absolute top-[72px] -z-10"
-                            style={{
-                                transition: 'all 0.4s ease-in-out',
-                            }}
-                        >
+                        <div className="absolute top-[72px] hidden group-hover:block group-hover:animate-fadein">
                             <ul className="bg-[#262b2f] rounded-b-[10px] overflow-hidden">
                                 {resources.map(resource => (
                                     <li
@@ -291,12 +276,7 @@ const Header = () => {
                                 <CgProfile />
                             </a>
                         </Link>
-                        <div
-                            className="opacity-0 group-hover:opacity-100 group-hover:z-10 absolute top-[72px] right-[72px] -z-10"
-                            style={{
-                                transition: 'all 0.4s ease-in-out',
-                            }}
-                        >
+                        <div className="absolute top-[72px] right-[72px] hidden group-hover:block group-hover:animate-fadein">
                             <ul className="bg-[#262b2f] rounded-b-[10px] overflow-hidden">
                                 {accounts.map(account => (
                                     <li
