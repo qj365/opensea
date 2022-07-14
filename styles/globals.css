@@ -19,3 +19,7 @@ a {
 * {
     box-sizing: border-box;
 }
+
+.collapse-arrow .collapse-title:after {
+    right: 2.2rem;
+}

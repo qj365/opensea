@@ -7,6 +7,7 @@ import PhotographyLogo from './photography-category-dark.svg';
 import SportsLogo from './sports-dark.svg';
 import OpenseaLogo from './openseaLogo.svg';
 import OpenseaWhite from './openseaWhite.svg';
+import EthLogo from './ethLogo.svg';
 
 export default {
     AllnftsLogo,
@@ -18,4 +19,5 @@ export default {
     SportsLogo,
     OpenseaLogo,
     OpenseaWhite,
+    EthLogo,
 };

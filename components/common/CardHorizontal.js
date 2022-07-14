@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 import Link from 'next/link';
 
-function Card() {
+function CardHorizontal() {
     return (
         <div className="group w-[455px] rounded-xl mb-6 overflow-hidden ">
             <Link href="/">
@@ -19,8 +19,9 @@ function Card() {
                                 alt="sun"
                             />
                         </div>
-                        <div className="pl-4 text-white font-semibold text-xl mb-2">
-                            The Coldest Sunset
+                        <div className="pl-4 text-white font-semibold text-xl mt-4 mb-2 truncate max-w-[80%]">
+                            The Coldest Sunset The Coldest Sunset The Coldest
+                            The Coldest Sunset The Coldest Sunset Sunset
                         </div>
                     </div>
                 </a>
@@ -29,4 +30,4 @@ function Card() {
     );
 }
 
-export default Card;
+export default CardHorizontal;

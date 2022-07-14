@@ -1,14 +1,14 @@
-import Card from './Card';
+import CardHorizontal from './../common/CardHorizontal';
 
 function CardContainer() {
     return (
         <div className="flex flex-wrap py-10 w-full justify-evenly max-w-[1462px]">
-            <Card />
-            <Card />
-            <Card />
-            <Card />
-            <Card />
-            <Card />
+            <CardHorizontal />
+            <CardHorizontal />
+            <CardHorizontal />
+            <CardHorizontal />
+            <CardHorizontal />
+            <CardHorizontal />
         </div>
     );
 }
