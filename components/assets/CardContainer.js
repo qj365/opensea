@@ -9,6 +9,9 @@ function CardContainer() {
             <CardVertical />
             <CardVertical />
             <CardVertical />
+            <CardVertical />
+            <CardVertical />
+            <CardVertical />
         </div>
     );
 }

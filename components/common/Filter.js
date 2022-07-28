@@ -27,7 +27,7 @@ const categories = [
 
 function Filter() {
     return (
-        <div className="h-[calc(100vh-72px)] w-1/4 overflow-y-scroll sticky top-[72px]">
+        <div className="h-[calc(100vh-72px)] w-1/4 overflow-y-auto sticky top-[72px]">
             <div className="collapse collapse-arrow">
                 <input
                     type="checkbox"
@@ -157,17 +157,16 @@ function Filter() {
                 <div className="collapse-content pl-0">
                     <ul>
                         {categories.map(category => (
-                            <>
-                                <li className="h-12 px-[10px] flex justify-between items-center cursor-pointer hover:bg-[#35384033] hover:rounded-md">
-                                    <p className="text-white">
-                                        {category.title}
-                                    </p>
-                                    <input
-                                        type="checkbox"
-                                        className="checkbox  h-[24px] w-[24px] rounded-[6px] outline-none"
-                                    />
-                                </li>
-                            </>
+                            <li
+                                className="h-12 px-[10px] flex justify-between items-center cursor-pointer hover:bg-[#35384033] hover:rounded-md"
+                                key={category.id}
+                            >
+                                <p className="text-white">{category.title}</p>
+                                <input
+                                    type="checkbox"
+                                    className="checkbox  h-[24px] w-[24px] rounded-[6px] outline-none"
+                                />
+                            </li>
                         ))}
                     </ul>
                 </div>

@@ -12,7 +12,7 @@ import {
     MdSettings,
     MdLogout,
 } from 'react-icons/md';
-import SvgLogo from '../assets/icons/index';
+import SvgLogo from '../../assets/icons/index';
 
 const categories = [
     {

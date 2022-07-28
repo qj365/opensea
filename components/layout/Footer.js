@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 
-import openseaWhite from '../assets/icons/openseaWhite.svg';
+import openseaWhite from '../../assets/icons/openseaWhite.svg';
 
 const footers = [
     {
