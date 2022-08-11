@@ -23,3 +23,12 @@ a {
 .collapse-arrow .collapse-title:after {
     right: 2.2rem;
 }
+
+.tooltip::before {
+    background-color: #3d444a;
+    color: white;
+    font-weight: 600;
+    padding: 10px;
+    font-size: 14px;
+    border-radius: 10px;
+}

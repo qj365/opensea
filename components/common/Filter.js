@@ -29,10 +29,7 @@ function Filter() {
     return (
         <div className="h-[calc(100vh-72px)] w-1/4 overflow-y-auto sticky top-[72px]">
             <div className="collapse collapse-arrow">
-                <input
-                    type="checkbox"
-                    className="hover:bg-black hover:rounded-md z-50"
-                />
+                <input type="checkbox" />
                 <div className="collapse-title font-semibold text-white h-12 pl-[10px] ">
                     Status
                 </div>
@@ -71,10 +68,7 @@ function Filter() {
                 </div>
             </div>
             <div className="collapse collapse-arrow">
-                <input
-                    type="checkbox"
-                    className="hover:bg-black hover:rounded-md z-50"
-                />
+                <input type="checkbox" />
                 <div className="collapse-title font-semibold text-white h-12 pl-[10px] ">
                     Status
                 </div>

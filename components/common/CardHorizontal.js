@@ -12,7 +12,7 @@ function CardHorizontal() {
                         alt="Sunset in the mountains"
                     />
                     <div className="flex items-center -mt-[26px] px-6 py-4 bg-[#353840] group-hover:bg-[#4c505c] transition ease-in-out duration-400 ">
-                        <div className="border-4 border-[#303339] rounded-[4px] overflow-hidden z-10">
+                        <div className="border-4 border-[#303339] rounded-[4px] overflow-hidden ">
                             <img
                                 className="h-[70px] w-[70px]"
                                 src="https://openseauserdata.com/files/68377331e92e84100a24261a9bf341d3.jpg"

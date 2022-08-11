@@ -9,6 +9,9 @@ function CardContainer() {
             <CardHorizontal />
             <CardHorizontal />
             <CardHorizontal />
+            <CardHorizontal />
+            <CardHorizontal />
+            <CardHorizontal />
         </div>
     );
 }

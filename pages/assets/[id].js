@@ -1,9 +1,13 @@
-import React from 'react';
-import Header from '../../components/layout/Header';
-import Footer from '../../components/layout/Footer';
+import ItemWrapper from '../../components/sub-asset/ItemWrapper';
 
 function NftItem() {
-    return <></>;
+    return (
+        <>
+            <div className="pt-2 pb-4">
+                <ItemWrapper />
+            </div>
+        </>
+    );
 }
 
 export default NftItem;
