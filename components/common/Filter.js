@@ -40,7 +40,7 @@ function Filter() {
                             <p className="text-white">Buy Now</p>
                             <input
                                 type="checkbox"
-                                className="checkbox  h-[24px] w-[24px] rounded-[6px] outline-none"
+                                className="checkbox h-[24px] w-[24px] rounded-[6px] outline-none"
                             />
                         </li>
                         <li className="h-12 px-[10px] flex justify-between items-center cursor-pointer hover:bg-[#35384033] hover:rounded-md">

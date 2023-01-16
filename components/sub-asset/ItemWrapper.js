@@ -4,7 +4,7 @@ import ItemSummary from './ItemSummary';
 
 function ItemWrapper() {
     return (
-        <div className="flex w-[1280px] m-auto">
+        <div className="flex">
             <ItemSummary />
             <ItemMain />
         </div>
