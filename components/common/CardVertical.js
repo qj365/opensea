@@ -42,8 +42,10 @@ function CardVertical() {
                             </div>
                         </div>
                         <div>
-                            <div className="mt-6 text-xs">a day left</div>
-                            <button className="translate-y-full opacity-0 invisible group-hover:opacity-100 group-hover:translate-y-0 group-hover:visible group-hover: duration-[300ms] h-[38px] w-full absolute left-0 bottom-0 text-white font-medium text-sm bg-[#2081e2]">
+                            <div className="mt-6 text-xs text-[#8a939b]">
+                                a day left
+                            </div>
+                            <button className="font-semibold translate-y-full opacity-0 invisible group-hover:opacity-100 group-hover:translate-y-0 group-hover:visible group-hover: duration-[300ms] h-[38px] w-full absolute left-0 bottom-0 text-white text-sm bg-[#2081e2]">
                                 Buy now
                             </button>
                         </div>
