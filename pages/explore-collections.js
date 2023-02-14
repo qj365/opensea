@@ -15,7 +15,3 @@ export default function ExploreCollections() {
         </>
     );
 }
-
-ExploreCollections.getLayout = function getLayout(page) {
-    return <OnlyHeaderLayout>{page}</OnlyHeaderLayout>;
-};

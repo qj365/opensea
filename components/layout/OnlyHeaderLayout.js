@@ -4,7 +4,7 @@ function OnlyHeaderLayout({ children }) {
     return (
         <>
             <Header />
-            <main>{children}</main>
+            <main className="mt-[72px]">{children}</main>
         </>
     );
 }

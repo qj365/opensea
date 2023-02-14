@@ -9,8 +9,15 @@ import OpenseaLogo from './openseaLogo.svg';
 import OpenseaWhite from './openseaWhite.svg';
 import EthLogo from './ethLogo.svg';
 import EthPriceLogo from './ethPriceLogo.svg';
+import MetamaskLogo from './metamask.svg';
+import walletconnectLogo from './walletconnect.png';
+import coinbaseWalletLogo from './walletlink.png';
+import openSeaRealLogo from './opensea.svg';
+import twitterLogo from './twitter.svg';
+import facebookLogo from './facebook.png';
+import wethLogo from './weth.svg';
 
-export default {
+const Logo = {
     AllnftsLogo,
     ArtLogo,
     CollectiblesLogo,
@@ -22,4 +29,13 @@ export default {
     OpenseaWhite,
     EthLogo,
     EthPriceLogo,
+    MetamaskLogo,
+    walletconnectLogo,
+    coinbaseWalletLogo,
+    openSeaRealLogo,
+    twitterLogo,
+    facebookLogo,
+    wethLogo,
 };
+
+export default Logo;

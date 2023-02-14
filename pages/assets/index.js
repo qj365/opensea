@@ -12,7 +12,3 @@ export default function Assests() {
         </>
     );
 }
-
-Assests.getLayout = function getLayout(page) {
-    return <OnlyHeaderLayout>{page}</OnlyHeaderLayout>;
-};
