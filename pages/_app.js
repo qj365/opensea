@@ -3,6 +3,8 @@ import { ApolloClient, InMemoryCache, ApolloProvider } from '@apollo/client';
 import OnlyHeaderLayout from '../components/layout/OnlyHeaderLayout';
 import '../styles/globals.css';
 import { SidebarContextProvider } from '../context/sidebar-context';
+import ClientOnly from '../components/layout/ClientOnly';
+import { AvatarContextProvider } from '../context/avatar-context';
 
 function MyApp({ Component, pageProps }) {
     const getLayout =
@@ -14,11 +16,17 @@ function MyApp({ Component, pageProps }) {
     });
 
     return (
-        <ThirdwebProvider desiredChainId={ChainId.Goerli}>
-            <SidebarContextProvider>
-                {getLayout(<Component {...pageProps} />)}
-            </SidebarContextProvider>
-        </ThirdwebProvider>
+        <ApolloProvider client={client}>
+            <ThirdwebProvider desiredChainId={ChainId.Goerli}>
+                <ClientOnly>
+                    <AvatarContextProvider>
+                        <SidebarContextProvider>
+                            {getLayout(<Component {...pageProps} />)}
+                        </SidebarContextProvider>
+                    </AvatarContextProvider>
+                </ClientOnly>
+            </ThirdwebProvider>
+        </ApolloProvider>
     );
 }
 

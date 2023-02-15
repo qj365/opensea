@@ -14,12 +14,14 @@ import {
     MdLogout,
 } from 'react-icons/md';
 import SvgLogo from '../../assets/icons/index';
-import { useState, useCallback, useContext } from 'react';
+import { useState, useCallback, useContext, useEffect } from 'react';
 import WalletModal from '../common/WalletModal';
 import { useAddress } from '@thirdweb-dev/react';
 import { useRouter } from 'next/router';
 import AccountSidebar from '../common/AccountSidebar';
 import { SidebarContext } from '../../context/sidebar-context';
+import { AvatarContext } from '../../context/avatar-context';
+import Logo from '../../assets/icons/index';
 
 const categories = [
     {
@@ -148,14 +150,14 @@ const style = {
 };
 
 const Header = () => {
-    const sidebarContext = useContext(SidebarContext);
+    const { toggleSidebar } = useContext(SidebarContext);
+    const { avatar, setAvatar } = useContext(AvatarContext);
 
     // const [showWalletModal, setShowWalletModal] = useState(false);
     // const handleCloseWalletModal = useCallback(
     //     () => setShowWalletModal(false),
     //     []
     // );
-    const address = useAddress();
     // function handleWalletClick() {
     //     if (!address) setShowWalletModal(true);
     // }
@@ -167,7 +169,7 @@ const Header = () => {
     //     document.body.style.overflow =
     //         document.body.style.overflow === 'hidden' ? 'auto' : 'hidden';
     // };
-
+    const address = useAddress();
     return (
         <>
             <Head>
@@ -304,11 +306,23 @@ const Header = () => {
                         </li>
                     </div>
                     <div className="flex">
-                        <li className="group">
-                            <Link href="/">
-                                <a className="flex items-center text-3xl h-full px-5 font-bold text-[#8a939b] hover:text-white">
-                                    <CgProfile />
-                                </a>
+                        <li className="group px-5 h-full hover:cursor-pointer">
+                            <Link href={`/account/${address}`}>
+                                {avatar ? (
+                                    <div className="flex h-full items-center">
+                                        <Image
+                                            src={avatar}
+                                            alt="Profile Image"
+                                            height={30}
+                                            width={30}
+                                            className="rounded-full"
+                                        ></Image>
+                                    </div>
+                                ) : (
+                                    <a className="flex items-center text-3xl h-full font-bold text-[#8a939b] hover:text-white">
+                                        <CgProfile />
+                                    </a>
+                                )}
                             </Link>
                             <div className="absolute top-[72px] right-[72px] hidden group-hover:block group-hover:animate-fadein">
                                 <ul className="bg-[#353840] rounded-b-[10px] overflow-hidden">
@@ -338,7 +352,7 @@ const Header = () => {
                         <li>
                             <button
                                 className="text-[32px] h-full px-5 font-bold text-[#8a939b] hover:text-white"
-                                onClick={sidebarContext.toggleSidebar}
+                                onClick={toggleSidebar}
                             >
                                 <MdOutlineAccountBalanceWallet />
                             </button>

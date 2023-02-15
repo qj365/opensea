@@ -20,6 +20,10 @@ import shortenAddress from '../../utils/shortenAddress';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import { Tooltip, Spinner } from 'flowbite-react';
 import { SidebarContext } from '../../context/sidebar-context';
+import { useQuery, useMutation, useApolloClient } from '@apollo/client';
+import { GET_PROFILE_IMAGE } from '../../graphql/query';
+import { CREATE_USER } from '../../graphql/mutation';
+import { AvatarContext } from '../../context/avatar-context';
 
 const wallets = [
     {
@@ -41,6 +45,7 @@ const wallets = [
 
 function AccountSidebar() {
     const { sidebarIsVisible, toggleSidebar } = useContext(SidebarContext);
+    const { avatar, setAvatar } = useContext(AvatarContext);
 
     const address = useAddress();
     const disconnect = useDisconnect();
@@ -66,6 +71,8 @@ function AccountSidebar() {
     function handleLogout() {
         router.push('/');
         window.localStorage.removeItem('__user_address');
+        // setAvatar(null);
+
         setShowMyWalletOptions(false);
         disconnect();
     }
@@ -84,10 +91,51 @@ function AccountSidebar() {
     //     }
     // }, []);
 
+    // const [getProfileImage, { loading, error, data }] =
+    //     useLazyQuery(GET_PROFILE_IMAGE);
+    const client = useApolloClient();
+    const [createUser, { data, loading, error }] = useMutation(CREATE_USER);
+
+    // No document found with that ID
     useEffect(() => {
         if (window) {
-            if (!address) window.localStorage.removeItem('__user_address');
-            else window.localStorage.setItem('__user_address', address);
+            if (!address) {
+                window.localStorage.removeItem('__user_address');
+                console.log('remove');
+                setAvatar(null);
+            } else {
+                window.localStorage.setItem('__user_address', address);
+
+                async function getProfileImage() {
+                    try {
+                        const { data } = await client.query({
+                            query: GET_PROFILE_IMAGE,
+                            variables: {
+                                getUserByIdId: address.toLocaleLowerCase(),
+                            },
+                        });
+                        if (data) setAvatar(data.getUserById.profileImage);
+                    } catch (err) {
+                        if (err.message === 'No document found with that ID') {
+                            try {
+                                const { data } = await client.mutate({
+                                    mutation: CREATE_USER,
+                                    variables: {
+                                        input: {
+                                            _id: address.toLocaleLowerCase(),
+                                        },
+                                    },
+                                });
+                                if (data)
+                                    setAvatar(data.createUser.profileImage);
+                            } catch (err) {
+                                console.log(err);
+                            }
+                        }
+                    }
+                }
+                getProfileImage();
+            }
         }
     }, [address]);
 
@@ -133,7 +181,19 @@ function AccountSidebar() {
                                     setShowMyWalletOptions(!showMyWalletOption)
                                 }
                             >
-                                <MdAccountCircle className="text-3xl mr-2" />
+                                {avatar ? (
+                                    <span className="flex items-center mr-2">
+                                        <Image
+                                            src={avatar}
+                                            alt="profile"
+                                            width={30}
+                                            height={30}
+                                            className="rounded-full"
+                                        />
+                                    </span>
+                                ) : (
+                                    <MdAccountCircle className="text-3xl mr-2" />
+                                )}
                                 My wallet
                                 <MdKeyboardArrowDown className="text-[#8a939b] text-2xl ml-2" />
                             </button>
@@ -149,7 +209,10 @@ function AccountSidebar() {
                                     </li>
                                     <li
                                         className="p-4 flex items-center border-[1px] border-[#353840] pr-8 hover:cursor-pointer hover:bg-[#262b2f]"
-                                        onClick={getBalance}
+                                        onClick={() => {
+                                            getBalance();
+                                            setShowMyWalletOptions(false);
+                                        }}
                                     >
                                         <MdSync className="text-2xl mr-4" />
                                         Refresh funds
