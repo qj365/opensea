@@ -94,15 +94,15 @@ function AccountSidebar() {
     // const [getProfileImage, { loading, error, data }] =
     //     useLazyQuery(GET_PROFILE_IMAGE);
     const client = useApolloClient();
-    const [createUser, { data, loading, error }] = useMutation(CREATE_USER);
+    // const [createUser, { data, loading, error }] = useMutation(CREATE_USER);
 
     // No document found with that ID
     useEffect(() => {
         if (window) {
             if (!address) {
                 window.localStorage.removeItem('__user_address');
-                console.log('remove');
                 setAvatar(null);
+                // router.push('/');
             } else {
                 window.localStorage.setItem('__user_address', address);
 

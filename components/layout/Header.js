@@ -108,7 +108,7 @@ const accounts = [
     {
         id: 0,
         title: 'Profile',
-        link: '/profile',
+        link: '/account',
         icon: <MdPerson className="text-2xl text-[#8a939b]" />,
     },
     {
@@ -307,9 +307,9 @@ const Header = () => {
                     </div>
                     <div className="flex">
                         <li className="group px-5 h-full hover:cursor-pointer">
-                            <Link href={`/account/${address}`}>
+                            <Link href={`/account`}>
                                 {avatar ? (
-                                    <div className="flex h-full items-center">
+                                    <a className="flex h-full items-center">
                                         <Image
                                             src={avatar}
                                             alt="Profile Image"
@@ -317,9 +317,17 @@ const Header = () => {
                                             width={30}
                                             className="rounded-full"
                                         ></Image>
-                                    </div>
+                                    </a>
                                 ) : (
-                                    <a className="flex items-center text-3xl h-full font-bold text-[#8a939b] hover:text-white">
+                                    <a
+                                        className="flex items-center text-3xl h-full font-bold text-[#8a939b] hover:text-white"
+                                        // onClick={event => {
+                                        //     if (!address) {
+                                        //         event.preventDefault();
+                                        //         toggleSidebar();
+                                        //     }
+                                        // }}
+                                    >
                                         <CgProfile />
                                     </a>
                                 )}
