@@ -212,7 +212,7 @@ const Header = () => {
                                 <ul className="bg-[#353840] rounded-b-[10px] overflow-hidden">
                                     {categories.map(category => (
                                         <li
-                                            className="w-[220px] h-14 hover:bg-[#1e2225]
+                                            className="w-[220px] h-14 hover:bg-[#414c51]
                                         "
                                             style={{
                                                 transition:
@@ -247,7 +247,7 @@ const Header = () => {
                                 <ul className="bg-[#353840] rounded-b-[10px] overflow-hidden">
                                     {stats.map(stat => (
                                         <li
-                                            className="w-[220px] h-14 hover:bg-[#1e2225]
+                                            className="w-[220px] h-14 hover:bg-[#414c51]
                                         "
                                             style={{
                                                 transition:
@@ -277,7 +277,7 @@ const Header = () => {
                                 <ul className="bg-[#353840] rounded-b-[10px] overflow-hidden">
                                     {resources.map(resource => (
                                         <li
-                                            className="w-[230px] h-14 hover:bg-[#1e2225]
+                                            className="w-[230px] h-14 hover:bg-[#414c51]
                                         "
                                             style={{
                                                 transition:
@@ -321,12 +321,12 @@ const Header = () => {
                                 ) : (
                                     <a
                                         className="flex items-center text-3xl h-full font-bold text-[#8a939b] hover:text-white"
-                                        // onClick={event => {
-                                        //     if (!address) {
-                                        //         event.preventDefault();
-                                        //         toggleSidebar();
-                                        //     }
-                                        // }}
+                                        onClick={event => {
+                                            if (!address) {
+                                                event.preventDefault();
+                                                toggleSidebar();
+                                            }
+                                        }}
                                     >
                                         <CgProfile />
                                     </a>
@@ -336,7 +336,7 @@ const Header = () => {
                                 <ul className="bg-[#353840] rounded-b-[10px] overflow-hidden">
                                     {accounts.map(account => (
                                         <li
-                                            className="w-[220px] h-14 hover:bg-[#1e2225]
+                                            className="w-[220px] h-14 hover:bg-[#414c51]
                                         "
                                             style={{
                                                 transition:

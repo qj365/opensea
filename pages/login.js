@@ -20,8 +20,16 @@ import { useEffect, useState, useContext } from 'react';
 import Logo from '../assets/icons';
 import { useRouter } from 'next/router';
 import { IconContext } from 'react-icons/lib';
+import useDidMountEffect from '../utils/useDidMountEffect';
+import Cookies from 'js-cookie';
+import { SidebarContext } from '../context/sidebar-context';
 
 function LoginPage() {
+    const { hideSidebar } = useContext(SidebarContext);
+    useEffect(() => {
+        hideSidebar();
+    }, []);
+
     const wallets = [
         {
             id: 'metamask',
@@ -49,15 +57,6 @@ function LoginPage() {
     const router = useRouter();
 
     const address = useAddress();
-    // useEffect(() => {
-    //     if (address) {
-    //         router.replace('/account');
-    //         // window.location.href = '/account';
-    //     }
-    // }, []);
-    if (address) {
-        return <></>;
-    }
 
     return (
         <div className="w-full h-[100vh]">
@@ -86,7 +85,19 @@ function LoginPage() {
                                             error
                                         );
                                     }
-                                    if (data) router.replace('/account');
+                                    if (data) {
+                                        window.localStorage.setItem(
+                                            '__user_address',
+                                            data
+                                        );
+                                        Cookies.set('__user_address', data);
+                                        if (router.query.referrer) {
+                                            return router.push(
+                                                router.query.referrer
+                                            );
+                                        }
+                                        return router.push('/');
+                                    }
                                 }}
                             >
                                 <div className="flex">
@@ -115,3 +126,17 @@ function LoginPage() {
 }
 
 export default LoginPage;
+
+export function getServerSideProps(context) {
+    const { req, res } = context;
+    const token = req.cookies.__user_address;
+    if (token) {
+        return {
+            redirect: {
+                destination: context.query.referrer || '/',
+            },
+        };
+    }
+
+    return { props: { data: {} } };
+}

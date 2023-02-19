@@ -1,4 +1,4 @@
-import { useEffect, useState, useContext } from 'react';
+import { useEffect, useState, useContext, useRef } from 'react';
 import {
     MdAccountCircle,
     MdKeyboardArrowDown,
@@ -24,6 +24,8 @@ import { useQuery, useMutation, useApolloClient } from '@apollo/client';
 import { GET_PROFILE_IMAGE } from '../../graphql/query';
 import { CREATE_USER } from '../../graphql/mutation';
 import { AvatarContext } from '../../context/avatar-context';
+import Cookies from 'js-cookie';
+import useDidMountEffect from '../../utils/useDidMountEffect';
 
 const wallets = [
     {
@@ -71,41 +73,55 @@ function AccountSidebar() {
     function handleLogout() {
         router.push('/');
         window.localStorage.removeItem('__user_address');
-        // setAvatar(null);
-
         setShowMyWalletOptions(false);
+        Cookies.remove('__user_address');
+        setAvatar(null);
         disconnect();
     }
 
-    // useEffect(() => {
-    //     if (window?.ethereum) {
-    //         window.ethereum.on('accountsChanged', async function (accounts) {
-    //             if (!accounts?.length) {
-    //                 window.localStorage.removeItem('__user_address');
-    //             } else {
-    //                 console.log('change ' + address);
-    //                 window.localStorage.setItem('__user_address', accounts[0]);
-    //                 router.push(`/account/${accounts[0]}`);
-    //             }
-    //         });
-    //     }
-    // }, []);
-
-    // const [getProfileImage, { loading, error, data }] =
-    //     useLazyQuery(GET_PROFILE_IMAGE);
     const client = useApolloClient();
-    // const [createUser, { data, loading, error }] = useMutation(CREATE_USER);
 
-    // No document found with that ID
-    useEffect(() => {
+    useDidMountEffect(() => {
         if (window) {
-            if (!address) {
-                window.localStorage.removeItem('__user_address');
-                setAvatar(null);
-                // router.push('/');
-            } else {
+            // if (!address) {
+            //     window.localStorage.removeItem('__user_address');
+            //     setAvatar(null);
+            // } else {
+            //     window.localStorage.setItem('__user_address', address);
+            //     Cookies.set('__user_address', address);
+            //     async function getProfileImage() {
+            //         try {
+            //             const { data } = await client.query({
+            //                 query: GET_PROFILE_IMAGE,
+            //                 variables: {
+            //                     getUserByIdId: address.toLocaleLowerCase(),
+            //                 },
+            //             });
+            //             if (data) setAvatar(data.getUserById.profileImage);
+            //         } catch (err) {
+            //             if (err.message === 'No document found with that ID') {
+            //                 try {
+            //                     const { data } = await client.mutate({
+            //                         mutation: CREATE_USER,
+            //                         variables: {
+            //                             input: {
+            //                                 _id: address.toLocaleLowerCase(),
+            //                             },
+            //                         },
+            //                     });
+            //                     if (data)
+            //                         setAvatar(data.createUser.profileImage);
+            //                 } catch (err) {
+            //                     console.log(err);
+            //                 }
+            //             }
+            //         }
+            //     }
+            //     getProfileImage();
+            // }
+            if (address) {
                 window.localStorage.setItem('__user_address', address);
-
+                Cookies.set('__user_address', address);
                 async function getProfileImage() {
                     try {
                         const { data } = await client.query({
@@ -138,6 +154,14 @@ function AccountSidebar() {
             }
         }
     }, [address]);
+
+    useEffect(() => {
+        if (window) {
+            window.ethereum.on('accountsChanged', function (accounts) {
+                if (accounts.length === 0) handleLogout();
+            });
+        }
+    }, []);
 
     const getBalance = async () => {
         setIsLoadingBalance(true);
