@@ -5,15 +5,12 @@ import '../styles/globals.css';
 import { SidebarContextProvider } from '../context/sidebar-context';
 import ClientOnly from '../components/layout/ClientOnly';
 import { AvatarContextProvider } from '../context/avatar-context';
+import client from '../graphql/apollo-client';
 
 function MyApp({ Component, pageProps }) {
     const getLayout =
         Component.getLayout ||
         (page => <OnlyHeaderLayout>{page}</OnlyHeaderLayout>);
-    const client = new ApolloClient({
-        uri: process.env.NEXT_PUBLIC_GRAPHQL_URI,
-        cache: new InMemoryCache(),
-    });
 
     return (
         <ApolloProvider client={client}>

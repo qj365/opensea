@@ -127,7 +127,7 @@ function LoginPage() {
 
 export default LoginPage;
 
-export function getServerSideProps(context) {
+export async function getServerSideProps(context) {
     const { req, res } = context;
     const token = req.cookies.__user_address;
     if (token) {

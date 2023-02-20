@@ -6,11 +6,14 @@ import { useRouter } from 'next/router';
 import { useEffect, useState, useRef } from 'react';
 import { useAddress } from '@thirdweb-dev/react';
 import requireAuthentication from '../components/layout/withAuth';
+import client from '../graphql/apollo-client';
+import { GET_USER_INFO } from '../graphql/query';
 
-function AccountPage({ userAddress }) {
+function AccountPage({ userInfo, token }) {
+    useEffect;
     return (
         <>
-            <ProfileImage />
+            <ProfileImage userInfo={userInfo} token={token} />
             <NFTList />
         </>
     );
@@ -18,10 +21,11 @@ function AccountPage({ userAddress }) {
 
 export default AccountPage;
 
-export function getServerSideProps(context) {
+export async function getServerSideProps(context) {
     const { req, res } = context;
     const token = req.cookies.__user_address;
-    if (context.params.account[0] === 'account') {
+    let userInfo;
+    if (context.params.account[0].toLowerCase() === 'account') {
         if (!token) {
             return {
                 redirect: {
@@ -29,8 +33,26 @@ export function getServerSideProps(context) {
                 },
             };
         }
+        const { data } = await client.query({
+            query: GET_USER_INFO,
+            variables: { getUserByIdId: token.toLowerCase() },
+        });
+        userInfo = data.getUserById;
+    } else {
+        const { data } = await client.query({
+            query: GET_USER_INFO,
+            variables: {
+                getUserByIdId: context.params.account[0].toLowerCase(),
+            },
+        });
+        if (!data) {
+            return {
+                notFound: true,
+            };
+        }
+        userInfo = data.getUserById;
     }
     return {
-        props: { userAddress: token }, // will be passed to the page component as props
+        props: { userInfo, token }, // will be passed to the page component as props
     };
 }

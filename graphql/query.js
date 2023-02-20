@@ -9,4 +9,17 @@ const GET_PROFILE_IMAGE = gql`
     }
 `;
 
-export { GET_PROFILE_IMAGE };
+const GET_USER_INFO = gql`
+    query GetUserInfo($getUserByIdId: ID) {
+        getUserById(id: $getUserByIdId) {
+            username
+            bio
+            link
+            profileImage
+            profileBanner
+            createdAt
+        }
+    }
+`;
+
+export { GET_PROFILE_IMAGE, GET_USER_INFO };

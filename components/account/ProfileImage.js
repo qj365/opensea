@@ -7,8 +7,10 @@ import Logo from '../../assets/icons';
 import shortenAddress from '../../utils/shortenAddress';
 import Toast from '../common/Toast';
 import ShowMore from '../common/ShowMore';
+import { useAddress } from '@thirdweb-dev/react';
+import { formatJoinedDate } from '../../utils/formatDate';
 
-function ProfileImage() {
+function ProfileImage({ userInfo, token }) {
     const [copiedAddress, setCopiedAddress] = useState(false);
     const handleCopyAddress = () => {
         setCopiedAddress(true);
@@ -20,6 +22,7 @@ function ProfileImage() {
     const [typeToast, setTypeToast] = useState('success');
 
     const [messageToast, setMessageToast] = useState('Link copied!');
+    const address = useAddress();
 
     const options = [
         {
@@ -27,16 +30,22 @@ function ProfileImage() {
             image: Logo.openSeaRealLogo.src,
             text: 'Copy link',
             func: function () {
-                navigator.clipboard.writeText(window.location.href).then(
-                    function () {
-                        setIsVisibleToast(true);
-                        setTypeToast('success');
-                    },
-                    function (err) {
-                        setTypeToast('error');
-                        setMessageToast('Copy failed!');
-                    }
-                );
+                navigator.clipboard
+                    .writeText(
+                        window.location.pathname.toLowerCase() === '/account'
+                            ? `${window.location.origin}/${token}`
+                            : window.location.href
+                    )
+                    .then(
+                        function () {
+                            setIsVisibleToast(true);
+                            setTypeToast('success');
+                        },
+                        function (err) {
+                            setTypeToast('error');
+                            setMessageToast('Copy failed!');
+                        }
+                    );
                 setIsOpen(false);
             },
         },
@@ -47,7 +56,12 @@ function ProfileImage() {
             func: function () {
                 window
                     .open(
-                        `https://www.facebook.com/sharer/sharer.php?u=${window.location.href}`,
+                        `https://www.facebook.com/sharer/sharer.php?u=${
+                            window.location.pathname.toLowerCase() ===
+                            '/account'
+                                ? `${window.location.origin}/${token}`
+                                : window.location.href
+                        }`,
                         '_blank'
                     )
                     .focus();
@@ -61,7 +75,12 @@ function ProfileImage() {
             func: function () {
                 window
                     .open(
-                        `https://twitter.com/intent/tweet?text=Check out this NFT account ${window.location.href}`,
+                        `https://twitter.com/intent/tweet?text=Check out this NFT account ${
+                            window.location.pathname.toLowerCase() ===
+                            '/account'
+                                ? `${window.location.origin}/${token}`
+                                : window.location.href
+                        }`,
                         '_blank'
                     )
                     .focus();
@@ -71,13 +90,20 @@ function ProfileImage() {
     ];
     return (
         <>
-            <div className="w-full h-[320px] bg-[#262b2f]"></div>
+            <div className="w-full h-[320px] bg-[#262b2f] relative">
+                <Image
+                    src="https://i.seadn.io/gae/Vvv8i-ubYdOJ0IbCXxeZmczdRgrAJ6kGpgFLPxu4yl0vEV3vppKIgKAzt_Byui-GUWr6YrmItqtEldwsyaKfbanPNb8XAKoWx4sxLw?auto=format&w=1920"
+                    layout="fill"
+                    objectFit="cover"
+                    alt="cover"
+                />
+            </div>
             <div className="w-full bg-[#202225] px-8 h-fit">
                 <div className="top-[-148px] relative">
                     {/* 202225 */}
                     <div className="relative h-[168px] w-[168px] rounded-[50%] border-[6px] border-[#202225] overflow-hidden">
                         <Image
-                            src="https://i.seadn.io/gcs/files/e7e72c85caa933265d664cef001fb411.png?auto=format&w=256"
+                            src={userInfo.profileImage}
                             layout="fill"
                             objectFit="cover"
                             alt="avatar"
@@ -88,15 +114,17 @@ function ProfileImage() {
                             Not_0x
                         </p>
                         <div>
-                            <button className="rounded-[50%] hover:bg-[#4c505c] p-3 mr-2">
-                                <a
-                                    href="https://opensea.io/assets/0x495f947276749ce646f68ac8c248420045cb7b5e/1"
-                                    target="_blank"
-                                    rel="noreferrer"
-                                >
-                                    <MdLanguage className="text-xl text-white" />
-                                </a>
-                            </button>
+                            {userInfo.link && (
+                                <button className="rounded-[50%] hover:bg-[#4c505c] p-3 mr-2">
+                                    <a
+                                        href={userInfo.link}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                    >
+                                        <MdLanguage className="text-xl text-white" />
+                                    </a>
+                                </button>
+                            )}
                             <button
                                 className="rounded-[50%] hover:bg-[#4c505c] p-3"
                                 onClick={() => setIsOpen(!isOpen)}
@@ -127,7 +155,7 @@ function ProfileImage() {
                             </ul>
                         )}
                     </div>
-                    <div className="flex">
+                    <div className="flex mt-1">
                         <Image
                             src={Logo.EthLogo.src}
                             alt="eth"
@@ -135,7 +163,7 @@ function ProfileImage() {
                             height={20}
                         />
                         <CopyToClipboard
-                            text="0xFd41545b555d1F5041aeBB5D49fd10f7DCEcaFfA"
+                            text={address}
                             onCopy={handleCopyAddress}
                         >
                             <button className="hover:text-red text-[#e5e8eb] ml-2">
@@ -143,22 +171,20 @@ function ProfileImage() {
                                     content={copiedAddress ? 'Copied!' : 'Copy'}
                                 >
                                     <span className="hover:text-[rgba(229,232,235,0.8)]">
-                                        {shortenAddress(
-                                            '0xFd41545b555d1F5041aeBB5D49fd10f7DCEcaFfA'
-                                        )}
+                                        {shortenAddress(address)}
                                     </span>
                                 </Tooltip>
                             </button>
                         </CopyToClipboard>
                         <span className="text-[#8a939b] ml-3">
-                            Joined January 2023
+                            {formatJoinedDate(userInfo.createdAt)}
                         </span>
                     </div>
-                    <div>
-                        <ShowMore>
-                            aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-                        </ShowMore>
-                    </div>
+                    {userInfo.bio && (
+                        <div>
+                            <ShowMore>{userInfo.bio}</ShowMore>
+                        </div>
+                    )}
                 </div>
             </div>
 
