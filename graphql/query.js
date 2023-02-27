@@ -12,6 +12,7 @@ const GET_PROFILE_IMAGE = gql`
 const GET_USER_INFO = gql`
     query GetUserInfo($getUserByIdId: ID) {
         getUserById(id: $getUserByIdId) {
+            _id
             username
             bio
             link
@@ -22,4 +23,13 @@ const GET_USER_INFO = gql`
     }
 `;
 
-export { GET_PROFILE_IMAGE, GET_USER_INFO };
+const GET_COLLECTIONS_BY_QUERY = gql`
+    query GetCollectionByQuery($query: String) {
+        getAllCollections(query: $query) {
+            _id
+            name
+        }
+    }
+`;
+
+export { GET_PROFILE_IMAGE, GET_USER_INFO, GET_COLLECTIONS_BY_QUERY };

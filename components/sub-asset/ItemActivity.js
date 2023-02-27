@@ -41,15 +41,14 @@ function ItemActivity() {
                                 ...baseStyles,
                                 backgroundColor: 'transparent',
                                 padding: '4px 0',
-                                border: 'solid 2px #4c505c',
+                                border: state.menuIsOpen
+                                    ? 'solid 2px #8a939b'
+                                    : 'solid 2px #4c505c',
                                 borderRadius: '10px',
+                                boxShadow: 'none',
                                 ':hover': {
                                     border: 'solid 2px #8a939b',
                                     cursor: 'pointer',
-                                    boxShadow: 'none',
-                                },
-                                ':focus': {
-                                    border: 'solid 2px #8a939b',
                                     boxShadow: 'none',
                                 },
                             }),
@@ -76,6 +75,10 @@ function ItemActivity() {
                             multiValueLabel: baseStyles => ({
                                 ...baseStyles,
                                 color: 'white',
+                            }),
+                            input: baseStyles => ({
+                                ...baseStyles,
+                                opacity: 0,
                             }),
                         }}
                         className="react-select-container"

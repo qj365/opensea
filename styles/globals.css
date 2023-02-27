@@ -20,17 +20,28 @@ a {
     box-sizing: border-box;
 }
 
-.collapse-arrow .collapse-title:after {
-    right: 2.2rem;
+.Toastify__toast-container {
+    width: auto !important;
 }
 
-.tooltip::before {
-    background-color: #3d444a;
-    color: white;
-    font-weight: 600;
-    padding: 10px;
-    font-size: 14px;
-    border-radius: 10px;
+.Toastify__toast {
+    border-radius: 10px !important;
+    padding: 16px !important;
+}
+
+.Toastify__toast-body {
+    font-family: 'Poppins', sans-serif;
+    font-size: 16px;
+    font-weight: 600 !important; /* Change the font weight to 600 */
+}
+
+.Toastify__toast-theme--dark {
+    background-color: #353840 !important;
+    color: #fff !important;
+}
+
+.Toastify__close-button > svg {
+    display: none;
 }
 
 .without-ring {

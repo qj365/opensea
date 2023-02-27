@@ -7,6 +7,7 @@ const nextConfig = {
             'opensea.io',
             'i.seadn.io',
             'storage.googleapis.com',
+            'firebasestorage.googleapis.com',
         ],
     },
 };

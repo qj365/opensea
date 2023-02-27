@@ -46,7 +46,8 @@ const wallets = [
 ];
 
 function AccountSidebar() {
-    const { sidebarIsVisible, toggleSidebar } = useContext(SidebarContext);
+    const { sidebarIsVisible, toggleSidebar, hideSidebar } =
+        useContext(SidebarContext);
     const { avatar, setAvatar } = useContext(AvatarContext);
 
     const address = useAddress();
@@ -184,8 +185,10 @@ function AccountSidebar() {
     return (
         <>
             <div
-                onClick={toggleSidebar}
-                className={`bg-[#00000099] fixed inset-0 z-10 transition-opacity ease-in-out duration-300 ${
+                onClick={() => {
+                    if (sidebarIsVisible) hideSidebar();
+                }}
+                className={`bg-[#00000099] fixed inset-0 z-20 transition-opacity ease-in-out duration-300 ${
                     sidebarIsVisible ? 'opacity-100' : 'opacity-0 -z-50'
                 }`}
             ></div>

@@ -92,7 +92,7 @@ function ProfileImage({ userInfo, token }) {
         <>
             <div className="w-full h-[320px] bg-[#262b2f] relative">
                 <Image
-                    src="https://i.seadn.io/gae/Vvv8i-ubYdOJ0IbCXxeZmczdRgrAJ6kGpgFLPxu4yl0vEV3vppKIgKAzt_Byui-GUWr6YrmItqtEldwsyaKfbanPNb8XAKoWx4sxLw?auto=format&w=1920"
+                    src={userInfo.profileBanner}
                     layout="fill"
                     objectFit="cover"
                     alt="cover"
@@ -111,7 +111,7 @@ function ProfileImage({ userInfo, token }) {
                     </div>
                     <div className="mt-4 flex justify-between">
                         <p className="font-semibold text-[30px] text-white">
-                            Not_0x
+                            {userInfo.username}
                         </p>
                         <div>
                             {userInfo.link && (

@@ -132,7 +132,7 @@ const accounts = [
     {
         id: 4,
         title: 'Settings',
-        link: '/account/settings',
+        link: '/settings',
         icon: <MdSettings className="text-2xl text-[#8a939b]" />,
     },
 ];
@@ -310,13 +310,14 @@ const Header = () => {
                             <Link href={`/account`}>
                                 {avatar ? (
                                     <a className="flex h-full items-center">
-                                        <Image
-                                            src={avatar}
-                                            alt="Profile Image"
-                                            height={30}
-                                            width={30}
-                                            className="rounded-full"
-                                        ></Image>
+                                        <div className="rounded-full h-[30px] w-[30px] relative overflow-hidden">
+                                            <Image
+                                                src={avatar}
+                                                alt="Profile Image"
+                                                layout="fill"
+                                                objectFit="cover"
+                                            ></Image>
+                                        </div>
                                     </a>
                                 ) : (
                                     <a
