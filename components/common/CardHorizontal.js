@@ -1,27 +1,33 @@
 /* eslint-disable @next/next/no-img-element */
 import Link from 'next/link';
 
-function CardHorizontal() {
+function CardHorizontal({
+    logoImage,
+    featuredImage,
+    name,
+    slug,
+    w = 455,
+    h = 183,
+}) {
     return (
-        <div className="group w-[455px] rounded-xl mb-6 overflow-hidden ">
-            <Link href="/">
+        <div className={`group w-[302px] rounded-xl mb-6 overflow-hidden `}>
+            <Link href={`/collection/${slug}`}>
                 <a>
                     <img
-                        className="w-full h-[183px] object-cover"
-                        src="https://openseauserdata.com/files/210bee57eb42ac564d26abe33d1f2aa4.png"
+                        className={`w-full h-[107px] object-cover`}
+                        src={featuredImage ? featuredImage : logoImage}
                         alt="Sunset in the mountains"
                     />
                     <div className="flex items-center -mt-[26px] px-6 py-4 bg-[#353840] group-hover:bg-[#4c505c] transition ease-in-out duration-400 ">
-                        <div className="border-4 border-[#303339] rounded-[4px] overflow-hidden ">
+                        <div className="border-4 border-[#303339] rounded-[10px] overflow-hidden ">
                             <img
-                                className="h-[70px] w-[70px]"
-                                src="https://openseauserdata.com/files/68377331e92e84100a24261a9bf341d3.jpg"
+                                className="h-[70px] w-[70px] object-cover"
+                                src={logoImage}
                                 alt="sun"
                             />
                         </div>
                         <div className="pl-4 text-white font-semibold text-xl mt-4 mb-2 truncate max-w-[80%]">
-                            The Coldest Sunset The Coldest Sunset The Coldest
-                            The Coldest Sunset The Coldest Sunset Sunset
+                            {name}
                         </div>
                     </div>
                 </a>

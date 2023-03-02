@@ -8,6 +8,7 @@ const nextConfig = {
             'i.seadn.io',
             'storage.googleapis.com',
             'firebasestorage.googleapis.com',
+            'gateway.ipfscdn.io',
         ],
     },
 };

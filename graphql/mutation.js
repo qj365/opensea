@@ -54,10 +54,29 @@ const CREATE_COLLECTION = gql`
     }
 `;
 
+const UPDATE_COLLECTION = gql`
+    mutation UpdateCollection(
+        $updateCollectionId: ID
+        $input: CollectionInput
+    ) {
+        updateCollection(id: $updateCollectionId, input: $input) {
+            _id
+            logoImage
+            featuredImage
+            bannerImage
+            name
+            slug
+            description
+            category
+        }
+    }
+`;
+
 export {
     CREATE_USER,
     UPDATE_AVATAR,
     UPDATE_BANNER,
     UPDATE_USER,
     CREATE_COLLECTION,
+    UPDATE_COLLECTION,
 };

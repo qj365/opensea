@@ -1,6 +1,6 @@
 import { useState, useCallback, memo } from 'react';
 import Image from 'next/image';
-import { MdShare, MdLanguage } from 'react-icons/md';
+import { MdShare, MdLanguage, MdSettings } from 'react-icons/md';
 import { Tooltip } from 'flowbite-react';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import Logo from '../../assets/icons';
@@ -9,8 +9,12 @@ import Toast from '../common/Toast';
 import ShowMore from '../common/ShowMore';
 import { useAddress } from '@thirdweb-dev/react';
 import { formatJoinedDate } from '../../utils/formatDate';
+import { useRouter } from 'next/router';
+import Link from 'next/link';
 
 function ProfileImage({ userInfo, token }) {
+    const router = useRouter();
+
     const [copiedAddress, setCopiedAddress] = useState(false);
     const handleCopyAddress = () => {
         setCopiedAddress(true);
@@ -91,46 +95,61 @@ function ProfileImage({ userInfo, token }) {
     return (
         <>
             <div className="w-full h-[320px] bg-[#262b2f] relative">
-                <Image
-                    src={userInfo.profileBanner}
-                    layout="fill"
-                    objectFit="cover"
-                    alt="cover"
-                />
+                {userInfo.profileBanner && (
+                    <Image
+                        src={userInfo.profileBanner}
+                        layout="fill"
+                        objectFit="cover"
+                        alt="cover"
+                    />
+                )}
             </div>
             <div className="w-full bg-[#202225] px-8 h-fit">
                 <div className="top-[-148px] relative">
                     {/* 202225 */}
                     <div className="relative h-[168px] w-[168px] rounded-[50%] border-[6px] border-[#202225] overflow-hidden">
-                        <Image
-                            src={userInfo.profileImage}
-                            layout="fill"
-                            objectFit="cover"
-                            alt="avatar"
-                        />
+                        {userInfo.profileImage && (
+                            <Image
+                                src={userInfo.profileImage}
+                                layout="fill"
+                                objectFit="cover"
+                                alt="avatar"
+                            />
+                        )}
                     </div>
                     <div className="mt-4 flex justify-between">
                         <p className="font-semibold text-[30px] text-white">
                             {userInfo.username}
                         </p>
-                        <div>
+                        <div className="flex items-center">
                             {userInfo.link && (
-                                <button className="rounded-[50%] hover:bg-[#4c505c] p-3 mr-2">
-                                    <a
-                                        href={userInfo.link}
-                                        target="_blank"
-                                        rel="noreferrer"
-                                    >
-                                        <MdLanguage className="text-xl text-white" />
-                                    </a>
-                                </button>
+                                <>
+                                    <button className="rounded-[50%] hover:bg-[#4c505c] p-3 mr-2 ">
+                                        <a
+                                            href={userInfo.link}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                        >
+                                            <MdLanguage className="text-xl text-white" />
+                                        </a>
+                                    </button>
+                                    <div className="h-[50%] border-r-[1px] border-[#4c505c]"></div>
+                                </>
                             )}
-                            <button
-                                className="rounded-[50%] hover:bg-[#4c505c] p-3"
-                                onClick={() => setIsOpen(!isOpen)}
-                            >
+                            <button className="rounded-[50%] hover:bg-[#4c505c] p-3 ml-2">
                                 <MdShare className="text-xl text-white" />
                             </button>
+
+                            {router.asPath === '/account' && (
+                                <Link href="/settings">
+                                    <button
+                                        className="rounded-[50%] hover:bg-[#4c505c] p-3"
+                                        onClick={() => setIsOpen(!isOpen)}
+                                    >
+                                        <MdSettings className="text-xl text-white" />
+                                    </button>
+                                </Link>
+                            )}
                         </div>
 
                         {isOpen && (

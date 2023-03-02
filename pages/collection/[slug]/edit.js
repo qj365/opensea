@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import requireAuthentication from '../../components/layout/withAuth';
+import requireAuthentication from '../../../components/layout/withAuth';
 import { MdImage, MdError } from 'react-icons/md';
-import TextInput from '../../components/common/TextInput';
+import TextInput from '../../../components/common/TextInput';
 import {
     useSigner,
     useSDK,
@@ -14,15 +14,19 @@ import {
 import Select from 'react-select';
 import Image from 'next/image';
 import { useLazyQuery, useMutation } from '@apollo/client';
-import { GET_COLLECTION_BY_NAME } from '../../graphql/query';
+import {
+    GET_COLLECTION_BY_OWNER,
+    GET_COLLECTION_BY_NAME,
+} from '../../../graphql/query';
 import { Spinner } from 'flowbite-react';
 import Cookies from 'js-cookie';
-import uploadImage from '../../utils/firebase';
+import uploadImage from '../../../utils/firebase';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { CREATE_COLLECTION } from '../../graphql/mutation';
 import { useRouter } from 'next/router';
 import slug from 'slug';
+import client from '../../../graphql/apollo-client';
+import { UPDATE_COLLECTION } from '../../../graphql/mutation';
 
 const options = [
     { value: 'Art', label: 'Art' },
@@ -33,9 +37,9 @@ const options = [
     { value: 'Music', label: 'Music' },
 ];
 
-function CreateColelctionPage() {
+function EditCollection({ collection, owner }) {
     const [getCollectionsByQuery] = useLazyQuery(GET_COLLECTION_BY_NAME);
-    const [createCollection] = useMutation(CREATE_COLLECTION);
+    const [updateCollection] = useMutation(UPDATE_COLLECTION);
 
     const sdk = useSDK();
 
@@ -43,19 +47,12 @@ function CreateColelctionPage() {
 
     const router = useRouter();
 
-    const [collectionData, setCollectionData] = useState({
-        logo: null,
-        featured: null,
-        banner: null,
-        name: '',
-        category: '',
-        description: '',
-    });
+    const [collectionData, setCollectionData] = useState({ ...collection });
 
     const [errors, setErrors] = useState({});
     const [submittingForm, setSubmittingForm] = useState(false);
 
-    const notify = status => {
+    const notify = (status, message = 'Something went wrong!') => {
         const settingToast = {
             position: 'bottom-right',
             autoClose: 2000,
@@ -66,8 +63,8 @@ function CreateColelctionPage() {
             progress: undefined,
             theme: 'dark',
         };
-        if (status === 'success') toast.success('Created!', settingToast);
-        else toast.error('Something went wrong!', settingToast);
+        if (status === 'success') toast.success('Updated!', settingToast);
+        else toast.error(`${message}`, settingToast);
     };
 
     function handleCollectionDataChange(e) {
@@ -84,23 +81,23 @@ function CreateColelctionPage() {
         let formIsValid = true;
         let errors = {};
 
-        // Check if username is empty
-        if (!collectionData.logo) {
+        if (!collectionData.logoImage) {
             formIsValid = false;
-            errors['logo'] = 'Logo cannot be empty';
+            errors['logoImage'] = 'Logo cannot be empty';
         }
 
-        // Check if password is empty
         if (!collectionData.name) {
             formIsValid = false;
             errors['name'] = "Collection's name cannot be empty";
         } else {
-            const { data } = await getCollectionsByQuery({
-                variables: { query: `slug=${slug(collectionData.name)}` },
-            });
-            if (data.getAllCollections.length > 0) {
-                formIsValid = false;
-                errors['name'] = "Collection's name already exists";
+            if (collectionData.name !== collection.name) {
+                const { data } = await getCollectionsByQuery({
+                    variables: { query: `slug=${slug(collectionData.name)}` },
+                });
+                if (data.getAllCollections.length > 0) {
+                    formIsValid = false;
+                    errors['name'] = "Collection's name already exists";
+                }
             }
         }
 
@@ -114,42 +111,100 @@ function CreateColelctionPage() {
         if (address && address !== Cookies.get('__user_address')) {
             window.location.href = '/login';
         } else {
+            if (address !== owner) {
+                return notify('error', 'You do not have permission to edit!');
+            }
             setSubmittingForm(true);
             if (await handleValidation()) {
                 try {
-                    const featured = await uploadImage(collectionData.featured);
-                    const banner = await uploadImage(collectionData.banner);
+                    let collectionUpdate = {};
+                    let contractChanged = false;
+                    let contractUpdate = {};
 
-                    const collectionAddress =
-                        await sdk.deployer.deployNFTCollection({
+                    if (collectionData.logoImage !== collection.logoImage) {
+                        contractChanged = true;
+                        contractUpdate = {
+                            ...contractUpdate,
+                            image: collectionData.logoImage,
+                        };
+                    }
+
+                    if (
+                        collectionData.featuredImage !==
+                        collection.featuredImage
+                    ) {
+                        const featuredImage = await uploadImage(
+                            collectionData.featuredImage
+                        );
+                        collectionUpdate = {
+                            ...collectionUpdate,
+                            featuredImage,
+                        };
+                    }
+
+                    if (collectionData.bannerImage !== collection.bannerImage) {
+                        const bannerImage = await uploadImage(
+                            collectionData.bannerImage
+                        );
+                        collectionUpdate = { ...collectionUpdate, bannerImage };
+                    }
+
+                    if (collectionData.name !== collection.name) {
+                        collectionUpdate = {
+                            ...collectionUpdate,
                             name: collectionData.name,
+                            slug: slug(collectionData.name),
+                        };
+                        contractUpdate = {
+                            ...contractUpdate,
+                            name: collectionData.name,
+                        };
+                        contractChanged = true;
+                    }
+
+                    if (collectionData.description !== collection.description) {
+                        collectionUpdate = {
+                            ...collectionUpdate,
                             description: collectionData.description,
-                            image: collectionData.logo,
-                            primary_sale_recipient: address,
-                        });
+                        };
+                        contractChanged = true;
+                        contractUpdate = {
+                            ...contractUpdate,
+                            description: collectionData.description,
+                        };
+                    }
 
-                    const contract = await sdk.getContract(collectionAddress);
-                    const metadata = await contract.metadata.get();
-                    const owner = await (
-                        await contract.owner.get()
-                    ).toLowerCase();
+                    if (collectionData.category !== collection.category) {
+                        collectionUpdate = {
+                            ...collectionUpdate,
+                            category: collectionData.category,
+                        };
+                    }
 
-                    const collection = {
-                        _id: collectionAddress.toLowerCase(),
-                        name: metadata.name,
-                        category: collectionData.category,
-                        description: metadata.description,
-                        logoImage: metadata.image,
-                        featuredImage: featured,
-                        bannerImage: banner,
-                        owner,
-                    };
-                    const { data, error } = await createCollection({
-                        variables: { input: collection },
+                    const contract = await sdk.getContract(collection._id);
+
+                    if (contractChanged) {
+                        await contract.metadata.update(contractUpdate);
+                        if (collectionData.logoImage !== collection.logoImage) {
+                            const metadata = await contract.metadata.get();
+                            collectionUpdate = {
+                                ...collectionUpdate,
+                                logoImage: metadata.image,
+                            };
+                        }
+                    }
+
+                    const { data, error } = await updateCollection({
+                        variables: {
+                            updateCollectionId: collection._id,
+                            input: collectionUpdate,
+                        },
                     });
                     if (!error) {
                         notify('success');
-                        router.push(`/collection/${slug(metadata.name)}`);
+                        router.push(
+                            `/collection/${slug(data.updateCollection.name)}`
+                        );
                     } else {
                         notify('error');
                     }
@@ -166,11 +221,11 @@ function CreateColelctionPage() {
     return (
         <div className="w-[646px] max-w-full h-[100vh] mx-auto pt-10">
             <h1 className="py-6 text-white font-semibold text-[40px]">
-                Create a Collection
+                Edit My Collection
             </h1>
             <form onSubmit={e => handleSubmit(e)}>
                 <div className="text-white mb-6">
-                    <label htmlFor="logo" className="font-semibold mb-1">
+                    <label htmlFor="logoImage" className="font-semibold mb-1">
                         Logo image *
                     </label>
                     <p>
@@ -179,23 +234,31 @@ function CreateColelctionPage() {
                     </p>
                     <div
                         className="group mt-2 cursor-pointer border-[3px] border-dashed border-[#cccccc] rounded-full h-40 w-40 flex items-center justify-center relative overflow-hidden"
-                        onClick={() => document.getElementById('logo').click()}
+                        onClick={() =>
+                            document.getElementById('logoImage').click()
+                        }
                     >
                         <input
                             type="file"
                             className="hidden"
                             accept="image/*"
-                            id="logo"
+                            id="logoImage"
                             onChange={e => {
                                 handleCollectionDataChange(e);
                             }}
                         />
-                        {collectionData.logo && (
+                        {collectionData.logoImage && (
                             <Image
-                                src={URL.createObjectURL(collectionData.logo)}
+                                src={
+                                    typeof collectionData.logoImage === 'string'
+                                        ? collectionData.logoImage
+                                        : URL.createObjectURL(
+                                              collectionData.logoImage
+                                          )
+                                }
                                 layout="fill"
                                 objectFit="cover"
-                                alt="logo"
+                                alt="logoImage"
                             />
                         )}
                         <MdImage className="text-[#cccccc] text-[84px] z-[5] opacity-0 group-hover:opacity-100" />
@@ -203,7 +266,10 @@ function CreateColelctionPage() {
                     </div>
                 </div>
                 <div className="text-white mb-6">
-                    <label htmlFor="featured" className="font-semibold mb-1">
+                    <label
+                        htmlFor="featuredImage"
+                        className="font-semibold mb-1"
+                    >
                         Featured image
                     </label>
                     <p>
@@ -214,26 +280,31 @@ function CreateColelctionPage() {
                     <div
                         className="group mt-2 cursor-pointer border-[3px] border-dashed border-[#cccccc] rounded-[10px] h-[200px] w-[300px] flex items-center justify-center relative overflow-hidden"
                         onClick={() =>
-                            document.getElementById('featured').click()
+                            document.getElementById('featuredImage').click()
                         }
                     >
                         <input
                             type="file"
                             className="hidden"
                             accept="image/*"
-                            id="featured"
+                            id="featuredImage"
                             onChange={e => {
                                 handleCollectionDataChange(e);
                             }}
                         />
-                        {collectionData.featured && (
+                        {collectionData.featuredImage && (
                             <Image
-                                src={URL.createObjectURL(
-                                    collectionData.featured
-                                )}
+                                src={
+                                    typeof collectionData.featuredImage ===
+                                    'string'
+                                        ? collectionData.featuredImage
+                                        : URL.createObjectURL(
+                                              collectionData.featuredImage
+                                          )
+                                }
                                 layout="fill"
                                 objectFit="cover"
-                                alt="featured"
+                                alt="featuredImage"
                             />
                         )}
 
@@ -242,36 +313,43 @@ function CreateColelctionPage() {
                     </div>
                 </div>
                 <div className="text-white mb-6">
-                    <label htmlFor="banner" className="font-semibold mb-1">
+                    <label htmlFor="bannerImage" className="font-semibold mb-1">
                         Banner image
                     </label>
                     <p>
                         This image will appear at the top of your collection
-                        page. Avoid including too much text in this banner
+                        page. Avoid including too much text in this bannerImage
                         image, as the dimensions change on different devices.
                         1400 x 350 recommended.
                     </p>
                     <div
                         className="group mt-2 cursor-pointer border-[3px] border-dashed border-[#cccccc] rounded-[10px] h-[200px] max-w-[700px] flex items-center justify-center relative overflow-hidden"
                         onClick={() =>
-                            document.getElementById('banner').click()
+                            document.getElementById('bannerImage').click()
                         }
                     >
                         <input
                             type="file"
                             className="hidden"
                             accept="image/*"
-                            id="banner"
+                            id="bannerImage"
                             onChange={e => {
                                 handleCollectionDataChange(e);
                             }}
                         />
-                        {collectionData.banner && (
+                        {collectionData.bannerImage && (
                             <Image
-                                src={URL.createObjectURL(collectionData.banner)}
+                                src={
+                                    typeof collectionData.bannerImage ===
+                                    'string'
+                                        ? collectionData.bannerImage
+                                        : URL.createObjectURL(
+                                              collectionData.bannerImage
+                                          )
+                                }
                                 layout="fill"
                                 objectFit="cover"
-                                alt="banner"
+                                alt="bannerImage"
                             />
                         )}
 
@@ -303,6 +381,9 @@ function CreateColelctionPage() {
                         name="category"
                         id="category"
                         options={options}
+                        value={options.filter(
+                            option => option.value === collectionData.category
+                        )}
                         onChange={e => {
                             setCollectionData({
                                 ...collectionData,
@@ -392,7 +473,7 @@ function CreateColelctionPage() {
                     type="submit"
                     disabled={submittingForm}
                 >
-                    {submittingForm ? <Spinner /> : 'Create'}
+                    {submittingForm ? <Spinner /> : 'Save'}
                 </button>
                 <ToastContainer />
             </form>
@@ -400,10 +481,21 @@ function CreateColelctionPage() {
     );
 }
 
-export default CreateColelctionPage;
+export default EditCollection;
 
 export const getServerSideProps = requireAuthentication(async context => {
-    return {
-        props: {},
-    };
+    const { req, res } = context;
+    const address = req.cookies.__user_address;
+    const { data } = await client.query({
+        query: GET_COLLECTION_BY_OWNER,
+        variables: {
+            query: `slug=${context.params.slug.toLowerCase()}&owner=${address.toLowerCase()}`,
+        },
+        fetchPolicy: 'network-only',
+    });
+    if (data.getAllCollections.length <= 0)
+        return {
+            notFound: true,
+        };
+    return { props: { collection: data.getAllCollections[0], owner: address } };
 });

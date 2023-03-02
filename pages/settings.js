@@ -71,6 +71,7 @@ export const getServerSideProps = requireAuthentication(async context => {
         variables: {
             getUserByIdId: context.req.cookies.__user_address.toLowerCase(),
         },
+        fetchPolicy: 'network-only',
     });
     const tab = context.query.tab || 'profile';
     return {

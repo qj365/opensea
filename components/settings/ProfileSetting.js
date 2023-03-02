@@ -15,6 +15,8 @@ import { AvatarContext } from '../../context/avatar-context';
 import { Spinner } from 'flowbite-react';
 import { useAddress } from '@thirdweb-dev/react';
 import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { GET_USER_INFO } from '../../graphql/query';
 
 function ProfileSetting({ userInfo }) {
     const [updateAvatar] = useMutation(UPDATE_AVATAR);
@@ -83,6 +85,7 @@ function ProfileSetting({ userInfo }) {
             <h1 className="text-white text-[40px] font-semibold">
                 Profile details
             </h1>
+
             <div className="mt-[30px]">
                 <form onSubmit={handleUpdateUser}>
                     <div className="flex flex-row">
@@ -318,12 +321,16 @@ function ProfileSetting({ userInfo }) {
                                                 <div className="bg-[#00000099] rounded-[12px] w-[150px] h-[120px] flex items-center justify-center absolute inset-0 z-[5] opacity-0 group-hover:opacity-100 transition-opacity">
                                                     <MdEdit className="text-white text-2xl" />
                                                 </div>
-                                                <Image
-                                                    layout="fill"
-                                                    src={banner}
-                                                    objectFit="cover"
-                                                    alt="cover"
-                                                />
+                                                {banner ? (
+                                                    <Image
+                                                        layout="fill"
+                                                        src={banner}
+                                                        objectFit="cover"
+                                                        alt="cover"
+                                                    />
+                                                ) : (
+                                                    <div className="bg-[#171616] w-[150px] h-[120px]"></div>
+                                                )}
                                             </>
                                         )}
                                     </div>

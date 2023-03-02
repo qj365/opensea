@@ -8,9 +8,10 @@ import { useAddress } from '@thirdweb-dev/react';
 import requireAuthentication from '../components/layout/withAuth';
 import client from '../graphql/apollo-client';
 import { GET_USER_INFO } from '../graphql/query';
+import { useApolloClient } from '@apollo/client';
+import { useQuery } from '@apollo/client';
 
 function AccountPage({ userInfo, token }) {
-    useEffect;
     return (
         <>
             <ProfileImage userInfo={userInfo} token={token} />
@@ -24,6 +25,7 @@ export default AccountPage;
 export async function getServerSideProps(context) {
     const { req, res } = context;
     const token = req.cookies.__user_address;
+
     let userInfo;
     if (context.params.account[0].toLowerCase() === 'account') {
         if (!token) {
@@ -36,6 +38,7 @@ export async function getServerSideProps(context) {
         const { data } = await client.query({
             query: GET_USER_INFO,
             variables: { getUserByIdId: token.toLowerCase() },
+            fetchPolicy: 'network-only',
         });
         userInfo = data.getUserById;
     } else {
@@ -44,6 +47,7 @@ export async function getServerSideProps(context) {
             variables: {
                 getUserByIdId: context.params.account[0].toLowerCase(),
             },
+            fetchPolicy: 'network-only',
         });
         if (!data) {
             return {
