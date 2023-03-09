@@ -298,7 +298,7 @@ const Header = () => {
                             </div>
                         </li>
                         <li className="h-full">
-                            <Link href="/">
+                            <Link href="/assets/create">
                                 <a className="flex items-center h-full px-5 font-bold text-[#c8cacd] hover:text-white">
                                     Create
                                 </a>

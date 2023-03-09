@@ -72,6 +72,19 @@ const UPDATE_COLLECTION = gql`
     }
 `;
 
+const CREATE_NFT = gql`
+    mutation Mutation($input: NftInput) {
+        createNft(input: $input) {
+            tokenId
+            media
+            listing
+            name
+            link
+            description
+        }
+    }
+`;
+
 export {
     CREATE_USER,
     UPDATE_AVATAR,
@@ -79,4 +92,5 @@ export {
     UPDATE_USER,
     CREATE_COLLECTION,
     UPDATE_COLLECTION,
+    CREATE_NFT,
 };

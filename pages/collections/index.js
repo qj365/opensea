@@ -11,6 +11,7 @@ function CollectionPage({ collections }) {
     const address = useAddress();
     const { data } = useQuery(GET_COLLECTIONS_FOR_DISPLAY, {
         variables: { query: `owner=${address?.toLowerCase()}` },
+        fetchPolicy: 'network-only',
     });
 
     return (
@@ -23,7 +24,7 @@ function CollectionPage({ collections }) {
                     Create, curate, and manage collections of unique NFTs to
                     share and sell.
                 </div>
-                <Link href="/collections/create" className="">
+                <Link href="/collection/create" className="">
                     <a className="bg-[#2081e2] hover:bg-[#2e8eee] text-white text-base font-semibold rounded-xl px-6 py-[18px] ">
                         Create a collection
                     </a>
@@ -31,9 +32,7 @@ function CollectionPage({ collections }) {
             </div>
             <div className="mt-8 grid grid-cols-4 gap-4">
                 {data?.getAllCollections?.map((collection, index) => (
-                    <>
-                        <CardHorizontal {...collection} key={index} />
-                    </>
+                    <CardHorizontal {...collection} key={index} />
                 ))}
             </div>
         </div>

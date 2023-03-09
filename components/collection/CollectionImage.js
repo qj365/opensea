@@ -12,7 +12,7 @@ import { formatJoinedDate } from '../../utils/formatDate';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 
-function ProfileImage({ userInfo, token }) {
+function ProfileImage({ collection, token }) {
     const router = useRouter();
 
     const [copiedAddress, setCopiedAddress] = useState(false);
@@ -95,9 +95,9 @@ function ProfileImage({ userInfo, token }) {
     return (
         <>
             <div className="w-full h-[320px] bg-[#262b2f] relative">
-                {userInfo.profileBanner && (
+                {collection.bannerImage && (
                     <Image
-                        src={userInfo.profileBanner}
+                        src={collection.bannerImage}
                         layout="fill"
                         objectFit="cover"
                         alt="cover"
@@ -107,10 +107,10 @@ function ProfileImage({ userInfo, token }) {
             <div className="w-full bg-[#202225] px-8 h-fit">
                 <div className="top-[-148px] relative">
                     {/* 202225 */}
-                    <div className="relative h-[168px] w-[168px] rounded-[50%] border-[6px] border-[#202225] overflow-hidden">
-                        {userInfo.profileImage && (
+                    <div className="relative h-[168px] w-[168px] rounded-[10px] border-[6px] border-[#202225] overflow-hidden">
+                        {collection.logoImage && (
                             <Image
-                                src={userInfo.profileImage}
+                                src={collection.logoImage}
                                 layout="fill"
                                 objectFit="cover"
                                 alt="avatar"
@@ -119,13 +119,13 @@ function ProfileImage({ userInfo, token }) {
                     </div>
                     <div className="mt-4 flex justify-between">
                         <p className="font-semibold text-[30px] text-white">
-                            {userInfo.username}
+                            {collection.name}
                         </p>
                         <div className="flex items-center">
-                            {userInfo.link && (
+                            {/* {collection.link && (
                                 <>
                                     <a
-                                        href={userInfo.link}
+                                        href={collection.link}
                                         target="_blank"
                                         rel="noreferrer"
                                         className=" mr-2"
@@ -136,15 +136,17 @@ function ProfileImage({ userInfo, token }) {
                                     </a>
                                     <div className="h-[50%] border-r-[1px] border-[#4c505c]"></div>
                                 </>
-                            )}
+                            )} */}
                             <button
                                 className="rounded-[50%] hover:bg-[#4c505c] p-3 ml-2 "
                                 onClick={() => setIsOpen(!isOpen)}
                             >
                                 <MdShare className="text-xl text-white" />
                             </button>
-                            {router.asPath === '/account' && (
-                                <Link href="/settings">
+                            {address?.toLowerCase() === collection.owner && (
+                                <Link
+                                    href={`/collection/${collection.slug}/edit`}
+                                >
                                     <button className="rounded-[50%] hover:bg-[#4c505c] p-3">
                                         <MdSettings className="text-xl text-white" />
                                     </button>
@@ -174,7 +176,7 @@ function ProfileImage({ userInfo, token }) {
                             </ul>
                         )}
                     </div>
-                    <div className="flex mt-1">
+                    {/* <div className="flex mt-1">
                         <Image
                             src={Logo.EthLogo.src}
                             alt="eth"
@@ -196,12 +198,12 @@ function ProfileImage({ userInfo, token }) {
                             </button>
                         </CopyToClipboard>
                         <span className="text-[#8a939b] ml-3">
-                            {formatJoinedDate(userInfo.createdAt)}
+                            {formatJoinedDate(collection.createdAt)}
                         </span>
-                    </div>
-                    {userInfo.bio && (
+                    </div> */}
+                    {collection.description && (
                         <div>
-                            <ShowMore>{userInfo.bio}</ShowMore>
+                            <ShowMore>{collection.description}</ShowMore>
                         </div>
                     )}
                 </div>

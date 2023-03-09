@@ -1,7 +1,31 @@
 import React from 'react';
+import { useQuery } from '@apollo/client';
+import { GET_COLLECTION_BY_QUERY } from '../../../graphql/query';
+import { useRouter } from 'next/router';
+import CollectionImage from '../../../components/collection/CollectionImage';
+import Error from 'next/error';
 
-function index() {
-    return <div>index</div>;
+function CollectionPage() {
+    const router = useRouter();
+
+    const { data, loading, error } = useQuery(GET_COLLECTION_BY_QUERY, {
+        variables: { query: `slug=${router.query?.slug?.toLowerCase()}` },
+        fetchPolicy: 'network-only',
+    });
+
+    React.useEffect(() => {
+        console.log(data), [data];
+    });
+
+    if (error || data?.getAllCollections.length <= 0)
+        return <Error statusCode={404} />;
+    if (loading) return <p>Loading...</p>;
+
+    return (
+        <>
+            <CollectionImage collection={data.getAllCollections[0]} />
+        </>
+    );
 }
 
-export default index;
+export default CollectionPage;

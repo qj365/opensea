@@ -19,7 +19,7 @@ const ShowMore = ({ children }) => {
             )}
             {showMore ? (
                 <button
-                    className="text-[#e5e8eb] hover:text-[#e5e8ebcc] flex items-center mt-2"
+                    className={`text-[#e5e8eb] hover:text-[#e5e8ebcc] flex items-center mt-2`}
                     onClick={toggleShowMore}
                 >
                     See less
@@ -27,7 +27,9 @@ const ShowMore = ({ children }) => {
                 </button>
             ) : (
                 <button
-                    className="text-[#e5e8eb] hover:text-[#e5e8ebcc] flex items-center  mt-2"
+                    className={`text-[#e5e8eb] hover:text-[#e5e8ebcc] flex items-center mt-2 ${
+                        children?.length < 85 && 'hidden'
+                    }`}
                     onClick={toggleShowMore}
                 >
                     See more

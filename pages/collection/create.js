@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import requireAuthentication from '../../../components/layout/withAuth';
+import requireAuthentication from '../../components/layout/withAuth';
 import { MdImage, MdError } from 'react-icons/md';
-import TextInput from '../../../components/common/TextInput';
+import TextInput from '../../components/common/TextInput';
 import {
     useSigner,
     useSDK,
@@ -14,19 +14,15 @@ import {
 import Select from 'react-select';
 import Image from 'next/image';
 import { useLazyQuery, useMutation } from '@apollo/client';
-import {
-    GET_COLLECTION_BY_QUERY,
-    GET_COLLECTION_BY_NAME,
-} from '../../../graphql/query';
+import { GET_COLLECTION_BY_NAME } from '../../graphql/query';
 import { Spinner } from 'flowbite-react';
 import Cookies from 'js-cookie';
-import uploadImage from '../../../utils/firebase';
+import uploadImage from '../../utils/firebase';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { CREATE_COLLECTION } from '../../graphql/mutation';
 import { useRouter } from 'next/router';
 import slug from 'slug';
-import client from '../../../graphql/apollo-client';
-import { UPDATE_COLLECTION } from '../../../graphql/mutation';
 import ClipLoader from 'react-spinners/ClipLoader';
 
 const options = [
@@ -38,9 +34,9 @@ const options = [
     { value: 'Music', label: 'Music' },
 ];
 
-function EditCollection({ collection, owner }) {
+function CreateColelctionPage() {
     const [getCollectionsByQuery] = useLazyQuery(GET_COLLECTION_BY_NAME);
-    const [updateCollection] = useMutation(UPDATE_COLLECTION);
+    const [createCollection] = useMutation(CREATE_COLLECTION);
 
     const sdk = useSDK();
 
@@ -48,12 +44,29 @@ function EditCollection({ collection, owner }) {
 
     const router = useRouter();
 
-    const [collectionData, setCollectionData] = useState({ ...collection });
+    const [collectionData, setCollectionData] = useState({
+        logo: null,
+        featured: null,
+        banner: null,
+        name: '',
+        category: '',
+        description: '',
+        owner: '',
+    });
+
+    useEffect(() => {
+        if (address) {
+            setCollectionData({
+                ...collectionData,
+                owner: address.toLowerCase(),
+            });
+        }
+    }, [address]);
 
     const [errors, setErrors] = useState({});
     const [submittingForm, setSubmittingForm] = useState(false);
 
-    const notify = (status, message = 'Something went wrong!') => {
+    const notify = status => {
         const settingToast = {
             position: 'bottom-right',
             autoClose: 2000,
@@ -64,8 +77,8 @@ function EditCollection({ collection, owner }) {
             progress: undefined,
             theme: 'dark',
         };
-        if (status === 'success') toast.success('Updated!', settingToast);
-        else toast.error(`${message}`, settingToast);
+        if (status === 'success') toast.success('Created!', settingToast);
+        else toast.error('Something went wrong!', settingToast);
     };
 
     function handleCollectionDataChange(e) {
@@ -82,23 +95,21 @@ function EditCollection({ collection, owner }) {
         let formIsValid = true;
         let errors = {};
 
-        if (!collectionData.logoImage) {
+        if (!collectionData.logo) {
             formIsValid = false;
-            errors['logoImage'] = 'Logo cannot be empty';
+            errors['logo'] = 'Logo cannot be empty';
         }
 
         if (!collectionData.name) {
             formIsValid = false;
             errors['name'] = "Collection's name cannot be empty";
         } else {
-            if (collectionData.name !== collection.name) {
-                const { data } = await getCollectionsByQuery({
-                    variables: { query: `slug=${slug(collectionData.name)}` },
-                });
-                if (data.getAllCollections.length > 0) {
-                    formIsValid = false;
-                    errors['name'] = "Collection's name already exists";
-                }
+            const { data, error } = await getCollectionsByQuery({
+                variables: { query: `slug=${slug(collectionData.name)}` },
+            });
+            if (data.getAllCollections.length > 0) {
+                formIsValid = false;
+                errors['name'] = "Collection's name already exists";
             }
         }
 
@@ -112,111 +123,57 @@ function EditCollection({ collection, owner }) {
         if (address && address !== Cookies.get('__user_address')) {
             window.location.href = '/login';
         } else {
-            if (address !== owner) {
-                return notify('error', 'You do not have permission to edit!');
-            }
             const isValidate = await handleValidation();
+
             if (isValidate) {
                 try {
                     document.body.style.overflowY = 'hidden';
                     setSubmittingForm(true);
-                    let collectionUpdate = {};
-                    let contractChanged = false;
-                    let contractUpdate = {};
+                    const featured = await uploadImage(
+                        collectionData.featured,
+                        'collections'
+                    );
+                    const banner = await uploadImage(
+                        collectionData.banner,
+                        'collections'
+                    );
+                    const logo = await uploadImage(
+                        collectionData.logo,
+                        'collections'
+                    );
 
-                    if (collectionData.logoImage !== collection.logoImage) {
-                        contractChanged = true;
-                        const logo = await uploadImage(
-                            collectionData.logoImage,
-                            'collections'
-                        );
-                        contractUpdate = {
-                            ...contractUpdate,
+                    const collectionAddress =
+                        await sdk.deployer.deployNFTCollection({
+                            name: collectionData.name,
+                            description: collectionData.description,
                             image: logo,
-                        };
-                        collectionUpdate = {
-                            ...collectionUpdate,
-                            logoImage: logo,
-                        };
-                    }
+                            primary_sale_recipient: address,
+                        });
 
-                    if (
-                        collectionData.featuredImage !==
-                        collection.featuredImage
-                    ) {
-                        const featuredImage = await uploadImage(
-                            collectionData.featuredImage,
-                            'collections'
-                        );
-                        collectionUpdate = {
-                            ...collectionUpdate,
-                            featuredImage,
-                        };
-                    }
-
-                    if (collectionData.bannerImage !== collection.bannerImage) {
-                        const bannerImage = await uploadImage(
-                            collectionData.bannerImage,
-                            'collections'
-                        );
-                        collectionUpdate = { ...collectionUpdate, bannerImage };
-                    }
-
-                    if (collectionData.name !== collection.name) {
-                        collectionUpdate = {
-                            ...collectionUpdate,
-                            name: collectionData.name,
-                            slug: slug(collectionData.name),
-                        };
-                        contractUpdate = {
-                            ...contractUpdate,
-                            name: collectionData.name,
-                        };
-                        contractChanged = true;
-                    }
-
-                    if (collectionData.description !== collection.description) {
-                        collectionUpdate = {
-                            ...collectionUpdate,
-                            description: collectionData.description,
-                        };
-                        contractChanged = true;
-                        contractUpdate = {
-                            ...contractUpdate,
-                            description: collectionData.description,
-                        };
-                    }
-
-                    if (collectionData.category !== collection.category) {
-                        collectionUpdate = {
-                            ...collectionUpdate,
-                            category: collectionData.category,
-                        };
-                    }
-
-                    const contract = await sdk.getContract(collection._id);
-
-                    if (contractChanged) {
-                        await contract.metadata.update(contractUpdate);
-                    }
-
-                    const { data, error } = await updateCollection({
-                        variables: {
-                            updateCollectionId: collection._id,
-                            input: collectionUpdate,
-                        },
+                    const collection = {
+                        _id: collectionAddress.toLowerCase(),
+                        name: collectionData.name,
+                        category: collectionData.category,
+                        description: collectionData.description,
+                        logoImage: logo,
+                        featuredImage: featured,
+                        bannerImage: banner,
+                        owner: collectionData.owner,
+                    };
+                    console.log(collection);
+                    const { data } = await createCollection({
+                        variables: { input: collection },
                     });
 
                     notify('success');
-                    router.push(
-                        `/collection/${slug(data.updateCollection.name)}`
-                    );
+                    router.push(`/collection/${data.createCollection.slug}`);
                 } catch (err) {
                     console.log(err);
 
                     notify('error');
                 }
             }
+
             setSubmittingForm(false);
             document.body.style.overflowY = 'auto';
         }
@@ -226,14 +183,11 @@ function EditCollection({ collection, owner }) {
         <>
             <div className="w-[646px] max-w-full h-[100vh] mx-auto pt-10">
                 <h1 className="py-6 text-white font-semibold text-[40px]">
-                    Edit My Collection
+                    Create a Collection
                 </h1>
                 <form onSubmit={e => handleSubmit(e)}>
                     <div className="text-white mb-6">
-                        <label
-                            htmlFor="logoImage"
-                            className="font-semibold mb-1"
-                        >
+                        <label htmlFor="logo" className="font-semibold mb-1">
                             Logo image *
                         </label>
                         <p>
@@ -243,31 +197,26 @@ function EditCollection({ collection, owner }) {
                         <div
                             className="group mt-2 cursor-pointer border-[3px] border-dashed border-[#cccccc] rounded-full h-40 w-40 flex items-center justify-center relative overflow-hidden"
                             onClick={() =>
-                                document.getElementById('logoImage').click()
+                                document.getElementById('logo').click()
                             }
                         >
                             <input
                                 type="file"
                                 className="hidden"
                                 accept="image/*"
-                                id="logoImage"
+                                id="logo"
                                 onChange={e => {
                                     handleCollectionDataChange(e);
                                 }}
                             />
-                            {collectionData.logoImage && (
+                            {collectionData.logo && (
                                 <Image
-                                    src={
-                                        typeof collectionData.logoImage ===
-                                        'string'
-                                            ? collectionData.logoImage
-                                            : URL.createObjectURL(
-                                                  collectionData.logoImage
-                                              )
-                                    }
+                                    src={URL.createObjectURL(
+                                        collectionData.logo
+                                    )}
                                     layout="fill"
                                     objectFit="cover"
-                                    alt="logoImage"
+                                    alt="logo"
                                 />
                             )}
                             <MdImage className="text-[#cccccc] text-[84px] z-[5] opacity-0 group-hover:opacity-100" />
@@ -276,7 +225,7 @@ function EditCollection({ collection, owner }) {
                     </div>
                     <div className="text-white mb-6">
                         <label
-                            htmlFor="featuredImage"
+                            htmlFor="featured"
                             className="font-semibold mb-1"
                         >
                             Featured image
@@ -289,31 +238,26 @@ function EditCollection({ collection, owner }) {
                         <div
                             className="group mt-2 cursor-pointer border-[3px] border-dashed border-[#cccccc] rounded-[10px] h-[200px] w-[300px] flex items-center justify-center relative overflow-hidden"
                             onClick={() =>
-                                document.getElementById('featuredImage').click()
+                                document.getElementById('featured').click()
                             }
                         >
                             <input
                                 type="file"
                                 className="hidden"
                                 accept="image/*"
-                                id="featuredImage"
+                                id="featured"
                                 onChange={e => {
                                     handleCollectionDataChange(e);
                                 }}
                             />
-                            {collectionData.featuredImage && (
+                            {collectionData.featured && (
                                 <Image
-                                    src={
-                                        typeof collectionData.featuredImage ===
-                                        'string'
-                                            ? collectionData.featuredImage
-                                            : URL.createObjectURL(
-                                                  collectionData.featuredImage
-                                              )
-                                    }
+                                    src={URL.createObjectURL(
+                                        collectionData.featured
+                                    )}
                                     layout="fill"
                                     objectFit="cover"
-                                    alt="featuredImage"
+                                    alt="featured"
                                 />
                             )}
 
@@ -322,46 +266,38 @@ function EditCollection({ collection, owner }) {
                         </div>
                     </div>
                     <div className="text-white mb-6">
-                        <label
-                            htmlFor="bannerImage"
-                            className="font-semibold mb-1"
-                        >
+                        <label htmlFor="banner" className="font-semibold mb-1">
                             Banner image
                         </label>
                         <p>
                             This image will appear at the top of your collection
-                            page. Avoid including too much text in this
-                            bannerImage image, as the dimensions change on
-                            different devices. 1400 x 350 recommended.
+                            page. Avoid including too much text in this banner
+                            image, as the dimensions change on different
+                            devices. 1400 x 350 recommended.
                         </p>
                         <div
                             className="group mt-2 cursor-pointer border-[3px] border-dashed border-[#cccccc] rounded-[10px] h-[200px] max-w-[700px] flex items-center justify-center relative overflow-hidden"
                             onClick={() =>
-                                document.getElementById('bannerImage').click()
+                                document.getElementById('banner').click()
                             }
                         >
                             <input
                                 type="file"
                                 className="hidden"
                                 accept="image/*"
-                                id="bannerImage"
+                                id="banner"
                                 onChange={e => {
                                     handleCollectionDataChange(e);
                                 }}
                             />
-                            {collectionData.bannerImage && (
+                            {collectionData.banner && (
                                 <Image
-                                    src={
-                                        typeof collectionData.bannerImage ===
-                                        'string'
-                                            ? collectionData.bannerImage
-                                            : URL.createObjectURL(
-                                                  collectionData.bannerImage
-                                              )
-                                    }
+                                    src={URL.createObjectURL(
+                                        collectionData.banner
+                                    )}
                                     layout="fill"
                                     objectFit="cover"
-                                    alt="bannerImage"
+                                    alt="banner"
                                 />
                             )}
 
@@ -393,10 +329,6 @@ function EditCollection({ collection, owner }) {
                             name="category"
                             id="category"
                             options={options}
-                            value={options.filter(
-                                option =>
-                                    option.value === collectionData.category
-                            )}
                             onChange={e => {
                                 setCollectionData({
                                     ...collectionData,
@@ -484,13 +416,13 @@ function EditCollection({ collection, owner }) {
                     <button
                         className="mb-8 text-white text-base font-semibold py-[17px] px-[24px] bg-[#2081e2] rounded-xl hover:bg-[#2e8eee]"
                         type="submit"
-                        disabled={submittingForm}
                     >
-                        {submittingForm ? <Spinner /> : 'Save'}
+                        Create
                     </button>
                     <ToastContainer />
                 </form>
             </div>
+
             <div
                 className={`fixed inset-0 bg-[#000000cc] flex items-center justify-center transition-opacity ease-in-out duration-200 ${
                     submittingForm ? 'opacity-100 z-50' : 'opacity-0 z-[-1]'
@@ -514,21 +446,10 @@ function EditCollection({ collection, owner }) {
     );
 }
 
-export default EditCollection;
+export default CreateColelctionPage;
 
 export const getServerSideProps = requireAuthentication(async context => {
-    const { req, res } = context;
-    const address = req.cookies.__user_address;
-    const { data } = await client.query({
-        query: GET_COLLECTION_BY_QUERY,
-        variables: {
-            query: `slug=${context.params.slug.toLowerCase()}&owner=${address.toLowerCase()}`,
-        },
-        fetchPolicy: 'network-only',
-    });
-    if (data.getAllCollections.length <= 0)
-        return {
-            notFound: true,
-        };
-    return { props: { collection: data.getAllCollections[0], owner: address } };
+    return {
+        props: {},
+    };
 });
