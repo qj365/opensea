@@ -1,8 +1,8 @@
 import React from 'react';
 
 function TextInput({
-    label,
-    id,
+    label = undefined,
+    id = undefined,
     placeholder,
     type = 'text',
     required = false,
@@ -11,6 +11,9 @@ function TextInput({
     onChange,
     disabled = false,
     value,
+    min = 0,
+    autoComplete = 'off',
+    step,
 }) {
     return (
         <>
@@ -29,6 +32,9 @@ function TextInput({
                 disabled={disabled}
                 value={value}
                 onChange={onChange}
+                min={min}
+                autoComplete={autoComplete}
+                step={step}
             />
         </>
     );

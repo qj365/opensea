@@ -27,7 +27,7 @@ import { CREATE_COLLECTION } from '../../graphql/mutation';
 import { useRouter } from 'next/router';
 import slug from 'slug';
 import ClipLoader from 'react-spinners/ClipLoader';
-import { CREATE_NFT } from '../../graphql/mutation';
+import { CREATE_NFT, CREATE_EVENT } from '../../graphql/mutation';
 
 const selectStyle = {
     control: (baseStyles, state) => ({
@@ -71,6 +71,7 @@ function CreateAssetPage() {
     const [getCollectionsByQuery] = useLazyQuery(GET_COLLECTION_BY_NAME);
     const [createCollection] = useMutation(CREATE_COLLECTION);
     const [createNft] = useMutation(CREATE_NFT);
+    const [createEvent] = useMutation(CREATE_EVENT);
 
     const { data } = useQuery(GET_COLLECTION_BY_QUERY, {
         variables: {
@@ -174,7 +175,8 @@ function CreateAssetPage() {
                         image: mediaUrl,
                         external_url: nftData.link,
                     };
-                    const tx = await contract.erc721.mintTo(address, metadata);
+                    const tx = await contract.erc721.mint(metadata);
+                    console.log(tx);
 
                     const { data } = await createNft({
                         variables: {
@@ -184,6 +186,23 @@ function CreateAssetPage() {
                                 media: mediaUrl,
                                 creator: address.toLowerCase(),
                                 owner: address.toLowerCase(),
+                            },
+                        },
+                    });
+
+                    const { data: eventData } = await createEvent({
+                        variables: {
+                            input: {
+                                eventType: 'mint',
+                                eventName: 'Minted',
+                                creator: address.toLowerCase(),
+                                assetContract:
+                                    nftData.collectionNft.toLowerCase(),
+                                from: '0x0000000000000000000000000000000000000000',
+                                to: address.toLowerCase(),
+                                tokenId: parseInt(tx.id._hex, 16),
+                                startTimestamp: new Date(),
+                                transactionHash: tx.receipt.transactionHash,
                             },
                         },
                     });

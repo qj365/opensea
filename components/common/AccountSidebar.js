@@ -83,7 +83,7 @@ function AccountSidebar() {
     const client = useApolloClient();
 
     useDidMountEffect(() => {
-        if (window) {
+        if (window?.ethereum) {
             // if (!address) {
             //     window.localStorage.removeItem('__user_address');
             //     setAvatar(null);
@@ -157,7 +157,7 @@ function AccountSidebar() {
     }, [address]);
 
     useEffect(() => {
-        if (window) {
+        if (window?.ethereum) {
             window.ethereum.on('accountsChanged', function (accounts) {
                 if (accounts.length === 0) handleLogout();
             });
@@ -181,6 +181,46 @@ function AccountSidebar() {
             setShowMyWalletOptions(false);
         }
     }, [sidebarIsVisible, address]);
+
+    const [usdBalance, setUsdBalance] = useState({
+        ETH: 0,
+        WETH: 0,
+    });
+    useEffect(() => {
+        async function getUsdPrice() {
+            const eth = await (
+                await fetch(
+                    'https://min-api.cryptocompare.com/data/price?fsym=ETH&tsyms=USD'
+                )
+            ).json();
+            const weth = await (
+                await fetch(
+                    'https://min-api.cryptocompare.com/data/price?fsym=WETH&tsyms=USD'
+                )
+            ).json();
+            const formatter = new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+            });
+            const ETH = formatter.format(balance?.eth.displayValue * eth.USD);
+            const WETH =
+                formatter.format(balance?.weth.displayValue * weth.USD) +
+                ' USD';
+            const Total =
+                formatter.format(
+                    balance?.eth.displayValue * eth.USD +
+                        balance?.weth.displayValue * weth.USD
+                ) + ' USD';
+            setUsdBalance({
+                ETH,
+                WETH,
+                Total,
+            });
+        }
+        if (balance) getUsdPrice();
+    }, [balance]);
 
     return (
         <>
@@ -264,7 +304,21 @@ function AccountSidebar() {
                                 </button>
                             </CopyToClipboard>
                         </div>
-                        <div className="p-[20px]">
+                        <div className="px-[20px]">
+                            <div className="flex flex-col justify-start items-center mt-6 border-[1px] border-[#353840] rounded-[10px] bg-[#202225]">
+                                <p className="text-[#8a939b] font-medium text-sm mt-[14px] mb-[6px]">
+                                    Total balance
+                                </p>
+                                <h4 className="text-white font-semibold text-xl mb-7">
+                                    {isLoadingBalance ? (
+                                        <Spinner />
+                                    ) : (
+                                        usdBalance.Total
+                                    )}
+                                </h4>
+                            </div>
+                        </div>
+                        <div className="px-[20px]">
                             <ul className="mt-6 border-[1px] border-[#353840] rounded-[10px] bg-[#202225]">
                                 <li className="p-4 border-b-[1px] border-[#353840] flex items-center justify-between">
                                     <div className="flex items-center">
@@ -287,19 +341,24 @@ function AccountSidebar() {
                                         {isLoadingBalance ? (
                                             <Spinner />
                                         ) : (
-                                            <Tooltip
-                                                content={
-                                                    balance?.eth.displayValue ||
-                                                    '0'
-                                                }
-                                            >
-                                                <span className="font-semibold text-white ">
-                                                    {balance?.eth.displayValue.slice(
-                                                        0,
-                                                        6
-                                                    ) || '0'}
+                                            <div className="flex flex-col items-end">
+                                                <Tooltip
+                                                    content={
+                                                        balance?.eth
+                                                            .displayValue || '0'
+                                                    }
+                                                >
+                                                    <span className="font-semibold text-white ">
+                                                        {balance?.eth.displayValue.slice(
+                                                            0,
+                                                            6
+                                                        ) || '0'}
+                                                    </span>
+                                                </Tooltip>
+                                                <span className="font-normal text-sm text-[#8a939b]">
+                                                    {usdBalance?.ETH}
                                                 </span>
-                                            </Tooltip>
+                                            </div>
                                         )}
                                     </div>
                                 </li>
@@ -324,19 +383,24 @@ function AccountSidebar() {
                                         {isLoadingBalance ? (
                                             <Spinner />
                                         ) : (
-                                            <Tooltip
-                                                content={
-                                                    balance?.weth
-                                                        .displayValue || '0'
-                                                }
-                                            >
-                                                <span className="font-semibold text-white ">
-                                                    {balance?.weth.displayValue.slice(
-                                                        0,
-                                                        6
-                                                    ) || '0'}
+                                            <div className="flex flex-col items-end">
+                                                <Tooltip
+                                                    content={
+                                                        balance?.weth
+                                                            .displayValue || '0'
+                                                    }
+                                                >
+                                                    <span className="font-semibold text-white ">
+                                                        {balance?.weth.displayValue.slice(
+                                                            0,
+                                                            6
+                                                        ) || '0'}
+                                                    </span>
+                                                </Tooltip>
+                                                <span className="font-normal text-sm text-[#8a939b]">
+                                                    {usdBalance?.WETH}
                                                 </span>
-                                            </Tooltip>
+                                            </div>
                                         )}
                                     </div>
                                 </li>

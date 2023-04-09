@@ -77,10 +77,56 @@ const CREATE_NFT = gql`
         createNft(input: $input) {
             tokenId
             media
-            listing
             name
             link
             description
+        }
+    }
+`;
+
+const VIEWS_NFT = gql`
+    mutation Mutation($collectionNft: ID, $tokenId: Int) {
+        viewNft(collectionNft: $collectionNft, tokenId: $tokenId) {
+            views
+            tokenId
+        }
+    }
+`;
+
+const UPDATE_LISTING = gql`
+    mutation UpdateNft($updateNftId: ID, $input: NftInput) {
+        updateNft(id: $updateNftId, input: $input) {
+            tokenId
+            listing {
+                _id
+                isListing
+                type
+                price
+                currency
+                startDate
+                endDate
+            }
+        }
+    }
+`;
+
+const CREATE_EVENT = gql`
+    mutation Mutation($input: EventInput) {
+        createEvent(input: $input) {
+            eventId
+            eventType
+        }
+    }
+`;
+
+const DEACTIVE_EVENT = gql`
+    mutation DeactiveEvent($ids: [ID]) {
+        deactiveEvent(ids: $ids) {
+            _id
+            eventId
+            eventName
+            eventType
+            active
         }
     }
 `;
@@ -93,4 +139,8 @@ export {
     CREATE_COLLECTION,
     UPDATE_COLLECTION,
     CREATE_NFT,
+    VIEWS_NFT,
+    UPDATE_LISTING,
+    CREATE_EVENT,
+    DEACTIVE_EVENT,
 };

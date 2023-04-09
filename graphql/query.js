@@ -45,6 +45,10 @@ const GET_COLLECTION_BY_QUERY = gql`
     query Query($query: String) {
         getAllCollections(query: $query) {
             _id
+            royalty {
+                creator
+                percentage
+            }
             name
             logoImage
             featuredImage
@@ -112,6 +116,112 @@ const GET_COLLECTION_BY_ID = gql`
     }
 `;
 
+const GET_NFT_ASSET_PAGE = gql`
+    query GetNftAssetPage($collectionNft: ID, $tokenId: Int) {
+        getNftAssetPage(collectionNft: $collectionNft, tokenId: $tokenId) {
+            _id
+            tokenId
+            listing {
+                isListing
+                type
+                price
+                currency
+                endTimestamp
+            }
+            events {
+                _id
+                eventId
+                eventType
+                eventName
+                assetContract
+                tokenId
+                currency
+                price
+                startTimestamp
+                endTimestamp
+                transactionHash
+                creator {
+                    _id
+                    username
+                }
+                from {
+                    _id
+                    username
+                }
+                to {
+                    _id
+                    username
+                }
+                active
+            }
+            views
+            media
+            name
+            link
+            description
+            collectionNft {
+                _id
+                royalty {
+                    creator
+                    percentage
+                }
+                name
+                logoImage
+                featuredImage
+                category
+                slug
+                description
+            }
+            creator {
+                _id
+                username
+            }
+            owner {
+                _id
+                username
+            }
+        }
+    }
+`;
+
+const GET_EVENT_OF_NFT = gql`
+    query GetEventOfNft(
+        $collectionNft: ID
+        $tokenId: Int
+        $eventType: String
+        $active: Boolean
+    ) {
+        getEventOfNft(
+            collectionNft: $collectionNft
+            tokenId: $tokenId
+            eventType: $eventType
+            active: $active
+        ) {
+            _id
+            eventId
+            eventType
+            eventName
+            assetContract
+            tokenId
+            currency
+            price
+            startTimestamp
+            endTimestamp
+            transactionHash
+            creator {
+                username
+            }
+            from {
+                username
+            }
+            to {
+                username
+            }
+            active
+        }
+    }
+`;
+
 export {
     GET_PROFILE_IMAGE,
     GET_USER_INFO,
@@ -122,4 +232,6 @@ export {
     GET_COLLECTION_BY_ID,
     GET_USER_NAME_BY_ID,
     GET_COLLECTION_BY_SLUG,
+    GET_NFT_ASSET_PAGE,
+    GET_EVENT_OF_NFT,
 };

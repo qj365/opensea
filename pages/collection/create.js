@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import requireAuthentication from '../../components/layout/withAuth';
-import { MdImage, MdError } from 'react-icons/md';
+import { MdImage, MdError, MdDeleteOutline } from 'react-icons/md';
 import TextInput from '../../components/common/TextInput';
 import {
     useSigner,
@@ -52,6 +52,8 @@ function CreateColelctionPage() {
         category: '',
         description: '',
         owner: '',
+        creatorRoyalty: '',
+        percentageRoyalty: '',
     });
 
     useEffect(() => {
@@ -113,6 +115,33 @@ function CreateColelctionPage() {
             }
         }
 
+        if (
+            (!collectionData.creatorRoyalty &&
+                collectionData.percentageRoyalty) ||
+            (collectionData.creatorRoyalty && !collectionData.percentageRoyalty)
+        ) {
+            formIsValid = false;
+            errors['creatorRoyalty'] =
+                "One of creator's royalty cannot be empty";
+        }
+
+        if (
+            collectionData.creatorRoyalty &&
+            !/^0x[a-fA-F0-9]{40}$/.test(collectionData.creatorRoyalty)
+        ) {
+            formIsValid = false;
+            errors['creatorAddress'] = "Creator's address is not valid";
+        }
+
+        if (
+            collectionData.percentageRoyalty &&
+            (parseFloat(collectionData.percentageRoyalty) > 10 ||
+                parseFloat(collectionData.percentageRoyalty) <= 0)
+        ) {
+            formIsValid = false;
+            errors['percentageRoyalty'] =
+                'Percentage royalty cannot be less than or equal to 0% and greater than 10%';
+        }
         setErrors(errors);
 
         return formIsValid;
@@ -148,6 +177,14 @@ function CreateColelctionPage() {
                             description: collectionData.description,
                             image: logo,
                             primary_sale_recipient: address,
+                            fee_recipient:
+                                collectionData.creatorRoyalty || undefined,
+                            seller_fee_basis_points:
+                                collectionData.percentageRoyalty
+                                    ? parseFloat(
+                                          collectionData.percentageRoyalty
+                                      ) * 100
+                                    : undefined,
                         });
 
                     const collection = {
@@ -159,6 +196,12 @@ function CreateColelctionPage() {
                         featuredImage: featured,
                         bannerImage: banner,
                         owner: collectionData.owner,
+                        royalty: {
+                            creator: collectionData.creatorRoyalty || undefined,
+                            percentage: collectionData.percentageRoyalty
+                                ? parseFloat(collectionData.percentageRoyalty)
+                                : undefined,
+                        },
                     };
                     console.log(collection);
                     const { data } = await createCollection({
@@ -399,6 +442,57 @@ function CreateColelctionPage() {
                             }}
                             value={collectionData.description}
                         />
+                    </div>
+                    <div className="text-white mb-6">
+                        <label
+                            htmlFor="description"
+                            className={`block text-base font-semibold text-[#e5e8eb] pb-2`}
+                        >
+                            Creator earning
+                        </label>
+                        <div className="flex">
+                            <TextInput
+                                placeholder="Enter an address"
+                                inputCss="w-full"
+                                onChange={e => {
+                                    setCollectionData({
+                                        ...collectionData,
+                                        creatorRoyalty: e.target.value,
+                                    });
+                                }}
+                                value={collectionData.creatorRoyalty}
+                            />
+                            <div className="flex w-[25%] ml-6 items-center">
+                                <input
+                                    className={`w-full rounded-xl border-2 border-[#4c505c] py-[10px] px-4 bg-transparent text-white hover:border-[#8a939b] focus:border-[#8a939b] without-ring transition-colors ease-in-out duration-[250] no-spin-buttons   `}
+                                    placeholder="0"
+                                    type="number"
+                                    onChange={e => {
+                                        setCollectionData({
+                                            ...collectionData,
+                                            percentageRoyalty: e.target.value,
+                                        });
+                                    }}
+                                    value={collectionData.percentageRoyalty}
+                                />
+                                <span className="text-lg relative right-6">
+                                    %
+                                </span>
+                            </div>
+                            <button
+                                className="rounded-[50%] hover:bg-[#4c505c] p-3 ml-2 "
+                                onClick={e => {
+                                    e.preventDefault();
+                                    setCollectionData({
+                                        ...collectionData,
+                                        creatorRoyalty: '',
+                                        percentageRoyalty: '',
+                                    });
+                                }}
+                            >
+                                <MdDeleteOutline className="text-white text-[24px]" />
+                            </button>
+                        </div>
                     </div>
                     {Object.keys(errors).length > 0 && (
                         <div className="mb-6">

@@ -19,4 +19,20 @@ function formatJoinedDate(timestamp) {
     return formattedDate;
 }
 
-export { formatJoinedDate };
+function formatToUSDate(timestamp) {
+    if (!timestamp) return '';
+    const date = new Date(parseInt(timestamp, 10));
+
+    const options = {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric',
+        hour12: true,
+    };
+
+    return new Intl.DateTimeFormat('en-US', options).format(date);
+}
+
+export { formatJoinedDate, formatToUSDate };

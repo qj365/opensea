@@ -21,7 +21,7 @@ function ItemActivity() {
     return (
         <Accordion
             alwaysOpen={true}
-            className="mt-5 ml-4 bg-[#262b2f] border-0 divide-y-0"
+            className="mt-5 bg-[#262b2f] border-0 divide-y-0"
         >
             <Accordion.Panel>
                 <Accordion.Title className="border-b border-[#151b22] px-5 py-4 bg-transparent font-semibold text-white focus:ring-0 hover:bg-transparent ">

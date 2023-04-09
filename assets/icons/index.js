@@ -16,6 +16,8 @@ import openSeaRealLogo from './opensea.svg';
 import twitterLogo from './twitter.svg';
 import facebookLogo from './facebook.png';
 import wethLogo from './weth.svg';
+import noListingLogo from './noListing.svg';
+import noOfferLogo from './noOffer.svg';
 
 const Logo = {
     AllnftsLogo,
@@ -36,6 +38,8 @@ const Logo = {
     twitterLogo,
     facebookLogo,
     wethLogo,
+    noListingLogo,
+    noOfferLogo,
 };
 
 export default Logo;

@@ -10,8 +10,10 @@
   },
   "dependencies": {
     "@apollo/client": "^3.7.7",
-    "@thirdweb-dev/react": "^3.7.3",
-    "@thirdweb-dev/sdk": "^3.7.3",
+    "@thirdweb-dev/chains": "^0.1.6",
+    "@thirdweb-dev/react": "^3.10.3",
+    "@thirdweb-dev/sdk": "^3.10.3",
+    "@wojtekmaj/react-datetimerange-picker": "^4.2.0",
     "ethers": "^5.7.2",
     "firebase": "^9.17.1",
     "flowbite": "^1.6.2",

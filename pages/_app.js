@@ -6,6 +6,10 @@ import { SidebarContextProvider } from '../context/sidebar-context';
 import ClientOnly from '../components/layout/ClientOnly';
 import { AvatarContextProvider } from '../context/avatar-context';
 import client from '../graphql/apollo-client';
+import '../styles/Calendar.css';
+import '../styles/Calendar.css';
+import '../styles/DateTimeRangePicker.css';
+import { Gnosis, Goerli } from '@thirdweb-dev/chains';
 
 function MyApp({ Component, pageProps }) {
     const getLayout =
@@ -14,7 +18,13 @@ function MyApp({ Component, pageProps }) {
 
     return (
         <ApolloProvider client={client}>
-            <ThirdwebProvider desiredChainId={ChainId.Goerli}>
+            <ThirdwebProvider
+                activeChain={{
+                    ...Goerli,
+                    rpc: ['https://rpc.ankr.com/eth_goerli'], // Override the "rpc" field.
+                    // ... Override any other fields you want to customize.
+                }}
+            >
                 <ClientOnly>
                     <AvatarContextProvider>
                         <SidebarContextProvider>

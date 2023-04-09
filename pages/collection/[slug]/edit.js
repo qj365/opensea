@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import requireAuthentication from '../../../components/layout/withAuth';
-import { MdImage, MdError } from 'react-icons/md';
+import { MdImage, MdError, MdDeleteOutline } from 'react-icons/md';
 import TextInput from '../../../components/common/TextInput';
 import {
     useSigner,
@@ -48,7 +48,9 @@ function EditCollection({ collection, owner }) {
 
     const router = useRouter();
 
-    const [collectionData, setCollectionData] = useState({ ...collection });
+    const [collectionData, setCollectionData] = useState({
+        ...collection,
+    });
 
     const [errors, setErrors] = useState({});
     const [submittingForm, setSubmittingForm] = useState(false);
@@ -102,6 +104,35 @@ function EditCollection({ collection, owner }) {
             }
         }
 
+        if (
+            (!collectionData?.royalty?.creator &&
+                collectionData?.royalty?.percentage) ||
+            (collectionData?.royalty?.creator &&
+                !collectionData?.royalty?.percentage)
+        ) {
+            formIsValid = false;
+            errors['creatorRoyalty'] =
+                "One of creator's royalty cannot be empty";
+        }
+
+        if (
+            collectionData?.royalty?.creator &&
+            !/^0x[a-fA-F0-9]{40}$/.test(collectionData?.royalty?.creator)
+        ) {
+            formIsValid = false;
+            errors['creatorAddress'] = "Creator's address is not valid";
+        }
+
+        if (
+            collectionData?.royalty?.percentage &&
+            (parseFloat(collectionData?.royalty?.percentage) > 10 ||
+                parseFloat(collectionData?.royalty?.percentage) <= 0)
+        ) {
+            formIsValid = false;
+            errors['percentageRoyalty'] =
+                'Percentage royalty cannot be less than or equal to 0% and greater than 10%';
+        }
+
         setErrors(errors);
 
         return formIsValid;
@@ -116,6 +147,7 @@ function EditCollection({ collection, owner }) {
                 return notify('error', 'You do not have permission to edit!');
             }
             const isValidate = await handleValidation();
+
             if (isValidate) {
                 try {
                     document.body.style.overflowY = 'hidden';
@@ -123,6 +155,15 @@ function EditCollection({ collection, owner }) {
                     let collectionUpdate = {};
                     let contractChanged = false;
                     let contractUpdate = {};
+                    const creator = collectionData.royalty.creator
+                        ? collectionData.royalty.creator
+                        : undefined;
+
+                    const percentage = collectionData?.royalty?.percentage
+                        ? parseFloat(collectionData?.royalty?.percentage)
+                        : undefined;
+
+                    let royaltyChanged = false;
 
                     if (collectionData.logoImage !== collection.logoImage) {
                         contractChanged = true;
@@ -187,17 +228,57 @@ function EditCollection({ collection, owner }) {
                         };
                     }
 
-                    if (collectionData.category !== collection.category) {
+                    if (collectionData.category !== collection?.category) {
                         collectionUpdate = {
                             ...collectionUpdate,
                             category: collectionData.category,
                         };
                     }
 
+                    if (
+                        collectionData?.royalty?.creator !==
+                        collection?.royalty?.creator
+                    ) {
+                        collectionUpdate = {
+                            ...collectionUpdate,
+                            royalty: {
+                                ...collectionUpdate.royalty,
+                                creator: creator,
+                            },
+                        };
+                        royaltyChanged = true;
+                    }
+
+                    if (
+                        collectionData?.royalty?.percentage !==
+                        collection?.royalty?.percentage
+                    ) {
+                        if (percentage)
+                            collectionUpdate = {
+                                ...collectionUpdate,
+                                royalty: {
+                                    ...collectionUpdate.royalty,
+                                    percentage: percentage,
+                                },
+                            };
+                        royaltyChanged = true;
+                    }
+
                     const contract = await sdk.getContract(collection._id);
 
                     if (contractChanged) {
                         await contract.metadata.update(contractUpdate);
+                    }
+
+                    if (royaltyChanged) {
+                        await contract.royalties.setDefaultRoyaltyInfo({
+                            seller_fee_basis_points: percentage
+                                ? percentage * 100
+                                : 0, // 1% royalty fee
+                            fee_recipient:
+                                creator ||
+                                '0x0000000000000000000000000000000000000000', // the fee recipient
+                        });
                     }
 
                     const { data, error } = await updateCollection({
@@ -208,9 +289,7 @@ function EditCollection({ collection, owner }) {
                     });
 
                     notify('success');
-                    router.push(
-                        `/collection/${slug(data.updateCollection.name)}`
-                    );
+                    router.push(`/collection/${data.updateCollection.slug}`);
                 } catch (err) {
                     console.log(err);
 
@@ -467,6 +546,75 @@ function EditCollection({ collection, owner }) {
                             }}
                             value={collectionData.description}
                         />
+                    </div>
+                    <div className="text-white mb-6">
+                        <label
+                            htmlFor="description"
+                            className={`block text-base font-semibold text-[#e5e8eb] pb-2`}
+                        >
+                            Creator earning
+                        </label>
+                        <div className="flex">
+                            <TextInput
+                                placeholder="Enter an address"
+                                inputCss="w-full"
+                                onChange={e => {
+                                    setCollectionData({
+                                        ...collectionData,
+                                        royalty: {
+                                            ...collectionData.royalty,
+                                            creator: e.target.value,
+                                        },
+                                    });
+                                }}
+                                value={
+                                    collectionData?.royalty?.creator === null
+                                        ? ''
+                                        : collectionData?.royalty?.creator
+                                }
+                            />
+                            <div className="flex w-[25%] ml-6 items-center">
+                                <input
+                                    className={`w-full rounded-xl border-2 border-[#4c505c] py-[10px] px-4 bg-transparent text-white hover:border-[#8a939b] focus:border-[#8a939b] without-ring transition-colors ease-in-out duration-[250] no-spin-buttons   `}
+                                    placeholder="0"
+                                    type="number"
+                                    onChange={e => {
+                                        setCollectionData({
+                                            ...collectionData,
+                                            royalty: {
+                                                ...collectionData.royalty,
+                                                percentage: e.target.value,
+                                            },
+                                        });
+                                    }}
+                                    value={
+                                        collectionData?.royalty?.percentage ===
+                                        null
+                                            ? ''
+                                            : collectionData?.royalty
+                                                  ?.percentage
+                                    }
+                                />
+                                <span className="text-lg relative right-6">
+                                    %
+                                </span>
+                            </div>
+                            <button
+                                className="rounded-[50%] hover:bg-[#4c505c] p-3 ml-2 "
+                                onClick={e => {
+                                    e.preventDefault();
+                                    setCollectionData({
+                                        ...collectionData,
+                                        royalty: {
+                                            creator: '',
+                                            percentage: '',
+                                        },
+                                    });
+                                }}
+                            >
+                                <MdDeleteOutline className="text-white text-[24px]" />
+                            </button>
+                        </div>
                     </div>
                     {Object.keys(errors).length > 0 && (
                         <div className="mb-6">

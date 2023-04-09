@@ -24,7 +24,7 @@ export default AccountPage;
 
 export async function getServerSideProps(context) {
     const { req, res } = context;
-    const token = req.cookies.__user_address;
+    const token = req.cookies.__user_address || null;
 
     let userInfo;
     if (context.params.account[0].toLowerCase() === 'account') {
