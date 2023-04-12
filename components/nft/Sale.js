@@ -1,4 +1,4 @@
-import React from 'react';
+import { useState } from 'react';
 import {
     MdLocalOffer,
     MdAccountBalanceWallet,
@@ -8,10 +8,16 @@ import validateLogin from '../../utils/validateLogin';
 import Image from 'next/image';
 import Icon from '../../assets/icons';
 import { formatToUSDate } from '../../utils/formatDate';
+import MakeOfferModal from './MakeOfferModal';
+import { useAddress } from '@thirdweb-dev/react';
 
-function Sale({ nft, address, toggleSidebar, usdPrice }) {
+function Sale({ nft, address, toggleSidebar, usdPrice, notify, sdk }) {
+    const [makeOfferModalVisible, setMakeOfferModalVisible] = useState(false);
     function handleMakeOffer() {
+        console.log(address, validateLogin(address));
         if (validateLogin(address)) {
+            setMakeOfferModalVisible(true);
+            document.body.style.overflowY = 'hidden';
             console.log(true);
         } else {
             toggleSidebar();
@@ -37,6 +43,16 @@ function Sale({ nft, address, toggleSidebar, usdPrice }) {
     }
     return (
         <>
+            <MakeOfferModal
+                makeOfferModalVisible={makeOfferModalVisible}
+                setMakeOfferModalVisible={setMakeOfferModalVisible}
+                nft={nft}
+                usdPrice={usdPrice}
+                notify={notify}
+                address={address}
+                sdk={sdk}
+            />
+
             {
                 // k dang nhap or dang nhap nhung khong phai chu so huu nft
                 address?.toLowerCase() !== nft?.owner?._id?.toLowerCase() ? (

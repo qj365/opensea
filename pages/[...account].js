@@ -15,7 +15,7 @@ function AccountPage({ userInfo, token }) {
     return (
         <>
             <ProfileImage userInfo={userInfo} token={token} />
-            <NFTList />
+            <NFTList token={token} />
         </>
     );
 }

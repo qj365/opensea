@@ -372,13 +372,22 @@ function SellPage({ nft }) {
                         </h2>
                         <div className="flex items-center">
                             {selectedType === 'fixed' ? (
-                                <TextInput
-                                    placeholder="Amount"
-                                    inputCss="no-spin-buttons w-[60%]"
-                                    id="price"
-                                    onChange={e => handleChangePrice(e)}
-                                    value={amount}
-                                />
+                                <div className="w-full flex items-end mb-4">
+                                    <div className="w-full">
+                                        <TextInput
+                                            placeholder="Amount"
+                                            type="number"
+                                            inputCss="no-spin-buttons w-full pr-20"
+                                            id="price"
+                                            onChange={e => handleChangePrice(e)}
+                                            value={amount}
+                                        />
+                                    </div>
+                                    <span className="text-white font-semibold text-base w-0 relative right-20 bottom-3  ">
+                                        <span className="border-r-[1px] border-[4c505c] mr-2"></span>
+                                        ETH
+                                    </span>
+                                </div>
                             ) : (
                                 <div className="w-full">
                                     <div className="w-full flex items-end mb-4">
@@ -402,7 +411,7 @@ function SellPage({ nft }) {
                                     </div>
                                 </div>
                             )}
-                            {selectedType === 'fixed' && (
+                            {/* {selectedType === 'fixed' && (
                                 <>
                                     <span className="inline-flex items-center">
                                         <input
@@ -437,7 +446,7 @@ function SellPage({ nft }) {
                                         </label>
                                     </span>
                                 </>
-                            )}
+                            )} */}
                         </div>
                         {amount && (
                             <div className="text-sm text-[#8a939b]">

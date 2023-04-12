@@ -384,11 +384,11 @@ function EditListingModal({
                             </button>
                             <button
                                 className={`text-base font-semibold tracking-[0.01em] py-[17px] px-6 bg-[#2081e2] border border-transparent text-white rounded-xl  ${
-                                    price
+                                    Boolean(parseFloat(price))
                                         ? 'hover:bg-[#2e8eee]'
                                         : 'opacity-40 hover:bg-inherit'
                                 }'}`}
-                                disabled={!price}
+                                disabled={!Boolean(parseFloat(price))}
                                 onClick={handleUpdateListing}
                             >
                                 Continue

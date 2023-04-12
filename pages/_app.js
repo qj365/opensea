@@ -9,7 +9,7 @@ import client from '../graphql/apollo-client';
 import '../styles/Calendar.css';
 import '../styles/Calendar.css';
 import '../styles/DateTimeRangePicker.css';
-import { Gnosis, Goerli } from '@thirdweb-dev/chains';
+import { Localhost, Goerli } from '@thirdweb-dev/chains';
 
 function MyApp({ Component, pageProps }) {
     const getLayout =

@@ -222,6 +222,64 @@ const GET_EVENT_OF_NFT = gql`
     }
 `;
 
+const GET_BEST_OFFER = gql`
+    query GetBestOffer($collectionNft: ID, $tokenId: Int) {
+        getBestOffer(collectionNft: $collectionNft, tokenId: $tokenId) {
+            _id
+            eventId
+            eventType
+            eventName
+            active
+            creator {
+                username
+            }
+            assetContract
+            from {
+                username
+            }
+            tokenId
+            currency
+            price
+            startTimestamp
+            endTimestamp
+            transactionHash
+            to {
+                username
+            }
+        }
+    }
+`;
+const GET_ALL_NFTS = gql`
+    query GetAllNfts($query: String) {
+        getAllNfts(query: $query) {
+            tokenId
+            listing {
+                isListing
+                type
+                price
+                currency
+            }
+            views
+            media
+            name
+            link
+            description
+            collectionNft {
+                _id
+                name
+            }
+            creator {
+                _id
+                username
+            }
+            owner {
+                username
+                _id
+            }
+        }
+    }
+`;
+
 export {
     GET_PROFILE_IMAGE,
     GET_USER_INFO,
@@ -234,4 +292,6 @@ export {
     GET_COLLECTION_BY_SLUG,
     GET_NFT_ASSET_PAGE,
     GET_EVENT_OF_NFT,
+    GET_BEST_OFFER,
+    GET_ALL_NFTS,
 };

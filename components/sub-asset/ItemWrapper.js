@@ -37,11 +37,14 @@ import { SidebarContext } from '../../context/sidebar-context';
 import Sale from '../nft/Sale';
 import diffDay from '../../utils/diffDay';
 import { formatToUSDate } from '../../utils/formatDate';
-import EditListingModal from '../assets/EditListingModal';
-import CloseListingModal from '../assets/CloseListingModal';
+import EditListingModal from '../nft/EditListingModal';
+import CloseListingModal from '../nft/CloseListingModal';
 import { CREATE_EVENT, DEACTIVE_EVENT } from '../../graphql/mutation';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import CancelOfferModal from '../nft/CancelOfferModal';
+import ApproveListingModal from '../nft/ApproveListingModal';
+import ApproveSaleModal from '../nft/ApproveSaleModal';
 
 const notify = (
     status,
@@ -95,6 +98,7 @@ function ItemWrapper({ nft }) {
     }
 
     const [validListings, setValidListings] = useState([]);
+    const [validOffers, setValidOffers] = useState([]);
     useEffect(() => {
         if (nft && nft?.listing?.isListing) {
             const validListings = nft.events.filter(
@@ -105,6 +109,15 @@ function ItemWrapper({ nft }) {
                     event.endTimestamp > Date.now()
             );
             if (validListings.length > 0) setValidListings(validListings);
+        }
+        if (nft?.events) {
+            const validOffers = nft.events.filter(
+                event =>
+                    event.eventType === 'offer' &&
+                    event.active &&
+                    event.endTimestamp > Date.now()
+            );
+            if (validOffers.length > 0) setValidOffers(validOffers);
         }
     }, []);
 
@@ -203,20 +216,72 @@ function ItemWrapper({ nft }) {
         }
     }
 
+    const [cancelOfferModalVisible, setCancelOfferModalVisible] =
+        useState(false);
+    const [isCancelingOffer, setIsCancelingOffer] = useState(false);
+    const [cancelOffer, setCancelOffer] = useState(null);
+    async function handleCancelOffer(offer) {
+        try {
+            if (validateLogin(address)) {
+                setCancelOfferModalVisible(true);
+                setCancelOffer(offer);
+                const contract = await sdk.getContract(
+                    process.env.NEXT_PUBLIC_MARKETPLACE_ADDRESS,
+                    'marketplace-v3'
+                );
+
+                if (contract) {
+                    setIsCancelingOffer(true);
+                    // const txResult = await contract.offers.cancelOffer(
+                    //     offer.eventId
+                    // );
+                    // const { data } = await deactiveEvent({
+                    //     variables: { ids: [offer._id] },
+                    // });
+
+                    notify('success', undefined, 'Offer canceled!');
+
+                    setTimeout(() => {
+                        router.reload();
+                    }, 1000);
+                } else throw new Error('Contract not found');
+            } else {
+                router.push('/login');
+            }
+        } catch (err) {
+            console.log('message', err);
+            notify('error', 'Cancel offer failed');
+            setIsCancelingOffer(false);
+        }
+    }
+
+    const [approveOfferModalVisible, setApproveOfferModalVisible] =
+        useState(false);
+    const [approveOffer, setApproveOffer] = useState(null);
+
+    async function handleApproveOffer(offer) {
+        setApproveOffer(offer);
+        setApproveOfferModalVisible(true);
+        document.body.style.overflowY = 'hidden';
+    }
+
     return (
         <>
             {validateLogin(address) && (
                 <div className="flex flex-row-reverse sticky z-10 top-[72px] bottom-0 right-0 py-3 bg-[#202225] border-b-[1px] border-[#353840]">
                     {nft?.listing?.isListing ? (
-                        <button
-                            onClick={() => {
-                                setOpenListingModal(true);
-                                document.body.style.overflowY = 'hidden';
-                            }}
-                            className="rounded-xl w-[166px] font-semibold text-base text-white bg-[#2081e2] py-[17px] px-6 tracking-[0.01]"
-                        >
-                            Edit listing
-                        </button>
+                        address?.toLowerCase() ===
+                            nft?.owner?._id?.toLowerCase() && (
+                            <button
+                                onClick={() => {
+                                    setOpenListingModal(true);
+                                    document.body.style.overflowY = 'hidden';
+                                }}
+                                className="rounded-xl w-[166px] font-semibold text-base text-white bg-[#2081e2] py-[17px] px-6 tracking-[0.01]"
+                            >
+                                Edit listing
+                            </button>
+                        )
                     ) : (
                         <Link
                             href={`/assets/${nft.collectionNft._id}/${nft.tokenId}/sell`}
@@ -480,6 +545,8 @@ function ItemWrapper({ nft }) {
                         address={address}
                         toggleSidebar={toggleSidebar}
                         usdPrice={usdPrice}
+                        notify={notify}
+                        sdk={sdk}
                     />
 
                     {/* chart */}
@@ -673,88 +740,144 @@ function ItemWrapper({ nft }) {
                                     Offers
                                 </div>
                             </Accordion.Title>
-                            <Accordion.Content className="px-5 py-2">
-                                {/* <ul className="max-h-[332px] overflow-y-auto">
-                                <li className="flex border-t-[1px] border-[#151b22]">
-                                    <div className="text-[#e5e8eb] text-[15px] w-full pl-4 pr-2 py-1 mr-[-1px]">
-                                        Price
-                                    </div>
-                                    <div className="text-[#e5e8eb] text-[15px] w-full px-2 py-1">
-                                        USD Price
-                                    </div>
-                                    <div className="text-[#e5e8eb] text-[15px] w-full px-2 py-1 text-left">
-                                        Floor Difference
-                                    </div>
-                                    <div className="text-[#e5e8eb] text-[15px] w-full px-2 py-1">
-                                        Expiration
-                                    </div>
-                                    <div className="text-[#e5e8eb] text-[15px] w-full px-2 py-1">
-                                        From
-                                    </div>
-                                </li>
+                            <Accordion.Content className="px-0 py-2">
+                                {/*  */}
+                                {validOffers.length > 0 ? (
+                                    <ul className="max-h-[332px] overflow-y-auto">
+                                        <li className="flex border-t-[1px] border-[#151b22]">
+                                            <div className="text-[#e5e8eb] text-[15px] w-full pl-4 pr-2 py-1 mr-[-1px]">
+                                                Price
+                                            </div>
+                                            <div className="text-[#e5e8eb] text-[15px] w-full px-2 py-1">
+                                                USD Price
+                                            </div>
 
-                                <li className="flex items-center border-t-[1px] border-[#151b22]">
-                                    <div className="flex items-center py-4 pl-4 pr-3 w-full">
+                                            <div className="text-[#e5e8eb] text-[15px] w-full px-2 py-1">
+                                                Expiration
+                                            </div>
+                                            <div className="text-[#e5e8eb] text-[15px] w-full px-2 py-1">
+                                                From
+                                            </div>
+                                            <div className="text-[#e5e8eb] text-[15px] w-full px-2 py-1"></div>
+                                        </li>
+                                        {validOffers.map((offer, index) => (
+                                            <li
+                                                className="flex items-center border-t-[1px] border-[#151b22]"
+                                                key={index}
+                                            >
+                                                <div className="flex items-center py-4 pl-4 pr-3 w-full">
+                                                    <Image
+                                                        src={Icon.wethLogo.src}
+                                                        alt="eth"
+                                                        height={16}
+                                                        width={16}
+                                                        className="brightness-200"
+                                                    />
+                                                    <span className="text-[#e5e8eb] text-[15px] font-semibold mx-[4.5px]">
+                                                        {offer.price}
+                                                    </span>
+                                                    <span className="text-[#e5e8eb] text-[15px] ">
+                                                        ETH
+                                                    </span>
+                                                </div>
+                                                <div className="py-4 px-2 w-full">
+                                                    <span className="text-[#e5e8eb] text-[15px] ">
+                                                        {new Intl.NumberFormat(
+                                                            'en-US',
+                                                            {
+                                                                style: 'currency',
+                                                                currency: 'USD',
+                                                            }
+                                                        ).format(
+                                                            offer.price *
+                                                                usdPrice['WETH']
+                                                        )}
+                                                    </span>
+                                                </div>
+
+                                                <div className="py-4 px-2 w-full">
+                                                    <div
+                                                        className="tooltip tooltip-primary tooltip-top"
+                                                        data-tip="September 10, 2022 at 8:29am GMT+7"
+                                                    >
+                                                        <button className="text-[#e5e8eb] text-[15px]">
+                                                            {diffDay(
+                                                                new Date(),
+                                                                new Date(
+                                                                    parseInt(
+                                                                        offer.endTimestamp
+                                                                    )
+                                                                ),
+                                                                'in '
+                                                            )}
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div className="w-full py-4 pr-4 pl-2 truncate max-w-[80%]">
+                                                    <Link
+                                                        href={`/${offer.creator._id}`}
+                                                    >
+                                                        <a className="text-[15px] text-[#2081e2] hover:text-[#1868b7]">
+                                                            {offer.creator
+                                                                ._id ===
+                                                            address?.toLowerCase()
+                                                                ? 'you'
+                                                                : offer.creator
+                                                                      ?.username ||
+                                                                  offer.creator?._id
+                                                                      .slice(-6)
+                                                                      .toUpperCase()}
+                                                        </a>
+                                                    </Link>
+                                                </div>
+                                                {offer.creator._id ===
+                                                    address?.toLowerCase() && (
+                                                    <div className="py-4 px-2 w-full">
+                                                        <button
+                                                            className="text-white bg-[#353840] rounded-xl font-semibold py-[11px] px-5 border-2 border-[#353840] hover:bg-[#4c505c] hover:border-transparent transition-colors"
+                                                            onClick={() =>
+                                                                handleCancelOffer(
+                                                                    offer
+                                                                )
+                                                            }
+                                                        >
+                                                            Cancel
+                                                        </button>
+                                                    </div>
+                                                )}
+                                                {address?.toLowerCase() ===
+                                                    nft.owner._id && (
+                                                    <div className="py-4 px-2 w-full">
+                                                        <button
+                                                            className="flex items-center text-white bg-[#2081e2] rounded-xl font-semibold py-[11px] px-4 hover:bg-[#2e8eee] transition-colors"
+                                                            onClick={() =>
+                                                                handleApproveOffer(
+                                                                    offer
+                                                                )
+                                                            }
+                                                        >
+                                                            <MdBolt className="text-[22px]" />
+                                                            Accept
+                                                        </button>
+                                                    </div>
+                                                )}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                ) : (
+                                    <div className="flex flex-col items-center relative">
                                         <Image
-                                            src={Icon.EthPriceLogo.src}
-                                            alt="eth"
-                                            height={16}
-                                            width={16}
-                                            className="brightness-200"
+                                            src={Icon.noOfferLogo.src}
+                                            width={136}
+                                            height={100}
+                                            alt="no offer"
+                                            className="opacity-50"
                                         />
-                                        <span className="text-[#e5e8eb] text-[15px] font-semibold mx-[4.5px]">
-                                            0,99
-                                        </span>
-                                        <span className="text-[#e5e8eb] text-[15px] ">
-                                            ETH
-                                        </span>
+                                        <p className="text-white mt-2">
+                                            No offers yet
+                                        </p>
                                     </div>
-                                    <div className="py-4 px-2 w-full">
-                                        <span className="text-[#e5e8eb] text-[15px] ">
-                                            $1.601,21
-                                        </span>
-                                    </div>
-                                    <div className="py-4 px-3 w-full">
-                                        <div
-                                            className="tooltip tooltip-primary tooltip-top"
-                                            data-tip="Collection floor price: 0.66 ETH"
-                                        >
-                                            <button className="text-[#e5e8eb] text-[15px]">
-                                                33% below
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <div className="py-4 px-2 w-full">
-                                        <div
-                                            className="tooltip tooltip-primary tooltip-top"
-                                            data-tip="September 10, 2022 at 8:29am GMT+7"
-                                        >
-                                            <button className="text-[#e5e8eb] text-[15px]">
-                                                3 days
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <div className="w-full py-4 pr-4 pl-2 truncate max-w-[80%]">
-                                        <Link href="/">
-                                            <a className="text-[15px] text-[#2081e2] hover:text-[#1868b7]">
-                                                C05D74C05D74C05D74
-                                            </a>
-                                        </Link>
-                                    </div>
-                                </li>
-                            </ul> */}
-                                <div className="flex flex-col items-center relative">
-                                    <Image
-                                        src={Icon.noOfferLogo.src}
-                                        width={136}
-                                        height={100}
-                                        alt="no offer"
-                                        className="opacity-50"
-                                    />
-                                    <p className="text-white mt-2">
-                                        No offers yet
-                                    </p>
-                                </div>
+                                )}
                             </Accordion.Content>
                         </Accordion.Panel>
                     </Accordion>
@@ -784,6 +907,28 @@ function ItemWrapper({ nft }) {
                         isCanceling={isCanceling}
                         isApproving={isApproving}
                     />
+                    <CancelOfferModal
+                        cancelOfferModalVisible={cancelOfferModalVisible}
+                        setCancelOfferModalVisible={setCancelOfferModalVisible}
+                        isCancelingOffer={isCancelingOffer}
+                        nft={nft}
+                        usdPrice={usdPrice}
+                        offer={cancelOffer}
+                    />
+                    {approveOffer && (
+                        <ApproveSaleModal
+                            approveOfferModalVisible={approveOfferModalVisible}
+                            setApproveOfferModalVisible={
+                                setApproveOfferModalVisible
+                            }
+                            nft={nft}
+                            usdPrice={usdPrice}
+                            offer={approveOffer}
+                            notify={notify}
+                            sdk={sdk}
+                            address={address}
+                        />
+                    )}
                 </>
             )}
 
