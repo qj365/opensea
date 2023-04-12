@@ -2,12 +2,12 @@
 import Image from 'next/image';
 import Link from 'next/link';
 
-function CardHorizontal({ logoImage, featuredImage, name, slug }) {
+function SlideCardHorizontal({ logoImage, featuredImage, name, slug }) {
     return (
-        <div className={`group rounded-xl mb-6 overflow-hidden w-[302px]`}>
+        <div className={`group rounded-xl mb-6 overflow-hidden w-[468px]`}>
             <Link href={`/collection/${slug}`}>
                 <a>
-                    <div className={` relative w-full h-[107px]`}>
+                    <div className={` relative w-full h-[264px]`}>
                         <Image
                             src={featuredImage ? featuredImage : logoImage}
                             alt="featured"
@@ -18,7 +18,7 @@ function CardHorizontal({ logoImage, featuredImage, name, slug }) {
 
                     <div className="flex items-center -mt-[26px] px-6 py-4 bg-[#353840] group-hover:bg-[#4c505c] transition ease-in-out duration-400 ">
                         <div
-                            className={`relative border-4 border-[#303339] rounded-[10px] overflow-hidden h-[70px] w-[70px]
+                            className={`relative border-4 border-[#303339] rounded-[10px] overflow-hidden h-[90px] w-[90px]
                             `}
                         >
                             <Image
@@ -38,4 +38,4 @@ function CardHorizontal({ logoImage, featuredImage, name, slug }) {
     );
 }
 
-export default CardHorizontal;
+export default SlideCardHorizontal;

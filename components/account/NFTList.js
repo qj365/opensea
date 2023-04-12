@@ -3,6 +3,7 @@ import Tabs from '../common/Tabs';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import CollectedTab from './CollectedTab';
+import CreatedTab from './CreatedTab';
 
 function NFTList({ token }) {
     const router = useRouter();
@@ -13,7 +14,11 @@ function NFTList({ token }) {
             href: '/collected',
             component: <CollectedTab token={token} />,
         },
-        { label: 'Created', href: '/created' },
+        {
+            label: 'Created',
+            href: '/created',
+            component: <CreatedTab token={token} />,
+        },
         { label: 'Activity', href: '/activity' },
     ];
     function handleTabClick(e, tab) {
