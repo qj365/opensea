@@ -102,7 +102,7 @@ function NftItem() {
         <>
             <div className="pt-2 pb-4 w-[1280px] m-auto">
                 <ItemWrapper nft={nftData.getNftAssetPage} />
-                <ItemActivity />
+                <ItemActivity nft={nftData.getNftAssetPage} address={address} />
             </div>
             <Footer />
         </>

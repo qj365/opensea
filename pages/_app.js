@@ -7,11 +7,22 @@ import ClientOnly from '../components/layout/ClientOnly';
 import { AvatarContextProvider } from '../context/avatar-context';
 import client from '../graphql/apollo-client';
 import '../styles/Calendar.css';
-import '../styles/Calendar.css';
 import '../styles/DateTimeRangePicker.css';
 import { Localhost, Goerli } from '@thirdweb-dev/chains';
+import TopBarProgress from 'react-topbar-progress-indicator';
+import { useState } from 'react';
+import Router from 'next/router';
 
 function MyApp({ Component, pageProps }) {
+    const [progress, setProgress] = useState(false);
+    Router.events.on('routeChangeStart', () => {
+        setProgress(true);
+    });
+
+    Router.events.on('routeChangeComplete', () => {
+        setProgress(false);
+    });
+
     const getLayout =
         Component.getLayout ||
         (page => <OnlyHeaderLayout>{page}</OnlyHeaderLayout>);
@@ -21,13 +32,13 @@ function MyApp({ Component, pageProps }) {
             <ThirdwebProvider
                 activeChain={{
                     ...Goerli,
-                    rpc: ['https://rpc.ankr.com/eth_goerli'], // Override the "rpc" field.
-                    // ... Override any other fields you want to customize.
+                    rpc: ['https://rpc.ankr.com/eth_goerli'],
                 }}
             >
                 <ClientOnly>
                     <AvatarContextProvider>
                         <SidebarContextProvider>
+                            {progress && <TopBarProgress />}
                             {getLayout(<Component {...pageProps} />)}
                         </SidebarContextProvider>
                     </AvatarContextProvider>

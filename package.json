@@ -29,6 +29,7 @@
     "react-slideshow-image": "^4.2.1",
     "react-spinners": "^0.13.8",
     "react-toastify": "^9.1.1",
+    "react-topbar-progress-indicator": "^4.1.1",
     "slug": "^8.2.2"
   },
   "devDependencies": {

@@ -6,18 +6,103 @@ import {
     MdShoppingCart,
     MdMoney,
     MdOpenInNew,
+    MdAutoAwesome,
+    MdCancel,
 } from 'react-icons/md';
 import { Accordion, Tooltip, Table } from 'flowbite-react';
 import Select from 'react-select';
+import { useState, useEffect } from 'react';
+import { timeElapsed, formatToUSDate } from '../../utils/formatDate';
 
 const options = [
-    { value: 'Sale', label: 'Sales' },
-    { value: 'Listing', label: 'Listings' },
-    { value: 'Offer', label: 'Offers' },
-    { value: 'Transfer', label: 'Transfers' },
+    {
+        value: 'Sale',
+        label: 'Sale',
+        icon: <MdShoppingCart className="mr-[10px] text-2xl" />,
+    },
+    {
+        value: 'Listing',
+        label: 'Listing',
+        icon: <MdSell className="mr-[10px] text-2xl" />,
+    },
+    {
+        value: 'Offer',
+        label: 'Offer',
+        icon: <MdMultipleStop className="mr-[10px] text-2xl" />,
+    },
+    {
+        value: 'Mint',
+        label: 'Mint',
+        icon: <MdAutoAwesome className="mr-[10px] text-2xl" />,
+    },
+    {
+        value: 'Cancel',
+        label: 'Cancel',
+        icon: <MdCancel className="mr-[10px] text-2xl" />,
+    },
 ];
+const styleSelect = {
+    control: (baseStyles, state) => ({
+        ...baseStyles,
+        backgroundColor: 'transparent',
+        padding: '4px 0',
+        border: state.menuIsOpen ? 'solid 2px #8a939b' : 'solid 2px #4c505c',
+        borderRadius: '10px',
+        boxShadow: 'none',
+        ':hover': {
+            border: 'solid 2px #8a939b',
+            cursor: 'pointer',
+            boxShadow: 'none',
+        },
+    }),
+    menu: (baseStyles, state) => ({
+        ...baseStyles,
+        backgroundColor: '#262b2f',
+        color: 'white',
+    }),
+    option: (baseStyles, state) => ({
+        padding: '10px 15px',
+        ':hover': {
+            cursor: 'pointer',
+            backgroundColor: '#4c505c',
+        },
+    }),
+    multiValue: (baseStyles, state) => ({
+        ...baseStyles,
+        color: 'white',
+        backgroundColor: '#4c505c',
+        borderRadius: '10px',
+        overflow: 'hidden',
+        padding: '2px',
+    }),
+    multiValueLabel: baseStyles => ({
+        ...baseStyles,
+        color: 'white',
+    }),
+    input: baseStyles => ({
+        ...baseStyles,
+        opacity: 0,
+    }),
+};
 
-function ItemActivity() {
+function ItemActivity({ nft, address }) {
+    const [events, setEvents] = useState([]);
+    const [eventFilter, setEventFilter] = useState([]);
+    useEffect(() => {
+        if (nft.events) {
+            const excludeOffers = nft.events.filter(
+                e => e.eventName !== 'Offer'
+            );
+            setEvents(nft.events);
+
+            if (eventFilter.length > 0) {
+                setEvents(
+                    nft.events.filter(e => eventFilter.includes(e.eventName))
+                );
+            }
+        }
+    }, [nft, eventFilter]);
+
     return (
         <Accordion
             alwaysOpen={true}
@@ -34,55 +119,14 @@ function ItemActivity() {
                     <Select
                         placeholder="Filler"
                         isMulti
-                        name="colors"
+                        name="events"
                         options={options}
-                        styles={{
-                            control: (baseStyles, state) => ({
-                                ...baseStyles,
-                                backgroundColor: 'transparent',
-                                padding: '4px 0',
-                                border: state.menuIsOpen
-                                    ? 'solid 2px #8a939b'
-                                    : 'solid 2px #4c505c',
-                                borderRadius: '10px',
-                                boxShadow: 'none',
-                                ':hover': {
-                                    border: 'solid 2px #8a939b',
-                                    cursor: 'pointer',
-                                    boxShadow: 'none',
-                                },
-                            }),
-                            menu: (baseStyles, state) => ({
-                                ...baseStyles,
-                                backgroundColor: '#262b2f',
-                                color: 'white',
-                            }),
-                            option: (baseStyles, state) => ({
-                                padding: '10px 15px',
-                                ':hover': {
-                                    cursor: 'pointer',
-                                    backgroundColor: '#4c505c',
-                                },
-                            }),
-                            multiValue: (baseStyles, state) => ({
-                                ...baseStyles,
-                                color: 'white',
-                                backgroundColor: '#4c505c',
-                                borderRadius: '10px',
-                                overflow: 'hidden',
-                                padding: '2px',
-                            }),
-                            multiValueLabel: baseStyles => ({
-                                ...baseStyles,
-                                color: 'white',
-                            }),
-                            input: baseStyles => ({
-                                ...baseStyles,
-                                opacity: 0,
-                            }),
-                        }}
+                        styles={styleSelect}
                         className="react-select-container"
                         classNamePrefix="select"
+                        onChange={e => {
+                            setEventFilter(e.map(e => e.value));
+                        }}
                     />
                     <div className="pt-3">
                         <div className="max-h-[332px] w-full overflow-y-auto scrollbar-thin scrollbar-thumb-[#171a1c] scrollbar-track-transparent">
@@ -122,406 +166,114 @@ function ItemActivity() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr className="border-t-[1px] border-[#151b22]">
-                                        <td className="text-[#e5e8eb] text-[15px] py-4 w-1/5">
-                                            <span className="flex">
-                                                <MdShoppingCart className="mr-[10px] text-2xl" />
-                                                Sale
-                                            </span>
-                                        </td>
-                                        <td className="text-[#e5e8eb] text-[15px] py-4 w-1/5">
-                                            0.033 ETH
-                                        </td>
-                                        <td className="py-4 w-1/5">
-                                            <Link href="/">
-                                                <a className="text-[15px] text-[#2081e2] hover:text-[#1868b7]">
-                                                    Quang
-                                                </a>
-                                            </Link>
-                                        </td>
-                                        <td className="py-4 w-1/5">
-                                            <Link href="/">
-                                                <a className="text-[15px] text-[#2081e2] hover:text-[#1868b7]">
-                                                    Quang
-                                                </a>
-                                            </Link>
-                                        </td>
-                                        <td className="py-4 w-1/5">
-                                            <a
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                href="/"
-                                                className="text-[15px] text-[#2081e2] hover:text-[#1868b7] inline-block max-w-full"
-                                            >
-                                                <Tooltip content="Tooltip content">
-                                                    <div className="flex">
-                                                        2 hours ago
-                                                        <MdOpenInNew className="ml-[10px] text-2xl" />
+                                    {events.map((e, i) => (
+                                        <tr
+                                            className="border-t-[1px] border-[#151b22]"
+                                            key={i}
+                                        >
+                                            <td className="text-[#e5e8eb] text-[15px] py-4 w-1/5">
+                                                <span className="flex">
+                                                    {
+                                                        options.find(
+                                                            option =>
+                                                                option.value ===
+                                                                e.eventName
+                                                        )?.icon
+                                                    }
+                                                    {e.eventName}
+                                                </span>
+                                            </td>
+                                            <td className="text-[#e5e8eb] text-[15px] py-4 w-1/5">
+                                                {e.price
+                                                    ? `${e.price} ${e.currency}`
+                                                    : ''}
+                                            </td>
+                                            <td className="py-4 w-1/5">
+                                                {e?.from?._id && (
+                                                    <Link
+                                                        href={`/${e.from._id}`}
+                                                    >
+                                                        <a className="text-[15px] text-[#2081e2] hover:text-[#1868b7]">
+                                                            {e.from._id ===
+                                                            address
+                                                                ? 'you'
+                                                                : e.from
+                                                                      .username ===
+                                                                  'Unnamed'
+                                                                ? e.from._id
+                                                                      .slice(-6)
+                                                                      .toUpperCase()
+                                                                : e.from
+                                                                      .username}
+                                                        </a>
+                                                    </Link>
+                                                )}
+                                            </td>
+                                            <td className="py-4 w-1/5">
+                                                {e?.to?._id && (
+                                                    <Link
+                                                        href={`/${e.to?._id}`}
+                                                    >
+                                                        <a className="text-[15px] text-[#2081e2] hover:text-[#1868b7]">
+                                                            {e.to._id ===
+                                                            address
+                                                                ? 'you'
+                                                                : e.to
+                                                                      .username ===
+                                                                  'Unnamed'
+                                                                ? e.to._id
+                                                                      .slice(-6)
+                                                                      .toUpperCase()
+                                                                : e.to.username}
+                                                        </a>
+                                                    </Link>
+                                                )}
+                                            </td>
+                                            {e.transactionHash ? (
+                                                <td className="py-4 w-1/5">
+                                                    <a
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        href={
+                                                            process.env
+                                                                .NEXT_PUBLIC_ETHERSCAN_LINK +
+                                                            e.transactionHash
+                                                        }
+                                                        className="text-[15px] text-[#2081e2] hover:text-[#1868b7] inline-block max-w-full"
+                                                    >
+                                                        <Tooltip
+                                                            content={formatToUSDate(
+                                                                e.startTimestamp
+                                                            )}
+                                                        >
+                                                            <div className="flex">
+                                                                {timeElapsed(
+                                                                    e.startTimestamp
+                                                                )}
+                                                                <MdOpenInNew className="ml-[10px] text-2xl" />
+                                                            </div>
+                                                        </Tooltip>
+                                                    </a>
+                                                </td>
+                                            ) : (
+                                                <td className="py-4 w-1/5">
+                                                    <div className="text-[15px] text-white inline-block max-w-full">
+                                                        <Tooltip
+                                                            content={formatToUSDate(
+                                                                e.startTimestamp
+                                                            )}
+                                                        >
+                                                            <div className="flex">
+                                                                {timeElapsed(
+                                                                    e.startTimestamp
+                                                                )}
+                                                            </div>
+                                                        </Tooltip>
                                                     </div>
-                                                </Tooltip>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                    <tr className="border-t-[1px] border-[#151b22]">
-                                        <td className="text-[#e5e8eb] text-[15px] py-4 w-1/5">
-                                            <span className="flex">
-                                                <MdShoppingCart className="mr-[10px] text-2xl" />
-                                                Sale
-                                            </span>
-                                        </td>
-                                        <td className="text-[#e5e8eb] text-[15px] py-4 w-1/5">
-                                            0.033 ETH
-                                        </td>
-                                        <td className="py-4 w-1/5">
-                                            <Link href="/">
-                                                <a className="text-[15px] text-[#2081e2] hover:text-[#1868b7]">
-                                                    Quang
-                                                </a>
-                                            </Link>
-                                        </td>
-                                        <td className="py-4 w-1/5">
-                                            <Link href="/">
-                                                <a className="text-[15px] text-[#2081e2] hover:text-[#1868b7]">
-                                                    Quang
-                                                </a>
-                                            </Link>
-                                        </td>
-                                        <td className="py-4 w-1/5">
-                                            <a
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                href="/"
-                                                className="text-[15px] text-[#2081e2] hover:text-[#1868b7] inline-block max-w-full"
-                                            >
-                                                <Tooltip content="Tooltip content">
-                                                    <div className="flex">
-                                                        2 hours ago
-                                                        <MdOpenInNew className="ml-[10px] text-2xl" />
-                                                    </div>
-                                                </Tooltip>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                    <tr className="border-t-[1px] border-[#151b22]">
-                                        <td className="text-[#e5e8eb] text-[15px] py-4 w-1/5">
-                                            <span className="flex">
-                                                <MdShoppingCart className="mr-[10px] text-2xl" />
-                                                Sale
-                                            </span>
-                                        </td>
-                                        <td className="text-[#e5e8eb] text-[15px] py-4 w-1/5">
-                                            0.033 ETH
-                                        </td>
-                                        <td className="py-4 w-1/5">
-                                            <Link href="/">
-                                                <a className="text-[15px] text-[#2081e2] hover:text-[#1868b7]">
-                                                    Quang
-                                                </a>
-                                            </Link>
-                                        </td>
-                                        <td className="py-4 w-1/5">
-                                            <Link href="/">
-                                                <a className="text-[15px] text-[#2081e2] hover:text-[#1868b7]">
-                                                    Quang
-                                                </a>
-                                            </Link>
-                                        </td>
-                                        <td className="py-4 w-1/5">
-                                            <a
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                href="/"
-                                                className="text-[15px] text-[#2081e2] hover:text-[#1868b7] inline-block max-w-full"
-                                            >
-                                                <Tooltip content="Tooltip content">
-                                                    <div className="flex">
-                                                        2 hours ago
-                                                        <MdOpenInNew className="ml-[10px] text-2xl" />
-                                                    </div>
-                                                </Tooltip>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                    <tr className="border-t-[1px] border-[#151b22]">
-                                        <td className="text-[#e5e8eb] text-[15px] py-4 w-1/5">
-                                            <span className="flex">
-                                                <MdShoppingCart className="mr-[10px] text-2xl" />
-                                                Sale
-                                            </span>
-                                        </td>
-                                        <td className="text-[#e5e8eb] text-[15px] py-4 w-1/5">
-                                            0.033 ETH
-                                        </td>
-                                        <td className="py-4 w-1/5">
-                                            <Link href="/">
-                                                <a className="text-[15px] text-[#2081e2] hover:text-[#1868b7]">
-                                                    Quang
-                                                </a>
-                                            </Link>
-                                        </td>
-                                        <td className="py-4 w-1/5">
-                                            <Link href="/">
-                                                <a className="text-[15px] text-[#2081e2] hover:text-[#1868b7]">
-                                                    Quang
-                                                </a>
-                                            </Link>
-                                        </td>
-                                        <td className="py-4 w-1/5">
-                                            <a
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                href="/"
-                                                className="text-[15px] text-[#2081e2] hover:text-[#1868b7] inline-block max-w-full"
-                                            >
-                                                <Tooltip content="Tooltip content">
-                                                    <div className="flex">
-                                                        2 hours ago
-                                                        <MdOpenInNew className="ml-[10px] text-2xl" />
-                                                    </div>
-                                                </Tooltip>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                    <tr className="border-t-[1px] border-[#151b22]">
-                                        <td className="text-[#e5e8eb] text-[15px] py-4 w-1/5">
-                                            <span className="flex">
-                                                <MdShoppingCart className="mr-[10px] text-2xl" />
-                                                Sale
-                                            </span>
-                                        </td>
-                                        <td className="text-[#e5e8eb] text-[15px] py-4 w-1/5">
-                                            0.033 ETH
-                                        </td>
-                                        <td className="py-4 w-1/5">
-                                            <Link href="/">
-                                                <a className="text-[15px] text-[#2081e2] hover:text-[#1868b7]">
-                                                    Quang
-                                                </a>
-                                            </Link>
-                                        </td>
-                                        <td className="py-4 w-1/5">
-                                            <Link href="/">
-                                                <a className="text-[15px] text-[#2081e2] hover:text-[#1868b7]">
-                                                    Quang
-                                                </a>
-                                            </Link>
-                                        </td>
-                                        <td className="py-4 w-1/5">
-                                            <a
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                href="/"
-                                                className="text-[15px] text-[#2081e2] hover:text-[#1868b7] inline-block max-w-full"
-                                            >
-                                                <Tooltip content="Tooltip content">
-                                                    <div className="flex">
-                                                        2 hours ago
-                                                        <MdOpenInNew className="ml-[10px] text-2xl" />
-                                                    </div>
-                                                </Tooltip>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                    <tr className="border-t-[1px] border-[#151b22]">
-                                        <td className="text-[#e5e8eb] text-[15px] py-4 w-1/5">
-                                            <span className="flex">
-                                                <MdShoppingCart className="mr-[10px] text-2xl" />
-                                                Sale
-                                            </span>
-                                        </td>
-                                        <td className="text-[#e5e8eb] text-[15px] py-4 w-1/5">
-                                            0.033 ETH
-                                        </td>
-                                        <td className="py-4 w-1/5">
-                                            <Link href="/">
-                                                <a className="text-[15px] text-[#2081e2] hover:text-[#1868b7]">
-                                                    Quang
-                                                </a>
-                                            </Link>
-                                        </td>
-                                        <td className="py-4 w-1/5">
-                                            <Link href="/">
-                                                <a className="text-[15px] text-[#2081e2] hover:text-[#1868b7]">
-                                                    Quang
-                                                </a>
-                                            </Link>
-                                        </td>
-                                        <td className="py-4 w-1/5">
-                                            <a
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                href="/"
-                                                className="text-[15px] text-[#2081e2] hover:text-[#1868b7] inline-block max-w-full"
-                                            >
-                                                <Tooltip content="Tooltip content">
-                                                    <div className="flex">
-                                                        2 hours ago
-                                                        <MdOpenInNew className="ml-[10px] text-2xl" />
-                                                    </div>
-                                                </Tooltip>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                    <tr className="border-t-[1px] border-[#151b22]">
-                                        <td className="text-[#e5e8eb] text-[15px] py-4 w-1/5">
-                                            <span className="flex">
-                                                <MdShoppingCart className="mr-[10px] text-2xl" />
-                                                Sale
-                                            </span>
-                                        </td>
-                                        <td className="text-[#e5e8eb] text-[15px] py-4 w-1/5">
-                                            0.033 ETH
-                                        </td>
-                                        <td className="py-4 w-1/5">
-                                            <Link href="/">
-                                                <a className="text-[15px] text-[#2081e2] hover:text-[#1868b7]">
-                                                    Quang
-                                                </a>
-                                            </Link>
-                                        </td>
-                                        <td className="py-4 w-1/5">
-                                            <Link href="/">
-                                                <a className="text-[15px] text-[#2081e2] hover:text-[#1868b7]">
-                                                    Quang
-                                                </a>
-                                            </Link>
-                                        </td>
-                                        <td className="py-4 w-1/5">
-                                            <a
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                href="/"
-                                                className="text-[15px] text-[#2081e2] hover:text-[#1868b7] inline-block max-w-full"
-                                            >
-                                                <Tooltip content="Tooltip content">
-                                                    <div className="flex">
-                                                        2 hours ago
-                                                        <MdOpenInNew className="ml-[10px] text-2xl" />
-                                                    </div>
-                                                </Tooltip>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                    <tr className="border-t-[1px] border-[#151b22]">
-                                        <td className="text-[#e5e8eb] text-[15px] py-4 w-1/5">
-                                            <span className="flex">
-                                                <MdShoppingCart className="mr-[10px] text-2xl" />
-                                                Sale
-                                            </span>
-                                        </td>
-                                        <td className="text-[#e5e8eb] text-[15px] py-4 w-1/5">
-                                            0.033 ETH
-                                        </td>
-                                        <td className="py-4 w-1/5">
-                                            <Link href="/">
-                                                <a className="text-[15px] text-[#2081e2] hover:text-[#1868b7]">
-                                                    Quang
-                                                </a>
-                                            </Link>
-                                        </td>
-                                        <td className="py-4 w-1/5">
-                                            <Link href="/">
-                                                <a className="text-[15px] text-[#2081e2] hover:text-[#1868b7]">
-                                                    Quang
-                                                </a>
-                                            </Link>
-                                        </td>
-                                        <td className="py-4 w-1/5">
-                                            <a
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                href="/"
-                                                className="text-[15px] text-[#2081e2] hover:text-[#1868b7] inline-block max-w-full"
-                                            >
-                                                <Tooltip content="Tooltip content">
-                                                    <div className="flex">
-                                                        2 hours ago
-                                                        <MdOpenInNew className="ml-[10px] text-2xl" />
-                                                    </div>
-                                                </Tooltip>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                    <tr className="border-t-[1px] border-[#151b22]">
-                                        <td className="text-[#e5e8eb] text-[15px] py-4 w-1/5">
-                                            <span className="flex">
-                                                <MdShoppingCart className="mr-[10px] text-2xl" />
-                                                Sale
-                                            </span>
-                                        </td>
-                                        <td className="text-[#e5e8eb] text-[15px] py-4 w-1/5">
-                                            0.033 ETH
-                                        </td>
-                                        <td className="py-4 w-1/5">
-                                            <Link href="/">
-                                                <a className="text-[15px] text-[#2081e2] hover:text-[#1868b7]">
-                                                    Quang
-                                                </a>
-                                            </Link>
-                                        </td>
-                                        <td className="py-4 w-1/5">
-                                            <Link href="/">
-                                                <a className="text-[15px] text-[#2081e2] hover:text-[#1868b7]">
-                                                    Quang
-                                                </a>
-                                            </Link>
-                                        </td>
-                                        <td className="py-4 w-1/5">
-                                            <a
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                href="/"
-                                                className="text-[15px] text-[#2081e2] hover:text-[#1868b7] inline-block max-w-full"
-                                            >
-                                                <Tooltip content="Tooltip content">
-                                                    <div className="flex">
-                                                        2 hours ago
-                                                        <MdOpenInNew className="ml-[10px] text-2xl" />
-                                                    </div>
-                                                </Tooltip>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                    <tr className="border-t-[1px] border-[#151b22]">
-                                        <td className="text-[#e5e8eb] text-[15px] py-4 w-1/5">
-                                            <span className="flex">
-                                                <MdShoppingCart className="mr-[10px] text-2xl" />
-                                                Sale
-                                            </span>
-                                        </td>
-                                        <td className="text-[#e5e8eb] text-[15px] py-4 w-1/5">
-                                            0.033 ETH
-                                        </td>
-                                        <td className="py-4 w-1/5">
-                                            <Link href="/">
-                                                <a className="text-[15px] text-[#2081e2] hover:text-[#1868b7]">
-                                                    Quang
-                                                </a>
-                                            </Link>
-                                        </td>
-                                        <td className="py-4 w-1/5">
-                                            <Link href="/">
-                                                <a className="text-[15px] text-[#2081e2] hover:text-[#1868b7]">
-                                                    Quang
-                                                </a>
-                                            </Link>
-                                        </td>
-                                        <td className="py-4 w-1/5">
-                                            <a
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                href="/"
-                                                className="text-[15px] text-[#2081e2] hover:text-[#1868b7] inline-block max-w-full"
-                                            >
-                                                <Tooltip content="Tooltip content">
-                                                    <div className="flex">
-                                                        2 hours ago
-                                                        <MdOpenInNew className="ml-[10px] text-2xl" />
-                                                    </div>
-                                                </Tooltip>
-                                            </a>
-                                        </td>
-                                    </tr>
+                                                </td>
+                                            )}
+                                        </tr>
+                                    ))}
                                 </tbody>
                             </table>
                         </div>

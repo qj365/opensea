@@ -35,4 +35,28 @@ function formatToUSDate(timestamp) {
     return new Intl.DateTimeFormat('en-US', options).format(date);
 }
 
-export { formatJoinedDate, formatToUSDate };
+function timeElapsed(dt) {
+    const now = new Date();
+    const diff = now - dt;
+
+    if (diff < 60000) {
+        return 'just now';
+    } else if (diff < 3600000) {
+        const minutes = Math.floor(diff / 60000);
+        return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+    } else if (diff < 86400000) {
+        const hours = Math.floor(diff / 3600000);
+        return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+    } else if (diff < 604800000) {
+        const days = Math.floor(diff / 86400000);
+        return `${days} day${days > 1 ? 's' : ''} ago`;
+    } else if (diff < 2419200000) {
+        const weeks = Math.floor(diff / 604800000);
+        return `${weeks} week${weeks > 1 ? 's' : ''} ago`;
+    } else {
+        const months = Math.floor(diff / 2419200000);
+        return `${months} month${months > 1 ? 's' : ''} ago`;
+    }
+}
+
+export { formatJoinedDate, formatToUSDate, timeElapsed };

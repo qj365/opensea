@@ -194,7 +194,7 @@ function CreateAssetPage() {
                         variables: {
                             input: {
                                 eventType: 'mint',
-                                eventName: 'Minted',
+                                eventName: 'Mint',
                                 creator: address.toLowerCase(),
                                 assetContract:
                                     nftData.collectionNft.toLowerCase(),

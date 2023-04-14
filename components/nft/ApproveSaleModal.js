@@ -131,10 +131,11 @@ function ApproveSaleModal({
                             <p className="text-white">From</p>
                             <Link href={`/${offer.creator._id.toLowerCase()}`}>
                                 <a className="text-[#2081e2] hover:text-[#1868b7]">
-                                    {offer.creator.username ||
-                                        offer.creator._id
-                                            .slice(-6)
-                                            .toUpperCase()}
+                                    {offer.creator.username === 'Unnamed'
+                                        ? offer.creator._id
+                                              .slice(-6)
+                                              .toUpperCase()
+                                        : offer.creator.username}
                                 </a>
                             </Link>
                         </div>

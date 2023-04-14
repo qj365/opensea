@@ -175,6 +175,7 @@ function ItemWrapper({ nft }) {
                             eventName: 'Cancel',
                             creator: address.toLowerCase(),
                             assetContract: listing.assetContract,
+                            from: address.toLowerCase(),
                             tokenId: listing.tokenId,
                             startTimestamp: now,
                             eventId: listing.eventId,
@@ -235,9 +236,9 @@ function ItemWrapper({ nft }) {
                     // const txResult = await contract.offers.cancelOffer(
                     //     offer.eventId
                     // );
-                    // const { data } = await deactiveEvent({
-                    //     variables: { ids: [offer._id] },
-                    // });
+                    const { data } = await deactiveEvent({
+                        variables: { ids: [offer._id] },
+                    });
 
                     notify('success', undefined, 'Offer canceled!');
 
@@ -476,7 +477,7 @@ function ItemWrapper({ nft }) {
                     <div>
                         <div className="flex justify-between items-center">
                             <Link
-                                href={`/collectionNft/${nft?.collectionNft?.slug}`}
+                                href={`/collection/${nft?.collectionNft?.slug}`}
                             >
                                 <a className="text-[#2081e2] hover:text-[#1868b7]">
                                     {nft?.collectionNft?.name}
@@ -741,7 +742,6 @@ function ItemWrapper({ nft }) {
                                 </div>
                             </Accordion.Title>
                             <Accordion.Content className="px-0 py-2">
-                                {/*  */}
                                 {validOffers.length > 0 ? (
                                     <ul className="max-h-[332px] overflow-y-auto">
                                         <li className="flex border-t-[1px] border-[#151b22]">
@@ -830,9 +830,9 @@ function ItemWrapper({ nft }) {
                                                         </a>
                                                     </Link>
                                                 </div>
-                                                {offer.creator._id ===
-                                                    address?.toLowerCase() && (
-                                                    <div className="py-4 px-2 w-full">
+                                                <div className="py-4 px-2 w-full">
+                                                    {offer.creator._id ===
+                                                    address?.toLowerCase() ? (
                                                         <button
                                                             className="text-white bg-[#353840] rounded-xl font-semibold py-[11px] px-5 border-2 border-[#353840] hover:bg-[#4c505c] hover:border-transparent transition-colors"
                                                             onClick={() =>
@@ -843,24 +843,23 @@ function ItemWrapper({ nft }) {
                                                         >
                                                             Cancel
                                                         </button>
-                                                    </div>
-                                                )}
-                                                {address?.toLowerCase() ===
-                                                    nft.owner._id && (
-                                                    <div className="py-4 px-2 w-full">
-                                                        <button
-                                                            className="flex items-center text-white bg-[#2081e2] rounded-xl font-semibold py-[11px] px-4 hover:bg-[#2e8eee] transition-colors"
-                                                            onClick={() =>
-                                                                handleApproveOffer(
-                                                                    offer
-                                                                )
-                                                            }
-                                                        >
-                                                            <MdBolt className="text-[22px]" />
-                                                            Accept
-                                                        </button>
-                                                    </div>
-                                                )}
+                                                    ) : (
+                                                        address?.toLowerCase() ===
+                                                            nft.owner._id && (
+                                                            <button
+                                                                className="flex items-center text-white bg-[#2081e2] rounded-xl font-semibold py-[11px] px-4 hover:bg-[#2e8eee] transition-colors"
+                                                                onClick={() =>
+                                                                    handleApproveOffer(
+                                                                        offer
+                                                                    )
+                                                                }
+                                                            >
+                                                                <MdBolt className="text-[22px]" />
+                                                                Accept
+                                                            </button>
+                                                        )
+                                                    )}
+                                                </div>
                                             </li>
                                         ))}
                                     </ul>
