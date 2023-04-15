@@ -369,20 +369,7 @@ function CreateAssetPage() {
                     <ToastContainer />
                 </form>
 
-                <button
-                    onClick={async () => {
-                        const contract = await sdk.getContract(
-                            '0xD7F21C64047E79C03C447d3b672A264808d03d84'
-                        );
-
-                        const events = await contract.events.getAllEvents();
-
-                        const nft = await contract.erc721.get(2);
-                        console.log(events, nft);
-                    }}
-                >
-                    button
-                </button>
+             
             </div>
             <div
                 className={`fixed inset-0 bg-[#000000cc] flex items-center justify-center transition-opacity ease-in-out duration-200 ${

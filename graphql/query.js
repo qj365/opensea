@@ -122,6 +122,8 @@ const GET_NFT_ASSET_PAGE = gql`
             _id
             tokenId
             listing {
+                _id
+                listingId
                 isListing
                 type
                 price

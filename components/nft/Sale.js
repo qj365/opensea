@@ -10,26 +10,84 @@ import Icon from '../../assets/icons';
 import { formatToUSDate } from '../../utils/formatDate';
 import MakeOfferModal from './MakeOfferModal';
 import { useAddress } from '@thirdweb-dev/react';
+import ApprovePurchase from './ApprovePurchase';
+import { useMutation } from '@apollo/client';
+import { BUY_NOW_NFT } from '../../graphql/mutation';
+import { useRouter } from 'next/router';
 
 function Sale({ nft, address, toggleSidebar, usdPrice, notify, sdk }) {
+    const router = useRouter();
+
     const [makeOfferModalVisible, setMakeOfferModalVisible] = useState(false);
     function handleMakeOffer() {
         console.log(address, validateLogin(address));
         if (validateLogin(address)) {
             setMakeOfferModalVisible(true);
             document.body.style.overflowY = 'hidden';
-            console.log(true);
         } else {
             toggleSidebar();
             console.log(false);
         }
     }
-    function handleBuyNow() {
-        if (validateLogin(address)) {
-            console.log(true);
-        } else {
-            toggleSidebar();
-            console.log(false);
+
+    const [buyNowNft] = useMutation(BUY_NOW_NFT);
+    const [approvePurchaseModalVisible, setApprovePurchaseModalVisible] =
+        useState(false);
+    const [isPurchasing, setIsPurchasing] = useState(false);
+    const [buyFromListing, setBuyFromListing] = useState(null);
+
+    async function handleBuyNow() {
+        setBuyFromListing(nft.listing);
+        try {
+            if (validateLogin(address)) {
+                setApprovePurchaseModalVisible(true);
+                document.body.style.overflowY = 'hidden';
+                setIsPurchasing(true);
+                const contract = await sdk.getContract(
+                    process.env.NEXT_PUBLIC_MARKETPLACE_ADDRESS,
+                    'marketplace-v3'
+                );
+
+                if (contract) {
+                    const txResult =
+                        await contract.directListings.buyFromListing(
+                            nft.listing.listingId,
+                            1,
+                            address
+                        );
+                    const { data } = await buyNowNft({
+                        variables: {
+                            _idListing: nft.listing._id,
+                            collectionNft: nft.collectionNft._id,
+                            tokenId: nft.tokenId,
+                            event: {
+                                creator: address.toLowerCase(),
+                                from: nft.owner._id,
+                                to: address.toLowerCase(),
+                                currency: nft.listing.currency,
+                                price: nft.listing.price,
+                                startTimestamp: new Date(),
+                                transactionHash:
+                                    txResult.receipt.transactionHash,
+                            },
+                        },
+                    });
+
+                    notify('success', undefined, 'Purchase successfully!');
+
+                    setTimeout(() => {
+                        router.reload();
+                    }, 1000);
+                } else throw new Error('Contract not found');
+            } else {
+                toggleSidebar();
+                console.log(false);
+            }
+        } catch (err) {
+            console.log('message', err);
+            setIsPurchasing(false);
+
+            notify('error', 'Purchase failed');
         }
     }
 
@@ -43,15 +101,30 @@ function Sale({ nft, address, toggleSidebar, usdPrice, notify, sdk }) {
     }
     return (
         <>
-            <MakeOfferModal
-                makeOfferModalVisible={makeOfferModalVisible}
-                setMakeOfferModalVisible={setMakeOfferModalVisible}
-                nft={nft}
-                usdPrice={usdPrice}
-                notify={notify}
-                address={address}
-                sdk={sdk}
-            />
+            {makeOfferModalVisible && (
+                <MakeOfferModal
+                    makeOfferModalVisible={makeOfferModalVisible}
+                    setMakeOfferModalVisible={setMakeOfferModalVisible}
+                    nft={nft}
+                    usdPrice={usdPrice}
+                    notify={notify}
+                    address={address}
+                    sdk={sdk}
+                />
+            )}
+
+            {approvePurchaseModalVisible && (
+                <ApprovePurchase
+                    approvePurchaseModalVisible={approvePurchaseModalVisible}
+                    setApprovePurchaseModalVisible={
+                        setApprovePurchaseModalVisible
+                    }
+                    isPurchasing={isPurchasing}
+                    nft={nft}
+                    usdPrice={usdPrice}
+                    listing={buyFromListing}
+                />
+            )}
 
             {
                 // k dang nhap or dang nhap nhung khong phai chu so huu nft

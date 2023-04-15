@@ -12,6 +12,10 @@ import {
     useAddress,
     useDisconnect,
     useSDK,
+    useNetworkMismatch,
+    useNetwork,
+    useChainId,
+    ChainId,
 } from '@thirdweb-dev/react';
 import Image from 'next/image';
 import Router, { useRouter } from 'next/router';
@@ -51,6 +55,8 @@ function AccountSidebar() {
     const { avatar, setAvatar } = useContext(AvatarContext);
 
     const address = useAddress();
+    const [, switchNetwork] = useNetwork(); // Switch to desired chain
+    const isMismatched = useNetworkMismatch();
     const disconnect = useDisconnect();
     const router = useRouter();
     const sdk = useSDK();
@@ -83,47 +89,15 @@ function AccountSidebar() {
     const client = useApolloClient();
 
     useDidMountEffect(() => {
-        if (window?.ethereum) {
-            // if (!address) {
-            //     window.localStorage.removeItem('__user_address');
-            //     setAvatar(null);
-            // } else {
-            //     window.localStorage.setItem('__user_address', address);
-            //     Cookies.set('__user_address', address);
-            //     async function getProfileImage() {
-            //         try {
-            //             const { data } = await client.query({
-            //                 query: GET_PROFILE_IMAGE,
-            //                 variables: {
-            //                     getUserByIdId: address.toLocaleLowerCase(),
-            //                 },
-            //             });
-            //             if (data) setAvatar(data.getUserById.profileImage);
-            //         } catch (err) {
-            //             if (err.message === 'No document found with that ID') {
-            //                 try {
-            //                     const { data } = await client.mutate({
-            //                         mutation: CREATE_USER,
-            //                         variables: {
-            //                             input: {
-            //                                 _id: address.toLocaleLowerCase(),
-            //                             },
-            //                         },
-            //                     });
-            //                     if (data)
-            //                         setAvatar(data.createUser.profileImage);
-            //                 } catch (err) {
-            //                     console.log(err);
-            //                 }
-            //             }
-            //         }
-            //     }
-            //     getProfileImage();
-            // }
-            if (address) {
-                window.localStorage.setItem('__user_address', address);
-                Cookies.set('__user_address', address);
-                async function getProfileImage() {
+        async function login() {
+            if (window?.ethereum) {
+                if (address) {
+                    if (isMismatched) {
+                        await switchNetwork(ChainId.Goerli);
+                    }
+                    window.localStorage.setItem('__user_address', address);
+                    Cookies.set('__user_address', address);
+
                     try {
                         const { data } = await client.query({
                             query: GET_PROFILE_IMAGE,
@@ -151,9 +125,9 @@ function AccountSidebar() {
                         }
                     }
                 }
-                getProfileImage();
             }
         }
+        login();
     }, [address]);
 
     useEffect(() => {
@@ -427,14 +401,15 @@ function AccountSidebar() {
                                         <button
                                             className="p-5 w-full flex justify-between"
                                             onClick={async () => {
-                                                const { data, error } =
-                                                    await connectWithWallet[
-                                                        wallet.id
-                                                    ]();
-                                                if (error) {
+                                                try {
+                                                    const { data, error } =
+                                                        await connectWithWallet[
+                                                            wallet.id
+                                                        ]();
+                                                } catch (err) {
                                                     console.log(
                                                         'connect wallet error: ',
-                                                        error
+                                                        err
                                                     );
                                                 }
                                             }}

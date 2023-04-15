@@ -1,4 +1,9 @@
-import { ChainId, ThirdwebProvider } from '@thirdweb-dev/react';
+import {
+    ChainId,
+    ThirdwebProvider,
+    useNetworkMismatch,
+    useNetwork,
+} from '@thirdweb-dev/react';
 import { ApolloClient, InMemoryCache, ApolloProvider } from '@apollo/client';
 import OnlyHeaderLayout from '../components/layout/OnlyHeaderLayout';
 import '../styles/globals.css';
@@ -8,7 +13,7 @@ import { AvatarContextProvider } from '../context/avatar-context';
 import client from '../graphql/apollo-client';
 import '../styles/Calendar.css';
 import '../styles/DateTimeRangePicker.css';
-import { Localhost, Goerli } from '@thirdweb-dev/chains';
+import { Localhost, Goerli, BinanceTestnet } from '@thirdweb-dev/chains';
 import TopBarProgress from 'react-topbar-progress-indicator';
 import { useState } from 'react';
 import Router from 'next/router';
@@ -32,7 +37,10 @@ function MyApp({ Component, pageProps }) {
             <ThirdwebProvider
                 activeChain={{
                     ...Goerli,
-                    rpc: ['https://rpc.ankr.com/eth_goerli'],
+                    rpc: [
+                        'https://rpc.ankr.com/eth_goerli',
+                        'https://eth-goerli.public.blastapi.io',
+                    ],
                 }}
             >
                 <ClientOnly>

@@ -10,6 +10,7 @@ import { GET_BEST_OFFER } from '../../graphql/query';
 import { useMutation } from '@apollo/client';
 import { CREATE_EVENT, DEACTIVE_EVENT } from '../../graphql/mutation';
 import validateLogin from '../../utils/validateLogin';
+import { useRouter } from 'next/router';
 
 const options = [
     { value: '12', label: '12 hours' },
@@ -71,12 +72,14 @@ function MakeOfferModal({
     address,
     sdk,
 }) {
+    const router = useRouter();
     const { data: bestOffer } = useQuery(GET_BEST_OFFER, {
         variables: {
             collectionNft: nft.collectionNft._id,
             tokenId: nft.tokenId,
         },
     });
+    const [isMakingOffer, setIsMakingOffer] = useState(false);
     const [createEvent] = useMutation(CREATE_EVENT);
     const [deactiveEvent] = useMutation(DEACTIVE_EVENT);
     const [selectedOption, setSelectedOption] = useState(options[1]);
@@ -110,6 +113,7 @@ function MakeOfferModal({
     async function handleMakeOffer() {
         try {
             if (validateLogin(address)) {
+                setIsMakingOffer(true);
                 const contract = await sdk.getContract(
                     process.env.NEXT_PUBLIC_MARKETPLACE_ADDRESS,
                     'marketplace-v3'
@@ -126,10 +130,12 @@ function MakeOfferModal({
                         ),
                     };
 
-                    // const txResult = await contract?.offers.makeOffer(inputContract);
+                    const txResult = await contract.offers.makeOffer(
+                        inputContract
+                    );
 
                     const input = {
-                        eventId: 1,
+                        eventId: parseInt(txResult.id._hex, 16),
                         eventType: 'offer',
                         eventName: 'Offer',
                         active: true,
@@ -141,7 +147,7 @@ function MakeOfferModal({
                         price: inputContract.totalPrice,
                         startTimestamp: new Date(),
                         endTimestamp: inputContract.endTimestamp,
-                        transactionHash: null,
+                        transactionHash: txResult.receipt.transactionHash,
                     };
                     const { data } = await createEvent({
                         variables: {
@@ -149,12 +155,11 @@ function MakeOfferModal({
                         },
                     });
 
-                    // setIsApproving(false);
                     notify('success', undefined, 'Offer created!');
 
-                    // setTimeout(() => {
-                    //     router.reload();
-                    // }, 1000);
+                    setTimeout(() => {
+                        router.reload();
+                    }, 1000);
                 } else throw new Error('Contract not found');
             } else {
                 router.push('/login');
@@ -163,6 +168,7 @@ function MakeOfferModal({
             console.log('message', err);
             notify('error', 'Offer failed');
             // setIsApproving(false);
+            setIsMakingOffer(false);
         }
     }
 
@@ -302,14 +308,37 @@ function MakeOfferModal({
                 <div className="p-6">
                     <button
                         className={`w-full text-base font-semibold tracking-[0.01em] py-[17px] px-6 bg-[#2081e2] border border-transparent text-white rounded-xl  ${
-                            Boolean(parseFloat(price)) && !gtError
+                            Boolean(parseFloat(price)) &&
+                            !gtError &&
+                            !isMakingOffer
                                 ? 'hover:bg-[#2e8eee]'
                                 : 'opacity-40 hover:bg-inherit'
                         }'}`}
-                        disabled={!Boolean(parseFloat(price)) || gtError}
+                        disabled={
+                            !Boolean(parseFloat(price)) ||
+                            gtError ||
+                            isMakingOffer
+                        }
                         onClick={handleMakeOffer}
                     >
-                        Make offer
+                        {isMakingOffer ? (
+                            <div className="flex items-center justify-center">
+                                <ClipLoader
+                                    loading={true}
+                                    color={'#ffffff'}
+                                    cssOverride={{
+                                        borderWidth: '3px',
+                                        zIndex: '10',
+                                        marginRight: '8px',
+                                    }}
+                                    size={20}
+                                />
+                                Go to your wallet and confirm this offer from
+                                your wallet.
+                            </div>
+                        ) : (
+                            'Make offer'
+                        )}
                     </button>
                 </div>
             </div>

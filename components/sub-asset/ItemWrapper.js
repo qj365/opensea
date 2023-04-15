@@ -8,6 +8,8 @@ import {
     MdBallot,
     MdAccessTime,
     MdBolt,
+    MdNewReleases,
+    MdTaskAlt,
 } from 'react-icons/md';
 import Link from 'next/link';
 import { Accordion, Tooltip } from 'flowbite-react';
@@ -39,12 +41,17 @@ import diffDay from '../../utils/diffDay';
 import { formatToUSDate } from '../../utils/formatDate';
 import EditListingModal from '../nft/EditListingModal';
 import CloseListingModal from '../nft/CloseListingModal';
-import { CREATE_EVENT, DEACTIVE_EVENT } from '../../graphql/mutation';
+import {
+    CREATE_EVENT,
+    DEACTIVE_EVENT,
+    BUY_NOW_NFT,
+} from '../../graphql/mutation';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import CancelOfferModal from '../nft/CancelOfferModal';
 import ApproveListingModal from '../nft/ApproveListingModal';
 import ApproveSaleModal from '../nft/ApproveSaleModal';
+import ApprovePurchase from '../nft/ApprovePurchase';
 
 const notify = (
     status,
@@ -65,15 +72,15 @@ const notify = (
     else toast.error(errorMessage, settingToast);
 };
 
-function ItemWrapper({ nft }) {
+function ItemWrapper({ nft, usdPrice }) {
     const router = useRouter();
     const address = useAddress();
     const sdk = useSDK();
 
-    const [usdPrice, setUsdPrice] = useState({
-        ETH: undefined,
-        WETH: undefined,
-    });
+    // const [usdPrice, setUsdPrice] = useState({
+    //     ETH: undefined,
+    //     WETH: undefined,
+    // });
 
     const { sidebarIsVisible, toggleSidebar, hideSidebar } =
         useContext(SidebarContext);
@@ -119,24 +126,6 @@ function ItemWrapper({ nft }) {
             );
             if (validOffers.length > 0) setValidOffers(validOffers);
         }
-    }, []);
-
-    useEffect(() => {
-        async function getUsdPrice() {
-            const eth = await (
-                await fetch(
-                    'https://min-api.cryptocompare.com/data/price?fsym=ETH&tsyms=USD'
-                )
-            ).json();
-
-            const weth = await (
-                await fetch(
-                    'https://min-api.cryptocompare.com/data/price?fsym=WETH&tsyms=USD'
-                )
-            ).json();
-            setUsdPrice({ ETH: eth.USD, WETH: weth.USD });
-        }
-        getUsdPrice();
     }, []);
 
     const [isApproving, setIsApproving] = useState(false);
@@ -231,11 +220,11 @@ function ItemWrapper({ nft }) {
                     'marketplace-v3'
                 );
 
+                setIsCancelingOffer(true);
                 if (contract) {
-                    setIsCancelingOffer(true);
-                    // const txResult = await contract.offers.cancelOffer(
-                    //     offer.eventId
-                    // );
+                    const txResult = await contract.offers.cancelOffer(
+                        offer.eventId
+                    );
                     const { data } = await deactiveEvent({
                         variables: { ids: [offer._id] },
                     });
@@ -262,36 +251,98 @@ function ItemWrapper({ nft }) {
 
     async function handleApproveOffer(offer) {
         setApproveOffer(offer);
+        console.log(approveOffer);
         setApproveOfferModalVisible(true);
         document.body.style.overflowY = 'hidden';
+    }
+
+    const [buyNowNft] = useMutation(BUY_NOW_NFT);
+    const [approvePurchaseModalVisible, setApprovePurchaseModalVisible] =
+        useState(false);
+    const [isPurchasing, setIsPurchasing] = useState(false);
+    const [buyFromListing, setBuyFromListing] = useState(null);
+    async function handleBuyFromListing(listing) {
+        setBuyFromListing(listing);
+        try {
+            if (validateLogin(address)) {
+                setApprovePurchaseModalVisible(true);
+                document.body.style.overflowY = 'hidden';
+                setIsPurchasing(true);
+                const contract = await sdk.getContract(
+                    process.env.NEXT_PUBLIC_MARKETPLACE_ADDRESS,
+                    'marketplace-v3'
+                );
+
+                if (contract) {
+                    const txResult =
+                        await contract.directListings.buyFromListing(
+                            listing.eventId,
+                            1,
+                            address
+                        );
+                    const { data } = await buyNowNft({
+                        variables: {
+                            _idListing: listing._id,
+                            collectionNft: nft.collectionNft._id,
+                            tokenId: nft.tokenId,
+                            event: {
+                                creator: address.toLowerCase(),
+                                from: nft.owner._id,
+                                to: address.toLowerCase(),
+                                currency: listing.currency,
+                                price: listing.price,
+                                startTimestamp: new Date(),
+                                transactionHash:
+                                    txResult.receipt.transactionHash,
+                            },
+                        },
+                    });
+
+                    notify('success', undefined, 'Purchase successfully!');
+
+                    setTimeout(() => {
+                        router.reload();
+                    }, 1000);
+                } else throw new Error('Contract not found');
+            } else {
+                toggleSidebar();
+                console.log(false);
+            }
+        } catch (err) {
+            console.log('message', err);
+            setIsPurchasing(false);
+
+            notify('error', 'Purchase failed');
+        }
     }
 
     return (
         <>
             {validateLogin(address) && (
                 <div className="flex flex-row-reverse sticky z-10 top-[72px] bottom-0 right-0 py-3 bg-[#202225] border-b-[1px] border-[#353840]">
-                    {nft?.listing?.isListing ? (
-                        address?.toLowerCase() ===
-                            nft?.owner?._id?.toLowerCase() && (
-                            <button
-                                onClick={() => {
-                                    setOpenListingModal(true);
-                                    document.body.style.overflowY = 'hidden';
-                                }}
-                                className="rounded-xl w-[166px] font-semibold text-base text-white bg-[#2081e2] py-[17px] px-6 tracking-[0.01]"
-                            >
-                                Edit listing
-                            </button>
-                        )
-                    ) : (
-                        <Link
-                            href={`/assets/${nft.collectionNft._id}/${nft.tokenId}/sell`}
-                        >
-                            <a className="text-center rounded-xl w-[166px] font-semibold text-base text-white bg-[#2081e2] py-[17px] px-6 tracking-[0.01]">
-                                Sell
-                            </a>
-                        </Link>
-                    )}
+                    {nft?.listing?.isListing
+                        ? address?.toLowerCase() ===
+                              nft?.owner?._id?.toLowerCase() && (
+                              <button
+                                  onClick={() => {
+                                      setOpenListingModal(true);
+                                      document.body.style.overflowY = 'hidden';
+                                  }}
+                                  className="rounded-xl w-[166px] font-semibold text-base text-white bg-[#2081e2] py-[17px] px-6 tracking-[0.01]"
+                              >
+                                  Edit listing
+                              </button>
+                          )
+                        : address?.toLowerCase() ===
+                              nft?.owner?._id?.toLowerCase() && (
+                              <Link
+                                  href={`/assets/${nft.collectionNft._id}/${nft.tokenId}/sell`}
+                              >
+                                  <a className="text-center rounded-xl w-[166px] font-semibold text-base text-white bg-[#2081e2] py-[17px] px-6 tracking-[0.01]">
+                                      Sell
+                                  </a>
+                              </Link>
+                          )}
                 </div>
             )}
             <div className="flex">
@@ -306,14 +357,14 @@ function ItemWrapper({ nft }) {
                                     height={23}
                                 />
                             </div>
-                            <div className="flex h-full">
+                            {/* <div className="flex h-full">
                                 <p className="text-xs mr-2 mt-[2px] text-[#A6ADBA]">
                                     15
                                 </p>
                                 <button className="group">
                                     <MdFavoriteBorder className="text-xl text-[#A6ADBA] group-hover:text-white" />
                                 </button>
-                            </div>
+                            </div> */}
                         </div>
                         <div className="relative w-full h-[508px]">
                             <Image
@@ -462,7 +513,9 @@ function ItemWrapper({ nft }) {
                                             </span>
                                             {/* remember */}
                                             <span className="text-sm font-medium text-[#A6ADBA]">
-                                                2.5%
+                                                {nft?.collectionNft?.royalty
+                                                    ?.percentage || 0}
+                                                %
                                             </span>
                                         </div>
                                     </div>
@@ -702,7 +755,14 @@ function ItemWrapper({ nft }) {
                                                             Cancel
                                                         </button>
                                                     ) : (
-                                                        <button className="flex items-center text-white bg-[#2081e2] rounded-xl font-semibold py-[11px] px-4 hover:bg-[#2e8eee] transition-colors">
+                                                        <button
+                                                            onClick={() =>
+                                                                handleBuyFromListing(
+                                                                    listing
+                                                                )
+                                                            }
+                                                            className="flex items-center text-white bg-[#2081e2] rounded-xl font-semibold py-[11px] px-4 hover:bg-[#2e8eee] transition-colors"
+                                                        >
                                                             <MdBolt className="text-[22px]" />
                                                             Buy
                                                         </button>
@@ -854,7 +914,7 @@ function ItemWrapper({ nft }) {
                                                                     )
                                                                 }
                                                             >
-                                                                <MdBolt className="text-[22px]" />
+                                                                <MdTaskAlt className="text-[22px] mr-2" />
                                                                 Accept
                                                             </button>
                                                         )
@@ -906,31 +966,42 @@ function ItemWrapper({ nft }) {
                         isCanceling={isCanceling}
                         isApproving={isApproving}
                     />
-                    <CancelOfferModal
-                        cancelOfferModalVisible={cancelOfferModalVisible}
-                        setCancelOfferModalVisible={setCancelOfferModalVisible}
-                        isCancelingOffer={isCancelingOffer}
-                        nft={nft}
-                        usdPrice={usdPrice}
-                        offer={cancelOffer}
-                    />
-                    {approveOffer && (
-                        <ApproveSaleModal
-                            approveOfferModalVisible={approveOfferModalVisible}
-                            setApproveOfferModalVisible={
-                                setApproveOfferModalVisible
-                            }
-                            nft={nft}
-                            usdPrice={usdPrice}
-                            offer={approveOffer}
-                            notify={notify}
-                            sdk={sdk}
-                            address={address}
-                        />
-                    )}
                 </>
             )}
-
+            {cancelOfferModalVisible && (
+                <CancelOfferModal
+                    cancelOfferModalVisible={cancelOfferModalVisible}
+                    setCancelOfferModalVisible={setCancelOfferModalVisible}
+                    isCancelingOffer={isCancelingOffer}
+                    nft={nft}
+                    usdPrice={usdPrice}
+                    offer={cancelOffer}
+                />
+            )}
+            {approveOfferModalVisible && (
+                <ApproveSaleModal
+                    approveOfferModalVisible={approveOfferModalVisible}
+                    setApproveOfferModalVisible={setApproveOfferModalVisible}
+                    nft={nft}
+                    usdPrice={usdPrice}
+                    offer={approveOffer}
+                    notify={notify}
+                    sdk={sdk}
+                    address={address}
+                />
+            )}
+            {approvePurchaseModalVisible && (
+                <ApprovePurchase
+                    approvePurchaseModalVisible={approvePurchaseModalVisible}
+                    setApprovePurchaseModalVisible={
+                        setApprovePurchaseModalVisible
+                    }
+                    isPurchasing={isPurchasing}
+                    nft={nft}
+                    usdPrice={usdPrice}
+                    listing={buyFromListing}
+                />
+            )}
             <ToastContainer />
         </>
     );

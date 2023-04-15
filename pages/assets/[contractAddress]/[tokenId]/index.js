@@ -68,26 +68,24 @@ function NftItem() {
         fetchPolicy: 'network-only',
     });
 
-    const { contract } = useContract(
-        process.env.NEXT_PUBLIC_MARKETPLACE_ADDRESS,
-        'marketplace-v3'
-    );
+    const [usdPrice, setUsdPrice] = useState({ ETH: 0, WETH: 0 });
+    useEffect(() => {
+        async function getUsdPrice() {
+            const eth = await (
+                await fetch(
+                    'https://min-api.cryptocompare.com/data/price?fsym=ETH&tsyms=USD'
+                )
+            ).json();
 
-    // useEffect(() => {
-    //     async function getAvailableListing() {
-    //         if (contract) {
-    //             const validListings = await contract.directListings.getAllValid(
-    //                 {
-    //                     tokenContract: contractAddress, // Only show NFTs from this collection
-    //                     tokenId: tokenId, // Only show NFTs with this ID
-    //                 }
-    //             );
-    //             console.log(validListings);
-    //             setValidListings(validListings);
-    //         }
-    //     }
-    //     getAvailableListing();
-    // }, [contract]);
+            const weth = await (
+                await fetch(
+                    'https://min-api.cryptocompare.com/data/price?fsym=WETH&tsyms=USD'
+                )
+            ).json();
+            setUsdPrice({ ETH: eth.USD, WETH: weth.USD });
+        }
+        getUsdPrice();
+    }, []);
 
     if (error) return <Error statusCode={404} title="NFT not found" />;
 
@@ -101,7 +99,10 @@ function NftItem() {
     return (
         <>
             <div className="pt-2 pb-4 w-[1280px] m-auto">
-                <ItemWrapper nft={nftData.getNftAssetPage} />
+                <ItemWrapper
+                    nft={nftData.getNftAssetPage}
+                    usdPrice={usdPrice}
+                />
                 <ItemActivity nft={nftData.getNftAssetPage} address={address} />
             </div>
             <Footer />

@@ -222,6 +222,7 @@ function SellPage({ nft }) {
                     process.env.NEXT_PUBLIC_MARKETPLACE_ADDRESS,
                     'marketplace-v3' // Provide the "marketplace-v3" contract type
                 );
+                console.log(contract);
                 let txResult;
 
                 if (selectedType === 'fixed') {
@@ -376,7 +377,6 @@ function SellPage({ nft }) {
                                     <div className="w-full">
                                         <TextInput
                                             placeholder="Amount"
-                                            type="number"
                                             inputCss="no-spin-buttons w-full pr-20"
                                             id="price"
                                             onChange={e => handleChangePrice(e)}
@@ -532,7 +532,9 @@ function SellPage({ nft }) {
                         </div>
                         <div className="text-white text-base mb-2 flex justify-between">
                             <div>Service fee</div>
-                            <div>2.5%</div>
+                            <div>
+                                {process.env.NEXT_PUBLIC_MARKETPLACE_SHARE}%
+                            </div>
                         </div>
                         <div className="text-white text-base mb-2 flex justify-between">
                             <div>Creator earnings</div>
@@ -540,7 +542,7 @@ function SellPage({ nft }) {
                                 nft?.collectionNft?.royalty?.percentage
                                     ? nft?.collectionNft?.royalty?.percentage
                                     : '0'
-                            } %`}</div>
+                            }%`}</div>
                         </div>
                         <hr className="my-6 border-t-[1px] border-[#8a939b] opacity-20" />
                         <div className="text-white text-xl font-semibold mb-2 flex justify-between">
@@ -552,7 +554,8 @@ function SellPage({ nft }) {
                                               (
                                                   (amount / 100) *
                                                   (100 -
-                                                      2.5 -
+                                                      process.env
+                                                          .NEXT_PUBLIC_MARKETPLACE_SHARE -
                                                       (nft?.collectionNft
                                                           ?.royalty?.percentage
                                                           ? nft?.collectionNft
@@ -575,7 +578,8 @@ function SellPage({ nft }) {
                                                     (
                                                         (amount / 100) *
                                                         (100 -
-                                                            2.5 -
+                                                            process.env
+                                                                .NEXT_PUBLIC_MARKETPLACE_SHARE -
                                                             (nft?.collectionNft
                                                                 ?.royalty
                                                                 ?.percentage

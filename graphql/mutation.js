@@ -131,6 +131,40 @@ const DEACTIVE_EVENT = gql`
     }
 `;
 
+const APPROVE_OFFER = gql`
+    mutation Mutation(
+        $offerId: ID
+        $collectionNft: ID
+        $tokenId: Int
+        $event: EventInput
+    ) {
+        approveOffer(
+            offerId: $offerId
+            collectionNft: $collectionNft
+            tokenId: $tokenId
+            event: $event
+        ) {
+            tokenId
+            collectionNft
+            owner
+        }
+    }
+`;
+
+const BUY_NOW_NFT = gql`
+    mutation BuyNow($collectionNft: ID, $tokenId: Int, $event: EventInput) {
+        buyNow(
+            collectionNft: $collectionNft
+            tokenId: $tokenId
+            event: $event
+        ) {
+            collectionNft
+            tokenId
+            owner
+        }
+    }
+`;
+
 export {
     CREATE_USER,
     UPDATE_AVATAR,
@@ -143,4 +177,6 @@ export {
     UPDATE_LISTING,
     CREATE_EVENT,
     DEACTIVE_EVENT,
+    APPROVE_OFFER,
+    BUY_NOW_NFT,
 };

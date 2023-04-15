@@ -10,8 +10,16 @@ import client from '../graphql/apollo-client';
 import { GET_USER_INFO } from '../graphql/query';
 import { useApolloClient } from '@apollo/client';
 import { useQuery } from '@apollo/client';
+import { useContext } from 'react';
+import { SidebarContext } from '../context/sidebar-context';
 
 function AccountPage({ userInfo, token }) {
+    const { sidebarIsVisible, hideSidebar } = useContext(SidebarContext);
+    useEffect(() => {
+        if (sidebarIsVisible) {
+            hideSidebar();
+        }
+    }, []);
     return (
         <>
             <ProfileImage userInfo={userInfo} token={token} />

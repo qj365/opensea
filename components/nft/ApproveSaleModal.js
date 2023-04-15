@@ -9,6 +9,9 @@ import Select from 'react-select';
 import ClipLoader from 'react-spinners/ClipLoader';
 import Link from 'next/link';
 import validateLogin from '../../utils/validateLogin';
+import { APPROVE_OFFER } from '../../graphql/mutation';
+import { useMutation } from '@apollo/client';
+import Decimal from 'decimal.js';
 
 function ApproveSaleModal({
     approveOfferModalVisible,
@@ -20,29 +23,45 @@ function ApproveSaleModal({
     sdk,
     address,
 }) {
+    const [approveOffer] = useMutation(APPROVE_OFFER);
     const [isApprovingOffer, setIsApprovingOffer] = useState(false);
     async function handleApproveOffer() {
-        setIsApprovingOffer(true);
         try {
             if (validateLogin(address)) {
                 const contract = await sdk.getContract(
                     process.env.NEXT_PUBLIC_MARKETPLACE_ADDRESS,
                     'marketplace-v3'
                 );
+                setIsApprovingOffer(true);
 
                 if (contract) {
-                    // const txResult = await contract.offers.cancelOffer(
-                    //     offer.eventId
-                    // );
-                    // const { data } = await deactiveEvent({
-                    //     variables: { ids: [offer._id] },
-                    // });
+                    const txResult = await contract.offers.acceptOffer(
+                        offer.eventId
+                    );
+
+                    // check variable
+                    const { data } = await approveOffer({
+                        variables: {
+                            event: {
+                                eventId: offer.eventId,
+                                creator: address.toLowerCase(),
+                                from: address.toLowerCase(),
+                                to: offer.creator._id.toLowerCase(),
+                                startTimestamp: new Date(),
+                                transactionHash:
+                                    txResult.receipt.transactionHash,
+                            },
+                            offerId: offer._id,
+                            collectionNft: nft.collectionNft._id,
+                            tokenId: nft.tokenId,
+                        },
+                    });
 
                     notify('success', undefined, 'Approve sale success');
 
-                    // setTimeout(() => {
-                    //     router.reload();
-                    // }, 1000);
+                    setTimeout(() => {
+                        router.reload();
+                    }, 1000);
                 } else throw new Error('Contract not found');
             } else {
                 router.push('/login');
@@ -56,9 +75,7 @@ function ApproveSaleModal({
     return (
         <div
             className={`fixed inset-0 bg-[#000000cc] flex items-center justify-center transition-opacity ease-in-out duration-200 ${
-                approveOfferModalVisible
-                    ? 'opacity-100 z-50'
-                    : 'opacity-0 z-[-1]'
+                true ? 'opacity-100 z-50' : 'opacity-0 z-[-1]'
             }`}
         >
             <div className="bg-[#262b2f] w-[700px] rounded-[10px] overflow-hidden">
@@ -159,7 +176,9 @@ function ApproveSaleModal({
                         <p className="text-white font-semibold ">Fees</p>
                         <div className="flex items-center justify-between ">
                             <p className="text-white">Service fee</p>
-                            <p className="text-white">2.5%</p>
+                            <p className="text-white">
+                                {process.env.NEXT_PUBLIC_MARKETPLACE_SHARE}%
+                            </p>
                         </div>
                         <div className="flex items-center justify-between ">
                             <p className="text-white">Creator earnings</p>
@@ -173,28 +192,22 @@ function ApproveSaleModal({
                         <div className="flex items-center justify-between text-white font-semibold">
                             <p>Total earnings</p>
                             <p>
-                                {console.log(offer)}
-                                {`${
-                                    isFinite(
-                                        (offer.price / 100) *
-                                            (100 -
-                                                2.5 -
-                                                (nft.collectionNft?.royalty
-                                                    ?.percentage || 0))
-                                    )
-                                        ? (offer.price / 100) *
-                                          (
-                                              100 -
-                                              2.5 -
-                                              (nft.collectionNft?.royalty
-                                                  ?.percentage || 0)
-                                          ).toFixed(5)
-                                        : (offer.price / 100) *
-                                          (100 -
-                                              2.5 -
-                                              (nft.collectionNft?.royalty
-                                                  ?.percentage || 0))
-                                } WETH`}
+                                {`${new Decimal(offer.price)
+                                    .dividedBy(100)
+                                    .times(
+                                        new Decimal(100)
+                                            .minus(
+                                                new Decimal(
+                                                    process.env.NEXT_PUBLIC_MARKETPLACE_SHARE
+                                                )
+                                            )
+                                            .minus(
+                                                new Decimal(
+                                                    nft.collectionNft?.royalty
+                                                        ?.percentage || 0
+                                                )
+                                            )
+                                    )} WETH`}
                             </p>
                         </div>
                         <div className="flex items-center justify-end">
@@ -205,7 +218,8 @@ function ApproveSaleModal({
                                 }).format(
                                     (offer.price / 100) *
                                         (100 -
-                                            2.5 -
+                                            process.env
+                                                .NEXT_PUBLIC_MARKETPLACE_SHARE -
                                             (nft.collectionNft?.royalty
                                                 ?.percentage || 0)) *
                                         usdPrice.WETH
@@ -233,7 +247,7 @@ function ApproveSaleModal({
                                     cssOverride={{
                                         borderWidth: '3px',
                                         zIndex: '10',
-                                        marginRight: '4px',
+                                        marginRight: '8px',
                                     }}
                                     size={20}
                                 />
