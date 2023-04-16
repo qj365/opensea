@@ -394,7 +394,6 @@ function SellPage({ nft }) {
                                         <div className="w-full">
                                             <TextInput
                                                 placeholder="Amount"
-                                                type="number"
                                                 label="Starting price"
                                                 inputCss="no-spin-buttons w-full pr-20"
                                                 id="price"

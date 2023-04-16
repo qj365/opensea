@@ -24,6 +24,7 @@ function AccountPage({ userInfo, token }) {
         <>
             <ProfileImage userInfo={userInfo} token={token} />
             <NFTList token={token} />
+            <div className="mb-8"></div>
         </>
     );
 }

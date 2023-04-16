@@ -7,7 +7,9 @@ import CreatedTab from './CreatedTab';
 
 function NFTList({ token }) {
     const router = useRouter();
-    const [activeTab, setActiveTab] = useState('collected');
+    const [activeTab, setActiveTab] = useState(
+        router.query.account[1] || 'collected'
+    );
     const tabs = [
         {
             label: 'Collected',

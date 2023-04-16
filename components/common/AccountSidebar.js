@@ -139,13 +139,19 @@ function AccountSidebar() {
     }, []);
 
     const getBalance = async () => {
-        setIsLoadingBalance(true);
-        const balanceEth = await sdk.wallet.balance();
-        const balanceWeth = await sdk.wallet.balance(
-            process.env.NEXT_PUBLIC_WETH_ADDRESS
-        );
-        setBalance({ eth: balanceEth, weth: balanceWeth });
-        setIsLoadingBalance(false);
+        try {
+            setIsLoadingBalance(true);
+
+            const balanceEth = await sdk.wallet.balance();
+            const balanceWeth = await sdk.wallet.balance(
+                process.env.NEXT_PUBLIC_WETH_ADDRESS
+            );
+            setBalance({ eth: balanceEth, weth: balanceWeth });
+
+            setIsLoadingBalance(false);
+        } catch (err) {
+            console.log(err);
+        }
     };
     useEffect(() => {
         if (sidebarIsVisible && address) {

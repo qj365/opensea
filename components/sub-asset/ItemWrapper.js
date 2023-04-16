@@ -52,6 +52,7 @@ import CancelOfferModal from '../nft/CancelOfferModal';
 import ApproveListingModal from '../nft/ApproveListingModal';
 import ApproveSaleModal from '../nft/ApproveSaleModal';
 import ApprovePurchase from '../nft/ApprovePurchase';
+import ChartNft from '../nft/ChartNft';
 
 const notify = (
     status,
@@ -604,30 +605,7 @@ function ItemWrapper({ nft, usdPrice }) {
                     />
 
                     {/* chart */}
-                    <Accordion
-                        alwaysOpen={true}
-                        className="mt-5 bg-[#262b2f] border-0 divide-y-0"
-                    >
-                        <Accordion.Panel>
-                            <Accordion.Title className="border-t border-[#151b22] px-5 py-4 bg-transparent font-semibold text-white focus:ring-0 hover:bg-transparent ">
-                                <div className="flex">
-                                    <MdTimeline className="mr-[10px] text-2xl" />
-                                    Price History
-                                </div>
-                            </Accordion.Title>
-                            <Accordion.Content className="px-5 py-2">
-                                <div className="flex flex-col items-center text-[#8a939b] py-10">
-                                    <MdAccessTime className="text-[32px] mb-8" />
-                                    <div className="text-sm font-semibold">
-                                        No events have occurred yet
-                                    </div>
-                                    <div className="text-sm">
-                                        Check back later.
-                                    </div>
-                                </div>
-                            </Accordion.Content>
-                        </Accordion.Panel>
-                    </Accordion>
+                    <ChartNft nft={nft} />
 
                     {/* listing */}
                     <Accordion

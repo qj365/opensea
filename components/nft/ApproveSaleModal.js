@@ -12,6 +12,7 @@ import validateLogin from '../../utils/validateLogin';
 import { APPROVE_OFFER } from '../../graphql/mutation';
 import { useMutation } from '@apollo/client';
 import Decimal from 'decimal.js';
+import { useRouter } from 'next/router';
 
 function ApproveSaleModal({
     approveOfferModalVisible,
@@ -23,6 +24,7 @@ function ApproveSaleModal({
     sdk,
     address,
 }) {
+    const router = useRouter();
     const [approveOffer] = useMutation(APPROVE_OFFER);
     const [isApprovingOffer, setIsApprovingOffer] = useState(false);
     async function handleApproveOffer() {
