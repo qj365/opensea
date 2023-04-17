@@ -1,7 +1,10 @@
 import ItemWrapper from '../../../../components/sub-asset/ItemWrapper';
 import ItemActivity from '../../../../components/sub-asset/ItemActivity';
 import client from '../../../../graphql/apollo-client';
-import { GET_SLUG_COLLECTION_BY_ID } from '../../../../graphql/query';
+import {
+    GET_SLUG_COLLECTION_BY_ID,
+    GET_BEST_OFFER,
+} from '../../../../graphql/query';
 import Error from 'next/error';
 import { useRouter } from 'next/router';
 import {
@@ -53,14 +56,6 @@ function NftItem() {
         loading,
         error,
     } = useQuery(GET_NFT_ASSET_PAGE, {
-        variables: {
-            collectionNft: contractAddress.toLowerCase(),
-            tokenId: parseInt(tokenId),
-        },
-        fetchPolicy: 'network-only',
-    });
-
-    const { data: events } = useQuery(GET_EVENT_OF_NFT, {
         variables: {
             collectionNft: contractAddress.toLowerCase(),
             tokenId: parseInt(tokenId),

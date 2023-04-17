@@ -91,10 +91,10 @@ function AccountSidebar() {
     useDidMountEffect(() => {
         async function login() {
             if (window?.ethereum) {
+                if (isMismatched) {
+                    await switchNetwork(ChainId.Goerli);
+                }
                 if (address) {
-                    if (isMismatched) {
-                        await switchNetwork(ChainId.Goerli);
-                    }
                     window.localStorage.setItem('__user_address', address);
                     Cookies.set('__user_address', address);
 

@@ -52,12 +52,12 @@ a {
     justify-content: center;
     padding: 8px;
     font-family: Poppins, sans-serif;
+    border-radius: 12px;
 }
 .highcharts-tooltip > p {
     color: white;
     font-size: 16px;
     font-weight: 600;
-    letter-spacing: 0.05em;
 }
 .highcharts-tooltip > span {
     color: #7a838a;

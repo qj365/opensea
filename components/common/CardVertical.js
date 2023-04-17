@@ -28,7 +28,7 @@ function CardVertical({ w = 256, h = 256, nft }) {
                                 {nft.collectionNft.name}
                             </p>
                         </div>
-                        <div className="h-[42px] mt-3 w-[40%]">
+                        <div className="h-[42px] mt-3 w-[90%] truncate">
                             {nft.listing && (
                                 <>
                                     <p className="text-white font-semibold text-xs">
@@ -63,7 +63,7 @@ function CardVertical({ w = 256, h = 256, nft }) {
                         <div className="h-[24px]"></div>
                         <div>
                             <button className="font-semibold translate-y-full opacity-0 invisible group-hover:opacity-100 group-hover:translate-y-0 group-hover:visible group-hover: duration-[300ms] h-[38px] w-full absolute left-0 bottom-0 text-white text-sm bg-[#2081e2]">
-                                Buy now
+                                View detail
                             </button>
                         </div>
                     </div>

@@ -91,6 +91,7 @@ function ChartNft({ nft }) {
             backgroundColor: '#34383F',
             borderColor: 'transparent',
             borderRadius: 10,
+            hideDelay: 100,
             useHTML: true,
             formatter: function () {
                 const event = last7SaleEvent.find(day => day.date === this.x);

@@ -30,8 +30,8 @@ import {
 } from 'react-icons/md';
 import { useRouter } from 'next/router';
 import Error from 'next/error';
-import { useMutation, useQuery } from '@apollo/client';
-import { GET_USER_NAME_BY_ID } from '../../graphql/query';
+import { useLazyQuery, useMutation, useQuery } from '@apollo/client';
+import { GET_BEST_BID, GET_USER_NAME_BY_ID } from '../../graphql/query';
 import shortenAddress from '../../utils/shortenAddress';
 import shortenNumber from '../../utils/shortenNumber';
 import validateLogin from '../../utils/validateLogin';
@@ -107,6 +107,7 @@ function ItemWrapper({ nft, usdPrice }) {
 
     const [validListings, setValidListings] = useState([]);
     const [validOffers, setValidOffers] = useState([]);
+    const [bestBid, setBestBid] = useState(null);
     useEffect(() => {
         if (nft && nft?.listing?.isListing) {
             const validListings = nft.events.filter(
@@ -119,15 +120,39 @@ function ItemWrapper({ nft, usdPrice }) {
             if (validListings.length > 0) setValidListings(validListings);
         }
         if (nft?.events) {
-            const validOffers = nft.events.filter(
-                event =>
-                    event.eventType === 'offer' &&
-                    event.active &&
-                    event.endTimestamp > Date.now()
-            );
+            let validOffers = [];
+            if (nft.listing.type === 'auction') {
+                validOffers = nft.events.filter(
+                    event =>
+                        event.eventName === 'Offer' &&
+                        event.eventType === 'bid' &&
+                        event.active
+                );
+            } else {
+                validOffers = nft.events.filter(
+                    event =>
+                        event.eventName === 'Offer' &&
+                        event.eventType === 'direct' &&
+                        event.active &&
+                        event.endTimestamp > Date.now()
+                );
+            }
+
             if (validOffers.length > 0) setValidOffers(validOffers);
         }
-    }, []);
+        if (nft?.listing?.type === 'auction') {
+            const bestBid = Math.max(
+                ...nft.events.filter(
+                    event =>
+                        event.eventName === 'Offer' &&
+                        event.eventType === 'bid' &&
+                        event.active
+                )
+            );
+            if (bestBid) setBestBid(bestBid);
+        }
+        console.log(nft);
+    }, [nft]);
 
     const [isApproving, setIsApproving] = useState(false);
 
@@ -145,10 +170,16 @@ function ItemWrapper({ nft, usdPrice }) {
                 txResult = await contract.directListings.cancelListing(
                     listings[0].eventId
                 );
-            } else {
-                txResult = await contract.englishAuctions.cancelAuction(
-                    listings[0].eventId
-                );
+            } else if (listings[0].eventType === 'auction') {
+                if (!bestBid?.getBestBid?.price) {
+                    txResult = await contract.englishAuctions.cancelAuction(
+                        listings[0].eventId
+                    );
+                } else {
+                    throw new Error(
+                        'Auction cannot be canceled once a bid has been made.'
+                    );
+                }
             }
 
             const { data } = await deactiveEvent({
@@ -201,9 +232,18 @@ function ItemWrapper({ nft, usdPrice }) {
                 router.push('/login');
             }
         } catch (err) {
-            console.log('message', err);
+            console.log('message+', err);
             setIsCanceling(false);
-            notify('error', 'Something went wrong when canceling listings.');
+            if (
+                err.props ===
+                'Auction cannot be canceled once a bid has been made.'
+            ) {
+                notify('error', err.props);
+            } else
+                notify(
+                    'error',
+                    'Something went wrong when canceling listings.'
+                );
         }
     }
 
@@ -602,6 +642,7 @@ function ItemWrapper({ nft, usdPrice }) {
                         usdPrice={usdPrice}
                         notify={notify}
                         sdk={sdk}
+                        bestBid={bestBid}
                     />
 
                     {/* chart */}
@@ -733,17 +774,20 @@ function ItemWrapper({ nft, usdPrice }) {
                                                             Cancel
                                                         </button>
                                                     ) : (
-                                                        <button
-                                                            onClick={() =>
-                                                                handleBuyFromListing(
-                                                                    listing
-                                                                )
-                                                            }
-                                                            className="flex items-center text-white bg-[#2081e2] rounded-xl font-semibold py-[11px] px-4 hover:bg-[#2e8eee] transition-colors"
-                                                        >
-                                                            <MdBolt className="text-[22px]" />
-                                                            Buy
-                                                        </button>
+                                                        nft.listing?.type !==
+                                                            'auction' && (
+                                                            <button
+                                                                onClick={() =>
+                                                                    handleBuyFromListing(
+                                                                        listing
+                                                                    )
+                                                                }
+                                                                className="flex items-center text-white bg-[#2081e2] rounded-xl font-semibold py-[11px] px-4 hover:bg-[#2e8eee] transition-colors"
+                                                            >
+                                                                <MdBolt className="text-[22px]" />
+                                                                Buy
+                                                            </button>
+                                                        )
                                                     )}
                                                 </div>
                                             </li>
@@ -809,13 +853,12 @@ function ItemWrapper({ nft, usdPrice }) {
                                                         alt="eth"
                                                         height={16}
                                                         width={16}
-                                                        className="brightness-200"
                                                     />
                                                     <span className="text-[#e5e8eb] text-[15px] font-semibold mx-[4.5px]">
                                                         {offer.price}
                                                     </span>
                                                     <span className="text-[#e5e8eb] text-[15px] ">
-                                                        ETH
+                                                        WETH
                                                     </span>
                                                 </div>
                                                 <div className="py-4 px-2 w-full">
@@ -839,15 +882,19 @@ function ItemWrapper({ nft, usdPrice }) {
                                                         data-tip="September 10, 2022 at 8:29am GMT+7"
                                                     >
                                                         <button className="text-[#e5e8eb] text-[15px]">
-                                                            {diffDay(
-                                                                new Date(),
-                                                                new Date(
-                                                                    parseInt(
-                                                                        offer.endTimestamp
-                                                                    )
-                                                                ),
-                                                                'in '
-                                                            )}
+                                                            {nft?.listing
+                                                                ?.type !==
+                                                            'auction'
+                                                                ? diffDay(
+                                                                      new Date(),
+                                                                      new Date(
+                                                                          parseInt(
+                                                                              offer.endTimestamp
+                                                                          )
+                                                                      ),
+                                                                      'in '
+                                                                  )
+                                                                : 'auction ends'}
                                                         </button>
                                                     </div>
                                                 </div>
@@ -869,34 +916,37 @@ function ItemWrapper({ nft, usdPrice }) {
                                                     </Link>
                                                 </div>
                                                 <div className="py-4 px-2 w-full">
-                                                    {offer.creator._id ===
-                                                    address?.toLowerCase() ? (
-                                                        <button
-                                                            className="text-white bg-[#353840] rounded-xl font-semibold py-[11px] px-5 border-2 border-[#353840] hover:bg-[#4c505c] hover:border-transparent transition-colors"
-                                                            onClick={() =>
-                                                                handleCancelOffer(
-                                                                    offer
-                                                                )
-                                                            }
-                                                        >
-                                                            Cancel
-                                                        </button>
-                                                    ) : (
-                                                        address?.toLowerCase() ===
-                                                            nft.owner._id && (
+                                                    {nft?.listing?.type !==
+                                                        'auction' &&
+                                                        (offer.creator._id ===
+                                                        address?.toLowerCase() ? (
                                                             <button
-                                                                className="flex items-center text-white bg-[#2081e2] rounded-xl font-semibold py-[11px] px-4 hover:bg-[#2e8eee] transition-colors"
+                                                                className="text-white bg-[#353840] rounded-xl font-semibold py-[11px] px-5 border-2 border-[#353840] hover:bg-[#4c505c] hover:border-transparent transition-colors"
                                                                 onClick={() =>
-                                                                    handleApproveOffer(
+                                                                    handleCancelOffer(
                                                                         offer
                                                                     )
                                                                 }
                                                             >
-                                                                <MdTaskAlt className="text-[22px] mr-2" />
-                                                                Accept
+                                                                Cancel
                                                             </button>
-                                                        )
-                                                    )}
+                                                        ) : (
+                                                            address?.toLowerCase() ===
+                                                                nft.owner
+                                                                    ._id && (
+                                                                <button
+                                                                    className="flex items-center text-white bg-[#2081e2] rounded-xl font-semibold py-[11px] px-4 hover:bg-[#2e8eee] transition-colors"
+                                                                    onClick={() =>
+                                                                        handleApproveOffer(
+                                                                            offer
+                                                                        )
+                                                                    }
+                                                                >
+                                                                    <MdTaskAlt className="text-[22px] mr-2" />
+                                                                    Accept
+                                                                </button>
+                                                            )
+                                                        ))}
                                                 </div>
                                             </li>
                                         ))}

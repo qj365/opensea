@@ -251,6 +251,21 @@ const GET_BEST_OFFER = gql`
         }
     }
 `;
+
+const GET_BEST_BID = gql`
+    query GetBestBid($collectionNft: ID, $tokenId: Int) {
+        getBestBid(collectionNft: $collectionNft, tokenId: $tokenId) {
+            _id
+            eventId
+            eventType
+            eventName
+            active
+            tokenId
+            currency
+            price
+        }
+    }
+`;
 const GET_ALL_NFTS = gql`
     query GetAllNfts($query: String) {
         getAllNfts(query: $query) {
@@ -296,4 +311,5 @@ export {
     GET_EVENT_OF_NFT,
     GET_BEST_OFFER,
     GET_ALL_NFTS,
+    GET_BEST_BID,
 };

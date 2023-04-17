@@ -21,6 +21,7 @@ import validateLogin from '../../../../utils/validateLogin';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import ClipLoader from 'react-spinners/ClipLoader';
+import { timeElapsedLabel } from '../../../../utils/formatDate';
 
 const options = [
     { value: '1', label: '1 day' },
@@ -175,8 +176,8 @@ function SellPage({ nft }) {
         setSelectedOption(e);
         const NOW = new Date();
         onChangeDateValue([
-            NOW,
-            new Date(NOW.getTime() + e.value * 24 * 60 * 60 * 1000),
+            new Date(),
+            new Date(new Date().getTime() + e.value * 24 * 60 * 60 * 1000),
         ]);
     }
 
@@ -185,10 +186,11 @@ function SellPage({ nft }) {
         if (e) {
             const diffTime = Math.abs(e[1] - e[0]);
             const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-            let label = '';
-            if (diffDays === 0) label = '0 day';
-            else if (diffDays === 1) label = '1 day';
-            else label = `${diffDays} days`;
+            const label = timeElapsedLabel(e[0], e[1]);
+            console.log(label);
+            // if (diffDays === 0) label = '0 day';
+            // else if (diffDays === 1) label = '1 day';
+            // else label = `${diffDays} days`;
             setSelectedOption({ value: diffDays, label });
         }
     }
@@ -207,7 +209,7 @@ function SellPage({ nft }) {
                     event.active &&
                     event.endTimestamp > Date.now()
             );
-            if (nft.isListing) {
+            if (nft?.listing?.isListing) {
                 const eventType = validListings[0].eventType;
                 if (eventType !== selectedType)
                     return notify('error', 'One type of listing at a time');
@@ -222,7 +224,6 @@ function SellPage({ nft }) {
                     process.env.NEXT_PUBLIC_MARKETPLACE_ADDRESS,
                     'marketplace-v3' // Provide the "marketplace-v3" contract type
                 );
-                console.log(contract);
                 let txResult;
 
                 if (selectedType === 'fixed') {
@@ -247,8 +248,9 @@ function SellPage({ nft }) {
                             process.env.NEXT_PUBLIC_WETH_ADDRESS,
                         startTimestamp: dateValue[0],
                         endTimestamp: dateValue[1],
-                        bidBufferBps: 500,
-                        timeBufferInSeconds: 60 * 10,
+                        bidBufferBps: process.env.NEXT_PUBLIC_BID_BUFFER * 100,
+                        timeBufferInSeconds:
+                            process.env.NEXT_PUBLIC_TIME_BUFFER,
                     });
                 }
                 // const updateData = {

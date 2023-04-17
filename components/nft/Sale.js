@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
     MdLocalOffer,
     MdAccountBalanceWallet,
@@ -11,16 +11,17 @@ import { formatToUSDate } from '../../utils/formatDate';
 import MakeOfferModal from './MakeOfferModal';
 import { useAddress } from '@thirdweb-dev/react';
 import ApprovePurchase from './ApprovePurchase';
-import { useMutation } from '@apollo/client';
+import { useLazyQuery, useMutation } from '@apollo/client';
 import { BUY_NOW_NFT } from '../../graphql/mutation';
 import { useRouter } from 'next/router';
+import PlaceABidModal from './PlcaceABidModal';
+import { GET_BEST_BID } from '../../graphql/query';
 
-function Sale({ nft, address, toggleSidebar, usdPrice, notify, sdk }) {
+function Sale({ nft, address, toggleSidebar, usdPrice, notify, sdk, bestBid }) {
     const router = useRouter();
 
     const [makeOfferModalVisible, setMakeOfferModalVisible] = useState(false);
     function handleMakeOffer() {
-        console.log(address, validateLogin(address));
         if (validateLogin(address)) {
             setMakeOfferModalVisible(true);
             document.body.style.overflowY = 'hidden';
@@ -91,9 +92,11 @@ function Sale({ nft, address, toggleSidebar, usdPrice, notify, sdk }) {
         }
     }
 
+    const [placeABidModalVisible, setPlaceABidModalVisible] = useState(false);
     function handlePlaceBid() {
         if (validateLogin(address)) {
-            console.log(true);
+            setPlaceABidModalVisible(true);
+            document.body.style.overflowY = 'hidden';
         } else {
             toggleSidebar();
             console.log(false);
@@ -110,6 +113,19 @@ function Sale({ nft, address, toggleSidebar, usdPrice, notify, sdk }) {
                     notify={notify}
                     address={address}
                     sdk={sdk}
+                />
+            )}
+
+            {placeABidModalVisible && (
+                <PlaceABidModal
+                    placeABidModalVisible={placeABidModalVisible}
+                    setPlaceABidModalVisible={setPlaceABidModalVisible}
+                    nft={nft}
+                    usdPrice={usdPrice}
+                    notify={notify}
+                    address={address}
+                    sdk={sdk}
+                    bestBid={bestBid}
                 />
             )}
 
@@ -189,7 +205,10 @@ function Sale({ nft, address, toggleSidebar, usdPrice, notify, sdk }) {
                             ) : (
                                 <div className="p-5 border-t-[1px] border-[#151b22]">
                                     <span className="text-[#A6ADBA] ">
-                                        Minimum bid
+                                        {bestBid?.getBestBid?.price
+                                            ? 'Top '
+                                            : 'Minimum '}
+                                        bid
                                     </span>
                                     <div className="flex items-center my-2">
                                         <Image
@@ -204,7 +223,8 @@ function Sale({ nft, address, toggleSidebar, usdPrice, notify, sdk }) {
                                             width={24}
                                         />
                                         <h1 className="ml-[9px] text-[#e5e8eb] text-3xl font-semibold">
-                                            {nft.listing.price}{' '}
+                                            {bestBid?.getBestBid?.price ||
+                                                nft.listing.price}{' '}
                                             {nft.listing.currency}
                                         </h1>
                                         <span className="ml-2 text-[#A6ADBA]">
@@ -241,7 +261,7 @@ function Sale({ nft, address, toggleSidebar, usdPrice, notify, sdk }) {
                         </div>
                     )
                 ) : // chu tai khoan chu nft
-                nft.isListing ? (
+                nft?.listing?.isListing ? (
                     <div className="bg-[#262b2f] border-[1px] border-[#151b22] rounded-[10px]">
                         <div className="flex p-5">
                             <MdSchedule className="text-2xl text-[#A6ADBA]" />

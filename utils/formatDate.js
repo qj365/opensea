@@ -59,4 +59,29 @@ function timeElapsed(dt) {
     }
 }
 
-export { formatJoinedDate, formatToUSDate, timeElapsed };
+function timeElapsedLabel(dt1, dt2) {
+    const now = new Date(dt1);
+    const diff = new Date(dt2) - now;
+    console.log(diff);
+
+    if (diff < 60000) {
+        return '< 60 seconds';
+    } else if (diff < 3600000) {
+        const minutes = Math.floor(diff / 60000);
+        return `${minutes} minute${minutes > 1 ? 's' : ''}`;
+    } else if (diff < 86400000) {
+        const hours = Math.floor(diff / 3600000);
+        return `${hours} hour${hours > 1 ? 's' : ''}`;
+    } else if (diff < 604800000) {
+        const days = Math.floor(diff / 86400000);
+        return `${days} day${days > 1 ? 's' : ''}`;
+    } else if (diff < 2419200000) {
+        const weeks = Math.floor(diff / 604800000);
+        return `${weeks} week${weeks > 1 ? 's' : ''}`;
+    } else {
+        const months = Math.floor(diff / 2419200000);
+        return `${months} month${months > 1 ? 's' : ''}`;
+    }
+}
+
+export { formatJoinedDate, formatToUSDate, timeElapsed, timeElapsedLabel };
