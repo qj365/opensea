@@ -115,11 +115,11 @@ function ItemWrapper({ nft, usdPrice }) {
                     (event.eventType === 'fixed' ||
                         event.eventType === 'auction') &&
                     event.active &&
-                    event.endTimestamp > Date.now()
+                    parseInt(event.endTimestamp) > Date.now()
             );
             if (validListings.length > 0) setValidListings(validListings);
         }
-        if (nft?.events) {
+        if (nft?.events && nft.listing) {
             let validOffers = [];
             if (nft.listing.type === 'auction') {
                 validOffers = nft.events.filter(
@@ -134,24 +134,35 @@ function ItemWrapper({ nft, usdPrice }) {
                         event.eventName === 'Offer' &&
                         event.eventType === 'direct' &&
                         event.active &&
-                        event.endTimestamp > Date.now()
+                        parseInt(event.endTimestamp) > Date.now()
                 );
             }
 
             if (validOffers.length > 0) setValidOffers(validOffers);
         }
         if (nft?.listing?.type === 'auction') {
-            const bestBid = Math.max(
-                ...nft.events.filter(
+            const offers = nft.events.filter(
+                event =>
+                    event.eventName === 'Offer' &&
+                    event.eventType === 'bid' &&
+                    event.active
+            );
+            if (offers.length > 0) {
+                const bestBid = Math.max(...offers.map(event => event.price));
+
+                if (bestBid) setBestBid(bestBid);
+            }
+        }
+        console.log(
+            ...nft.events
+                .filter(
                     event =>
                         event.eventName === 'Offer' &&
                         event.eventType === 'bid' &&
                         event.active
                 )
-            );
-            if (bestBid) setBestBid(bestBid);
-        }
-        console.log(nft);
+                .map(event => event.price)
+        );
     }, [nft]);
 
     const [isApproving, setIsApproving] = useState(false);
@@ -171,10 +182,15 @@ function ItemWrapper({ nft, usdPrice }) {
                     listings[0].eventId
                 );
             } else if (listings[0].eventType === 'auction') {
-                if (!bestBid?.getBestBid?.price) {
+                if (!bestBid) {
                     txResult = await contract.englishAuctions.cancelAuction(
                         listings[0].eventId
                     );
+                    deactiveEvent({
+                        variables: {
+                            ids: [listings[0]._id],
+                        },
+                    });
                 } else {
                     throw new Error(
                         'Auction cannot be canceled once a bid has been made.'

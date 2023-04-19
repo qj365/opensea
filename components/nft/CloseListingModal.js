@@ -74,7 +74,7 @@ function CloseListingModal({
                                 Listing price
                             </p>
                             <p className="text-white text-base font-semibold">
-                                {nft.listing.price + ' '} ETH
+                                {nft.listing.price + ' ' + nft.listing.currency}
                             </p>
                             <p className="text-[#8a939b] text-sm font-normal">
                                 {new Intl.NumberFormat('en-US', {

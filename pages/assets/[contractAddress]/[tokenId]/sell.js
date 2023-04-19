@@ -15,8 +15,13 @@ import DateTimeRangePicker from '@wojtekmaj/react-datetimerange-picker/dist/entr
 import Image from 'next/image';
 import Select from 'react-select';
 import { useMutation } from '@apollo/client';
-import { UPDATE_LISTING, CREATE_EVENT } from '../../../../graphql/mutation';
-import { useAddress, useSDK } from '@thirdweb-dev/react';
+import {
+    UPDATE_LISTING,
+    CREATE_EVENT,
+    SCHEDULE_DEACTIVE_AUCTION,
+    DEACTIVE_EVENT,
+} from '../../../../graphql/mutation';
+import { useAddress, useSDK, useSigner } from '@thirdweb-dev/react';
 import validateLogin from '../../../../utils/validateLogin';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -197,17 +202,21 @@ function SellPage({ nft }) {
 
     const [updateListing] = useMutation(UPDATE_LISTING);
     const [createEvent] = useMutation(CREATE_EVENT);
+    const [deactiveEvent] = useMutation(DEACTIVE_EVENT);
+    const [scheduleDeactiveAuction] = useMutation(SCHEDULE_DEACTIVE_AUCTION);
     const [submittingForm, setSubmittingForm] = useState(false);
     const sdk = useSDK();
+
     async function handleListing(e) {
         e.preventDefault();
+
         if (validateLogin(address)) {
             const validListings = nft.events.filter(
                 event =>
                     (event.eventType === 'fixed' ||
                         event.eventType === 'auction') &&
                     event.active &&
-                    event.endTimestamp > Date.now()
+                    parseInt(event.endTimestamp) > Date.now()
             );
             if (nft?.listing?.isListing) {
                 const eventType = validListings[0].eventType;
@@ -224,6 +233,35 @@ function SellPage({ nft }) {
                     process.env.NEXT_PUBLIC_MARKETPLACE_ADDRESS,
                     'marketplace-v3' // Provide the "marketplace-v3" contract type
                 );
+                console.log('quang');
+
+                const lastesAuction = nft.events
+                    .filter(
+                        event =>
+                            event.eventType === 'auction' &&
+                            event.active === true &&
+                            parseInt(event.startTimestamp) < Date.now() &&
+                            parseInt(event.endTimestamp) < Date.now()
+                    )
+                    .reduce(
+                        (latestEvent, currentEvent) =>
+                            latestEvent?.endTimestamp >
+                            currentEvent.endTimestamp
+                                ? latestEvent
+                                : currentEvent,
+                        null
+                    );
+
+                if (lastesAuction) {
+                    await deactiveEvent({
+                        variables: {
+                            ids: [lastesAuction._id],
+                        },
+                    });
+                    await contract.englishAuctions.cancelAuction(
+                        lastesAuction.eventId
+                    );
+                }
                 let txResult;
 
                 if (selectedType === 'fixed') {
@@ -288,6 +326,15 @@ function SellPage({ nft }) {
                     price: parseFloat(amount),
                 };
                 const { data } = await createEvent({ variables: { input } });
+                if (selectedType === 'auction') {
+                    console.log('quang');
+                    scheduleDeactiveAuction({
+                        variables: {
+                            deactiveAuctionId: data.createEvent._id,
+                            endTimestamp: dateValue[1],
+                        },
+                    });
+                }
 
                 notify('success');
                 setTimeout(() => {

@@ -113,6 +113,7 @@ const UPDATE_LISTING = gql`
 const CREATE_EVENT = gql`
     mutation Mutation($input: EventInput) {
         createEvent(input: $input) {
+            _id
             eventId
             eventType
         }
@@ -165,6 +166,25 @@ const BUY_NOW_NFT = gql`
     }
 `;
 
+const UPDATE_EVENT = gql`
+    mutation UpdateEvent($updateEventId: ID, $input: EventInput) {
+        updateEvent(id: $updateEventId, input: $input) {
+            endTimestamp
+        }
+    }
+`;
+
+const SCHEDULE_DEACTIVE_AUCTION = gql`
+    mutation DeactiveAuction($deactiveAuctionId: ID, $endTimestamp: String) {
+        deactiveAuction(id: $deactiveAuctionId, endTimestamp: $endTimestamp) {
+            active
+            _id
+            eventName
+            eventType
+        }
+    }
+`;
+
 export {
     CREATE_USER,
     UPDATE_AVATAR,
@@ -179,4 +199,6 @@ export {
     DEACTIVE_EVENT,
     APPROVE_OFFER,
     BUY_NOW_NFT,
+    UPDATE_EVENT,
+    SCHEDULE_DEACTIVE_AUCTION,
 };

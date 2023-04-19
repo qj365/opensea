@@ -7,7 +7,7 @@ import {
 import validateLogin from '../../utils/validateLogin';
 import Image from 'next/image';
 import Icon from '../../assets/icons';
-import { formatToUSDate } from '../../utils/formatDate';
+import { formatToUSDate, isValidDate } from '../../utils/formatDate';
 import MakeOfferModal from './MakeOfferModal';
 import { useAddress } from '@thirdweb-dev/react';
 import ApprovePurchase from './ApprovePurchase';
@@ -16,6 +16,7 @@ import { BUY_NOW_NFT } from '../../graphql/mutation';
 import { useRouter } from 'next/router';
 import PlaceABidModal from './PlcaceABidModal';
 import { GET_BEST_BID } from '../../graphql/query';
+import Countdown from './Countdown';
 
 function Sale({ nft, address, toggleSidebar, usdPrice, notify, sdk, bestBid }) {
     const router = useRouter();
@@ -152,6 +153,17 @@ function Sale({ nft, address, toggleSidebar, usdPrice, notify, sdk, bestBid }) {
                                 <span className="text-[#e5e8eb] ml-2">
                                     Sale ends{' '}
                                     {formatToUSDate(nft.listing.endTimestamp)}
+                                    {isValidDate(
+                                        new Date(
+                                            parseInt(nft?.listing?.endTimestamp)
+                                        )
+                                    ) && (
+                                        <Countdown
+                                            targetDate={
+                                                nft?.listing?.endTimestamp
+                                            }
+                                        />
+                                    )}
                                 </span>
                             </div>
                             {nft.listing.type === 'fixed' ? (
@@ -205,9 +217,7 @@ function Sale({ nft, address, toggleSidebar, usdPrice, notify, sdk, bestBid }) {
                             ) : (
                                 <div className="p-5 border-t-[1px] border-[#151b22]">
                                     <span className="text-[#A6ADBA] ">
-                                        {bestBid?.getBestBid?.price
-                                            ? 'Top '
-                                            : 'Minimum '}
+                                        {bestBid ? 'Top ' : 'Minimum '}
                                         bid
                                     </span>
                                     <div className="flex items-center my-2">
@@ -223,8 +233,7 @@ function Sale({ nft, address, toggleSidebar, usdPrice, notify, sdk, bestBid }) {
                                             width={24}
                                         />
                                         <h1 className="ml-[9px] text-[#e5e8eb] text-3xl font-semibold">
-                                            {bestBid?.getBestBid?.price ||
-                                                nft.listing.price}{' '}
+                                            {bestBid || nft.listing.price}{' '}
                                             {nft.listing.currency}
                                         </h1>
                                         <span className="ml-2 text-[#A6ADBA]">
@@ -268,6 +277,15 @@ function Sale({ nft, address, toggleSidebar, usdPrice, notify, sdk, bestBid }) {
                             <span className="text-[#e5e8eb] ml-2">
                                 Sale ends{' '}
                                 {formatToUSDate(nft.listing.endTimestamp)}
+                                {isValidDate(
+                                    new Date(
+                                        parseInt(nft?.listing?.endTimestamp)
+                                    )
+                                ) && (
+                                    <Countdown
+                                        targetDate={nft?.listing?.endTimestamp}
+                                    />
+                                )}
                             </span>
                         </div>
                         {nft.listing.type === 'fixed' ? (
@@ -305,7 +323,8 @@ function Sale({ nft, address, toggleSidebar, usdPrice, notify, sdk, bestBid }) {
                         ) : (
                             <div className="p-5 border-t-[1px] border-[#151b22]">
                                 <span className="text-[#A6ADBA] ">
-                                    Minimum bid
+                                    {bestBid ? 'Top ' : 'Minimum '}
+                                    bid
                                 </span>
                                 <div className="flex items-center my-2">
                                     <Image
@@ -320,7 +339,7 @@ function Sale({ nft, address, toggleSidebar, usdPrice, notify, sdk, bestBid }) {
                                         width={24}
                                     />
                                     <h1 className="ml-[9px] text-[#e5e8eb] text-3xl font-semibold">
-                                        {nft.listing.price}{' '}
+                                        {bestBid || nft.listing.price}{' '}
                                         {nft.listing.currency}
                                     </h1>
                                     <span className="ml-2 text-[#A6ADBA]">

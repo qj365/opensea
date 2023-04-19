@@ -84,4 +84,14 @@ function timeElapsedLabel(dt1, dt2) {
     }
 }
 
-export { formatJoinedDate, formatToUSDate, timeElapsed, timeElapsedLabel };
+function isValidDate(d) {
+    return d instanceof Date && !isNaN(d);
+}
+
+export {
+    formatJoinedDate,
+    formatToUSDate,
+    timeElapsed,
+    timeElapsedLabel,
+    isValidDate,
+};

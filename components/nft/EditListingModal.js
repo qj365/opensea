@@ -108,8 +108,8 @@ function EditListingModal({
         const overlapListings = [];
         validListings.forEach(listing => {
             const range1 = {
-                start: new Date(newListing.startTimestamp),
-                end: new Date(newListing.endTimestamp),
+                start: new Date(parseInt(newListing.startTimestamp)),
+                end: new Date(parseInt(newListing.endTimestamp)),
             };
             const range2 = {
                 start: new Date(parseInt(listing.startTimestamp)),

@@ -129,7 +129,7 @@ function CreateAssetPage() {
         setNftData({ ...nftData, [id]: value });
     }
 
-    async function handleValidation() {
+    function handleValidation() {
         let formIsValid = true;
         let errors = {};
 
@@ -159,10 +159,9 @@ function CreateAssetPage() {
         if (address && address !== Cookies.get('__user_address')) {
             window.location.href = '/login';
         } else {
-            setSubmittingForm(true);
-
             try {
                 if (handleValidation()) {
+                    setSubmittingForm(true);
                     document.body.style.overflowY = 'hidden';
                     setSubmittingForm(true);
                     const mediaUrl = await uploadImage(nftData.media, 'nfts');
@@ -368,8 +367,6 @@ function CreateAssetPage() {
                     </button>
                     <ToastContainer />
                 </form>
-
-             
             </div>
             <div
                 className={`fixed inset-0 bg-[#000000cc] flex items-center justify-center transition-opacity ease-in-out duration-200 ${

@@ -8,7 +8,7 @@ import { useSDK, useAddress, useBalance } from '@thirdweb-dev/react';
 import { useQuery } from '@apollo/client';
 import { GET_BEST_BID } from '../../graphql/query';
 import { useMutation } from '@apollo/client';
-import { CREATE_EVENT, DEACTIVE_EVENT } from '../../graphql/mutation';
+import { CREATE_EVENT, UPDATE_EVENT } from '../../graphql/mutation';
 import validateLogin from '../../utils/validateLogin';
 import { useRouter } from 'next/router';
 import Decimal from 'decimal.js';
@@ -25,11 +25,13 @@ function PlaceABidModal({
 }) {
     const router = useRouter();
 
+    const [updateEvent] = useMutation(UPDATE_EVENT);
+
     const [isPlacingBid, setIsPlacingBid] = useState(false);
     const [createEvent] = useMutation(CREATE_EVENT);
 
     const [higherBid, setHigherBid] = useState(
-        bestBid
+        (bestBid
             ? new Decimal(bestBid)
                   .mul(
                       new Decimal(100).add(
@@ -39,7 +41,7 @@ function PlaceABidModal({
 
                   .div(100)
                   .toNumber()
-            : ''
+            : nft?.listing?.price) || ''
     );
     const [price, setPrice] = useState(higherBid);
     const { data: wethBalance, isLoading } = useBalance(
@@ -89,6 +91,7 @@ function PlaceABidModal({
                     process.env.NEXT_PUBLIC_MARKETPLACE_ADDRESS,
                     'marketplace-v3'
                 );
+                console.log(nft?.listing?.endTimestamp - new Date());
 
                 if (contract) {
                     const inputContract = {
@@ -102,7 +105,24 @@ function PlaceABidModal({
                         inputContract.totalPrice
                     );
 
-                    console.log(txResult);
+                    if (
+                        parseInt(nft?.listing?.endTimestamp) - new Date() <
+                        process.env.NEXT_PUBLIC_TIME_BUFFER * 1000
+                    ) {
+                        const auction = await contract.englishAuctions.auctions(
+                            nft.listing.listingId
+                        );
+                        await updateEvent({
+                            variables: {
+                                updateEventId: nft.listing._id,
+                                input: {
+                                    endTimestamp:
+                                        auction.endTimeInSeconds * 1000,
+                                },
+                            },
+                        });
+                    }
+
                     const input = {
                         eventType: 'bid',
                         eventName: 'Offer',
