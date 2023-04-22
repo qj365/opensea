@@ -92,7 +92,7 @@ function AccountSidebar() {
         async function login() {
             if (window?.ethereum) {
                 if (isMismatched) {
-                    await switchNetwork(ChainId.Goerli);
+                    await switchNetwork(5);
                 }
                 if (address) {
                     window.localStorage.setItem('__user_address', address);

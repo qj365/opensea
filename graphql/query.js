@@ -182,6 +182,13 @@ const GET_NFT_ASSET_PAGE = gql`
                 _id
                 username
             }
+            onAuction {
+                auctionId
+                active
+                seller
+                winner
+                price
+            }
         }
     }
 `;

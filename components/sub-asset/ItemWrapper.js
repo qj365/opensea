@@ -45,6 +45,7 @@ import {
     CREATE_EVENT,
     DEACTIVE_EVENT,
     BUY_NOW_NFT,
+    UPDATE_NFT,
 } from '../../graphql/mutation';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -53,6 +54,7 @@ import ApproveListingModal from '../nft/ApproveListingModal';
 import ApproveSaleModal from '../nft/ApproveSaleModal';
 import ApprovePurchase from '../nft/ApprovePurchase';
 import ChartNft from '../nft/ChartNft';
+import PleaseWaitModal from '../common/PleaseWaitModal';
 
 const notify = (
     status,
@@ -119,11 +121,13 @@ function ItemWrapper({ nft, usdPrice }) {
             );
             if (validListings.length > 0) setValidListings(validListings);
         }
+
         if (nft?.events && nft.listing) {
             let validOffers = [];
             if (nft.listing.type === 'auction') {
                 validOffers = nft.events.filter(
                     event =>
+                        event.eventId === nft.listing.listingId &&
                         event.eventName === 'Offer' &&
                         event.eventType === 'bid' &&
                         event.active
@@ -133,8 +137,7 @@ function ItemWrapper({ nft, usdPrice }) {
                     event =>
                         event.eventName === 'Offer' &&
                         event.eventType === 'direct' &&
-                        event.active &&
-                        parseInt(event.endTimestamp) > Date.now()
+                        event.active
                 );
             }
 
@@ -153,20 +156,10 @@ function ItemWrapper({ nft, usdPrice }) {
                 if (bestBid) setBestBid(bestBid);
             }
         }
-        console.log(
-            ...nft.events
-                .filter(
-                    event =>
-                        event.eventName === 'Offer' &&
-                        event.eventType === 'bid' &&
-                        event.active
-                )
-                .map(event => event.price)
-        );
     }, [nft]);
 
     const [isApproving, setIsApproving] = useState(false);
-
+    const [updateNft] = useMutation(UPDATE_NFT);
     const [deactiveEvent] = useMutation(DEACTIVE_EVENT);
     const [createEvent] = useMutation(CREATE_EVENT);
     const [isCanceling, setIsCanceling] = useState(false);
@@ -186,9 +179,17 @@ function ItemWrapper({ nft, usdPrice }) {
                     txResult = await contract.englishAuctions.cancelAuction(
                         listings[0].eventId
                     );
-                    deactiveEvent({
+                    await deactiveEvent({
                         variables: {
                             ids: [listings[0]._id],
+                        },
+                    });
+                    await updateNft({
+                        variables: {
+                            updateNftId: nft._id,
+                            input: {
+                                onAuction: null,
+                            },
                         },
                     });
                 } else {
@@ -372,7 +373,103 @@ function ItemWrapper({ nft, usdPrice }) {
             notify('error', 'Purchase failed');
         }
     }
+    const [isClaimingNFT, setIsClaimingNFT] = useState(false);
+    async function handleClaimNFT() {
+        try {
+            setIsClaimingNFT(true);
+            document.body.style.overflowY = 'hidden';
+            const contract = await sdk.getContract(
+                process.env.NEXT_PUBLIC_MARKETPLACE_ADDRESS,
+                'marketplace-v3'
+            );
+            const tx = await contract.englishAuctions.closeAuctionForBidder(
+                nft.onAuction.auctionId
+            );
 
+            await createEvent({
+                variables: {
+                    input: {
+                        eventType: 'sale',
+                        eventName: 'Sale',
+                        creator: address.toLowerCase(),
+                        assetContract: nft.collectionNft._id,
+                        from: nft.owner._id,
+                        to: address.toLowerCase(),
+                        tokenId: nft.tokenId,
+                        currency: 'WETH',
+                        price: nft.onAuction.price,
+                        startTimestamp: new Date(),
+                        transactionHash: tx.receipt.transactionHash,
+                    },
+                },
+            });
+            delete nft.onAuction.__typename;
+
+            await updateNft({
+                variables: {
+                    updateNftId: nft._id,
+                    input: {
+                        owner: address.toLowerCase(),
+                        onAuction: {
+                            ...nft.onAuction,
+                            winner: null,
+                            active: false,
+                        },
+                    },
+                },
+            });
+        } catch (err) {
+            notify('error', 'Claim NFT failed');
+            setIsClaimingNFT(false);
+            document.body.style.overflowY = 'auto';
+        }
+    }
+    const [isClaimingBid, setIsClaimingBid] = useState(false);
+    async function handleClaimBid() {
+        try {
+            setIsClaimingBid(true);
+            document.body.style.overflowY = 'hidden';
+            const contract = await sdk.getContract(
+                process.env.NEXT_PUBLIC_MARKETPLACE_ADDRESS,
+                'marketplace-v3'
+            );
+            await contract.englishAuctions.closeAuctionForSeller(
+                nft.onAuction.auctionId
+            );
+            delete nft.onAuction.__typename;
+
+            await updateNft({
+                variables: {
+                    updateNftId: nft._id,
+                    input: {
+                        onAuction: {
+                            ...nft.onAuction,
+                            seller: null,
+                        },
+                    },
+                },
+            });
+        } catch (err) {
+            notify('error', 'Claim bid failed');
+            setIsClaimingBid(false);
+            document.body.style.overflowY = 'auto';
+        }
+    }
+    const isListingEnded =
+        nft?.listing && parseInt(nft.listing.endTimestamp) < Date.now();
+    const isSeller = nft?.onAuction?.seller === address?.toLowerCase();
+
+    const claimBidButton = (
+        <>
+            <button
+                onClick={handleClaimBid}
+                className="rounded-xl w-[166px] font-semibold text-base text-white bg-[#2081e2] py-[17px] px-6 tracking-[0.01]"
+            >
+                Claim bid
+            </button>
+            <PleaseWaitModal text="Claiming bid..." loading={isClaimingBid} />
+        </>
+    );
     return (
         <>
             {validateLogin(address) && (
@@ -390,7 +487,8 @@ function ItemWrapper({ nft, usdPrice }) {
                                   Edit listing
                               </button>
                           )
-                        : address?.toLowerCase() ===
+                        : nft?.onAuction?.seller !== address.toLowerCase() &&
+                          address?.toLowerCase() ===
                               nft?.owner?._id?.toLowerCase() && (
                               <Link
                                   href={`/assets/${nft.collectionNft._id}/${nft.tokenId}/sell`}
@@ -400,6 +498,42 @@ function ItemWrapper({ nft, usdPrice }) {
                                   </a>
                               </Link>
                           )}
+                    {nft?.listing
+                        ? parseInt(nft?.listing?.endTimestamp) < Date.now() &&
+                          nft?.onAuction?.winner === address?.toLowerCase() && (
+                              <>
+                                  <button
+                                      onClick={handleClaimNFT}
+                                      className="rounded-xl w-[166px] font-semibold text-base text-white bg-[#2081e2] py-[17px] px-6 tracking-[0.01]"
+                                  >
+                                      Claim NFT
+                                  </button>
+                                  <PleaseWaitModal
+                                      text={'Claiming NFT...'}
+                                      loading={isClaimingNFT}
+                                  />
+                              </>
+                          )
+                        : nft?.onAuction?.winner === address?.toLowerCase() && (
+                              <>
+                                  <button
+                                      onClick={handleClaimNFT}
+                                      className="rounded-xl w-[166px] font-semibold text-base text-white bg-[#2081e2] py-[17px] px-6 tracking-[0.01]"
+                                  >
+                                      Claim NFT
+                                  </button>
+                                  <PleaseWaitModal
+                                      text={'Claiming NFT...'}
+                                      loading={isClaimingNFT}
+                                  />
+                              </>
+                          )}
+                    {isSeller && (
+                        <>
+                            {nft?.listing && isListingEnded && claimBidButton}
+                            {!nft?.listing && claimBidButton}
+                        </>
+                    )}
                 </div>
             )}
             <div className="flex">
@@ -430,6 +564,7 @@ function ItemWrapper({ nft, usdPrice }) {
                                 layout="fill"
                                 objectFit="contain"
                                 className="rounded-b-[10px] overflow-hidden"
+                                priority
                             />
                         </div>
                     </div>

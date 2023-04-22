@@ -16,17 +16,25 @@ import Image from 'next/image';
 import Select from 'react-select';
 import { useMutation } from '@apollo/client';
 import {
-    UPDATE_LISTING,
+    UPDATE_NFT,
     CREATE_EVENT,
     SCHEDULE_DEACTIVE_AUCTION,
     DEACTIVE_EVENT,
 } from '../../../../graphql/mutation';
-import { useAddress, useSDK, useSigner } from '@thirdweb-dev/react';
+import {
+    ThirdwebSDK,
+    useAddress,
+    useSDK,
+    useSigner,
+} from '@thirdweb-dev/react';
 import validateLogin from '../../../../utils/validateLogin';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import ClipLoader from 'react-spinners/ClipLoader';
 import { timeElapsedLabel } from '../../../../utils/formatDate';
+import { marketplaceABi } from '../../../../abi/marketplace';
+import { ethers } from 'ethers';
+import { auctionABI } from '../../../../abi/auction';
 
 const options = [
     { value: '1', label: '1 day' },
@@ -200,7 +208,7 @@ function SellPage({ nft }) {
         }
     }
 
-    const [updateListing] = useMutation(UPDATE_LISTING);
+    const [updateNft] = useMutation(UPDATE_NFT);
     const [createEvent] = useMutation(CREATE_EVENT);
     const [deactiveEvent] = useMutation(DEACTIVE_EVENT);
     const [scheduleDeactiveAuction] = useMutation(SCHEDULE_DEACTIVE_AUCTION);
@@ -233,7 +241,6 @@ function SellPage({ nft }) {
                     process.env.NEXT_PUBLIC_MARKETPLACE_ADDRESS,
                     'marketplace-v3' // Provide the "marketplace-v3" contract type
                 );
-                console.log('quang');
 
                 const lastesAuction = nft.events
                     .filter(
@@ -252,15 +259,29 @@ function SellPage({ nft }) {
                         null
                     );
 
-                if (lastesAuction) {
-                    await deactiveEvent({
-                        variables: {
-                            ids: [lastesAuction._id],
-                        },
-                    });
+                // if (lastesAuction) {
+                //     await deactiveEvent({
+                //         variables: {
+                //             ids: [lastesAuction._id],
+                //         },
+                //     });
+                //     await contract.englishAuctions.cancelAuction(
+                //         lastesAuction.eventId
+                //     );
+                // }
+                if (nft?.onAuction?.active) {
                     await contract.englishAuctions.cancelAuction(
                         lastesAuction.eventId
                     );
+                    await updateNft({
+                        variables: {
+                            updateNftId: nft._id,
+                            onAuction: {
+                                ...nft.onAuction,
+                                active: false,
+                            },
+                        },
+                    });
                 }
                 let txResult;
 
@@ -291,26 +312,7 @@ function SellPage({ nft }) {
                             process.env.NEXT_PUBLIC_TIME_BUFFER,
                     });
                 }
-                // const updateData = {
-                //     _id: parseInt(txResult.id._hex, 16),
-                //     isListing: true,
-                //     type: selectedType,
-                //     price: parseFloat(amount),
-                //     currency: selectedCurrency,
-                //     startDate: dateValue[0],
-                //     endDate: dateValue[1],
-                // };
 
-                // const { data } = await updateListing({
-                //     variables: {
-                //         updateNftId: nft._id,
-                //         input: {
-                //             listing: {
-                //                 ...updateData,
-                //             },
-                //         },
-                //     },
-                // });
                 const input = {
                     eventType: selectedType,
                     eventName: 'Listing',
@@ -327,11 +329,16 @@ function SellPage({ nft }) {
                 };
                 const { data } = await createEvent({ variables: { input } });
                 if (selectedType === 'auction') {
-                    console.log('quang');
-                    scheduleDeactiveAuction({
+                    await updateNft({
                         variables: {
-                            deactiveAuctionId: data.createEvent._id,
-                            endTimestamp: dateValue[1],
+                            updateNftId: nft._id,
+                            input: {
+                                onAuction: {
+                                    active: true,
+                                    auctionId: input.eventId,
+                                    seller: address.toLowerCase(),
+                                },
+                            },
                         },
                     });
                 }

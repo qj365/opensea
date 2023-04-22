@@ -1,5 +1,6 @@
 import { MdRefresh } from 'react-icons/md';
 import CardContainer from './CardContainer';
+import CardVertical from '../common/CardVertical';
 
 function Assets() {
     return (
@@ -10,7 +11,17 @@ function Assets() {
                 </button>
                 <p className="text-white text-base">46.608.776 items</p>
             </div>
-            <CardContainer />
+            <div className="flex flex-wrap justify-around">
+                <CardVertical />
+                <CardVertical />
+                <CardVertical />
+                <CardVertical />
+                <CardVertical />
+                <CardVertical />
+                <CardVertical />
+                <CardVertical />
+                <CardVertical />
+            </div>
         </div>
     );
 }

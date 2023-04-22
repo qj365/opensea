@@ -8,7 +8,7 @@ import { useSDK, useAddress, useBalance } from '@thirdweb-dev/react';
 import { useQuery } from '@apollo/client';
 import { GET_BEST_BID } from '../../graphql/query';
 import { useMutation } from '@apollo/client';
-import { CREATE_EVENT, UPDATE_EVENT } from '../../graphql/mutation';
+import { CREATE_EVENT, UPDATE_EVENT, UPDATE_NFT } from '../../graphql/mutation';
 import validateLogin from '../../utils/validateLogin';
 import { useRouter } from 'next/router';
 import Decimal from 'decimal.js';
@@ -83,6 +83,7 @@ function PlaceABidModal({
         }
     }, [price, wethBalance, nft, bestBid]);
 
+    const [updateNft] = useMutation(UPDATE_NFT);
     async function handlePlaceBid() {
         try {
             if (validateLogin(address)) {
@@ -109,21 +110,24 @@ function PlaceABidModal({
                         parseInt(nft?.listing?.endTimestamp) - new Date() <
                         process.env.NEXT_PUBLIC_TIME_BUFFER * 1000
                     ) {
-                        const auction = await contract.englishAuctions.auctions(
-                            nft.listing.listingId
-                        );
+                        const auction =
+                            await contract.englishAuctions.getAuction(
+                                nft.listing.listingId
+                            );
                         await updateEvent({
                             variables: {
                                 updateEventId: nft.listing._id,
                                 input: {
-                                    endTimestamp:
-                                        auction.endTimeInSeconds * 1000,
+                                    endTimestamp: (
+                                        auction.endTimeInSeconds * 1000
+                                    ).toString(),
                                 },
                             },
                         });
                     }
 
                     const input = {
+                        eventId: nft.listing.listingId,
                         eventType: 'bid',
                         eventName: 'Offer',
                         active: true,
@@ -139,6 +143,20 @@ function PlaceABidModal({
                     const { data } = await createEvent({
                         variables: {
                             input,
+                        },
+                    });
+                    delete nft.onAuction.__typename;
+
+                    await updateNft({
+                        variables: {
+                            updateNftId: nft._id,
+                            input: {
+                                onAuction: {
+                                    ...nft.onAuction,
+                                    winner: address.toLowerCase(),
+                                    price: input.price,
+                                },
+                            },
                         },
                     });
 

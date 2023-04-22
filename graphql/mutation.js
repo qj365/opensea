@@ -93,19 +93,10 @@ const VIEWS_NFT = gql`
     }
 `;
 
-const UPDATE_LISTING = gql`
+const UPDATE_NFT = gql`
     mutation UpdateNft($updateNftId: ID, $input: NftInput) {
         updateNft(id: $updateNftId, input: $input) {
             tokenId
-            listing {
-                _id
-                isListing
-                type
-                price
-                currency
-                startDate
-                endDate
-            }
         }
     }
 `;
@@ -194,7 +185,7 @@ export {
     UPDATE_COLLECTION,
     CREATE_NFT,
     VIEWS_NFT,
-    UPDATE_LISTING,
+    UPDATE_NFT,
     CREATE_EVENT,
     DEACTIVE_EVENT,
     APPROVE_OFFER,
