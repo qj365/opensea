@@ -33,19 +33,19 @@ const categories = [
     },
 ];
 
-function Filter({ searchObj, setSearchObj, router, token, setPage, setNfts }) {
-    const { data: collections, loading } = useQuery(
-        GET_COLLECTIONS_FOR_DISPLAY,
-        {
-            variables: {
-                query: `owner=${
-                    router.query.account[0] === 'account'
-                        ? token?.toLowerCase()
-                        : router.query.account[0]
-                }`,
-            },
-        }
-    );
+function Filter({ searchObj, setSearchObj, router, setPage, setNfts }) {
+    // const { data: collections, loading } = useQuery(
+    //     GET_COLLECTIONS_FOR_DISPLAY,
+    //     {
+    //         variables: {
+    //             query: `owner=${
+    //                 router.query.account[0] === 'account'
+    //                     ? token?.toLowerCase()
+    //                     : router.query.account[0]
+    //             }`,
+    //         },
+    //     }
+    // );
     const [searchCollection, setSearchCollection] = useState('');
     function handleSearch(e) {
         e.preventDefault();
@@ -103,7 +103,7 @@ function Filter({ searchObj, setSearchObj, router, token, setPage, setNfts }) {
                         />
                     </Accordion.Content>
                 </Accordion.Panel>
-                <Accordion.Panel>
+                {/* <Accordion.Panel>
                     <Accordion.Title className="bg-transparent font-semibold text-white hover:bg-[#35384033] focus:ring-0 rounded-[10px] px-2">
                         Collections
                     </Accordion.Title>
@@ -195,7 +195,7 @@ function Filter({ searchObj, setSearchObj, router, token, setPage, setNfts }) {
                             </div>
                         }
                     </Accordion.Content>
-                </Accordion.Panel>
+                </Accordion.Panel> */}
 
                 <Accordion.Panel>
                     <Accordion.Title className="bg-transparent font-semibold text-white hover:bg-[#35384033] focus:ring-0 rounded-[10px] px-2">

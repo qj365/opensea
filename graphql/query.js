@@ -303,6 +303,27 @@ const GET_ALL_NFTS = gql`
         }
     }
 `;
+const NFT_QUERY = gql`
+    query Query($query: String, $page: Int, $limit: Int) {
+        getQueryNfts(query: $query, page: $page, limit: $limit) {
+            total
+            totalPage
+            nfts {
+                name
+                tokenId
+                collectionNft {
+                    _id
+                    name
+                }
+                media
+                listing {
+                    price
+                    currency
+                }
+            }
+        }
+    }
+`;
 
 export {
     GET_PROFILE_IMAGE,
@@ -319,4 +340,5 @@ export {
     GET_BEST_OFFER,
     GET_ALL_NFTS,
     GET_BEST_BID,
+    NFT_QUERY,
 };

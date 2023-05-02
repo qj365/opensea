@@ -122,9 +122,9 @@ function ItemWrapper({ nft, usdPrice }) {
             if (validListings.length > 0) setValidListings(validListings);
         }
 
-        if (nft?.events && nft.listing) {
+        if (nft?.events) {
             let validOffers = [];
-            if (nft.listing.type === 'auction') {
+            if (nft?.listing?.type === 'auction') {
                 validOffers = nft.events.filter(
                     event =>
                         event.eventId === nft.listing.listingId &&
@@ -1028,9 +1028,11 @@ function ItemWrapper({ nft, usdPrice }) {
                                                 </div>
 
                                                 <div className="py-4 px-2 w-full">
-                                                    <div
+                                                    <Tooltip
+                                                        content={formatToUSDate(
+                                                            offer.endTimestamp
+                                                        )}
                                                         className="tooltip tooltip-primary tooltip-top"
-                                                        data-tip="September 10, 2022 at 8:29am GMT+7"
                                                     >
                                                         <button className="text-[#e5e8eb] text-[15px]">
                                                             {nft?.listing
@@ -1047,7 +1049,7 @@ function ItemWrapper({ nft, usdPrice }) {
                                                                   )
                                                                 : 'auction ends'}
                                                         </button>
-                                                    </div>
+                                                    </Tooltip>
                                                 </div>
                                                 <div className="w-full py-4 pr-4 pl-2 truncate max-w-[80%]">
                                                     <Link

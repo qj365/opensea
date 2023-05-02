@@ -1,13 +1,12 @@
 import { useState, useEffect } from 'react';
-import Filter from '../common/Filter';
-import { useLazyQuery } from '@apollo/client';
-import { GET_ALL_NFTS, NFT_QUERY } from '../../graphql/query';
 import { useRouter } from 'next/router';
-import { useAddress } from '@thirdweb-dev/react';
+import { useLazyQuery } from '@apollo/client';
+import { NFT_QUERY } from '../../graphql/query';
 import CardVertical from '../common/CardVertical';
 import InfiniteScroll from 'react-infinite-scroll-component';
+import FilterCollection from './FilterCollection';
 
-function CollectedTab(props) {
+function ItemsTab({ collection }) {
     const router = useRouter();
     const [getQueryNfts1, { data: data1, loading: loading1 }] =
         useLazyQuery(NFT_QUERY);
@@ -28,15 +27,13 @@ function CollectedTab(props) {
 
     async function queryNFT1() {
         const queryObj = { ...router.query };
-        delete queryObj.account;
+        delete queryObj.slug;
         setSearchObj({ ...queryObj });
         const { data } = await getQueryNfts1({
             variables: {
                 query: JSON.stringify({
-                    owner:
-                        router.query.account[0] === 'account'
-                            ? props.token?.toLowerCase()
-                            : router.query.account[0],
+                    collectionNft: collection._id,
+
                     ...queryObj,
                 }),
                 page: page,
@@ -49,14 +46,12 @@ function CollectedTab(props) {
     }
     async function queryNFT2() {
         const queryObj = { ...router.query };
-        delete queryObj.account;
+        delete queryObj.slug;
         const { data } = await getQueryNfts2({
             variables: {
                 query: JSON.stringify({
-                    owner:
-                        router.query.account[0] === 'account'
-                            ? props.token?.toLowerCase()
-                            : router.query.account[0],
+                    collectionNft: collection._id,
+
                     ...queryObj,
                 }),
                 page: page,
@@ -72,11 +67,11 @@ function CollectedTab(props) {
     }, [router.query]);
     return (
         <div className="flex w-full mt-8">
-            <Filter
+            <FilterCollection
                 searchObj={searchObj}
                 setSearchObj={setSearchObj}
                 router={router}
-                token={props.token}
+                token={'123'}
                 setPage={setPage}
                 setNfts={setNfts}
             />
@@ -124,4 +119,4 @@ function CollectedTab(props) {
     );
 }
 
-export default CollectedTab;
+export default ItemsTab;
