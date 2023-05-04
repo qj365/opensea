@@ -14,9 +14,9 @@ import {
     useSDK,
     useNetworkMismatch,
     useNetwork,
-    useChainId,
-    ChainId,
+    useSwitchChain,
 } from '@thirdweb-dev/react';
+import { ChainId } from '@thirdweb-dev/chains';
 import Image from 'next/image';
 import Router, { useRouter } from 'next/router';
 import Logo from '../../assets/icons';
@@ -55,7 +55,6 @@ function AccountSidebar() {
     const { avatar, setAvatar } = useContext(AvatarContext);
 
     const address = useAddress();
-    const [, switchNetwork] = useNetwork(); // Switch to desired chain
     const isMismatched = useNetworkMismatch();
     const disconnect = useDisconnect();
     const router = useRouter();
@@ -87,13 +86,17 @@ function AccountSidebar() {
     }
 
     const client = useApolloClient();
+    const [, switchNetwork] = useNetwork();
+    useDidMountEffect(() => {
+        console.log(isMismatched);
+        if (!isMismatched && address) {
+            switchNetwork(5);
+        }
+    }, [isMismatched, address]);
 
     useDidMountEffect(() => {
         async function login() {
-            if (window?.ethereum) {
-                if (isMismatched) {
-                    await switchNetwork(5);
-                }
+            if (window) {
                 if (address) {
                     window.localStorage.setItem('__user_address', address);
                     Cookies.set('__user_address', address);
@@ -142,11 +145,13 @@ function AccountSidebar() {
         try {
             setIsLoadingBalance(true);
 
-            const balanceEth = await sdk.wallet.balance();
-            const balanceWeth = await sdk.wallet.balance(
-                process.env.NEXT_PUBLIC_WETH_ADDRESS
-            );
-            setBalance({ eth: balanceEth, weth: balanceWeth });
+            if (address) {
+                const balanceEth = await sdk.wallet.balance();
+                const balanceWeth = await sdk.wallet.balance(
+                    process.env.NEXT_PUBLIC_WETH_ADDRESS
+                );
+                setBalance({ eth: balanceEth, weth: balanceWeth });
+            }
 
             setIsLoadingBalance(false);
         } catch (err) {
@@ -154,13 +159,13 @@ function AccountSidebar() {
         }
     };
     useEffect(() => {
-        if (sidebarIsVisible && address) {
+        if (sidebarIsVisible && address && isMismatched) {
             getBalance();
         }
         if (!sidebarIsVisible) {
             setShowMyWalletOptions(false);
         }
-    }, [sidebarIsVisible, address]);
+    }, [sidebarIsVisible, address, isMismatched]);
 
     const [usdBalance, setUsdBalance] = useState({
         ETH: 0,
