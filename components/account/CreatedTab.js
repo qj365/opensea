@@ -114,7 +114,7 @@ function CreatedTab(props) {
     }, [router.query]);
     return (
         <div className=" mt-8">
-            {collections && (
+            {collections.length > 0 && (
                 <div className="">
                     <div className="w-full h-auto">
                         <Slide

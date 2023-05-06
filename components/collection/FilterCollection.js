@@ -69,7 +69,6 @@ function Filter({ searchObj, setSearchObj, router, setPage, setNfts }) {
                 delete query[key];
             }
         }
-        setFiltering(true);
         router.push({
             pathname: router.pathname,
             query: {

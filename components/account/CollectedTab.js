@@ -6,6 +6,7 @@ import { useRouter } from 'next/router';
 import { useAddress } from '@thirdweb-dev/react';
 import CardVertical from '../common/CardVertical';
 import InfiniteScroll from 'react-infinite-scroll-component';
+import CardVerticalSkeleton from '../common/CardVerticalSkeleton';
 
 function CollectedTab(props) {
     const router = useRouter();
@@ -23,6 +24,7 @@ function CollectedTab(props) {
         maxPrice: '',
         fixed: false,
         auction: false,
+        sort: '-createdAt',
     });
     const [page, setPage] = useState(1);
 
@@ -40,7 +42,6 @@ function CollectedTab(props) {
                     ...queryObj,
                 }),
                 page: page,
-                limit: 4,
             },
         });
         if (data?.getQueryNfts?.nfts?.length > 0)
@@ -100,7 +101,14 @@ function CollectedTab(props) {
                                 hasMore={
                                     data1?.getQueryNfts?.totalPage > page - 1
                                 }
-                                loader={<h4>Loading...</h4>}
+                                loader={
+                                    <div className="w-full grid grid-cols-4 gap-4 mt-4">
+                                        <CardVerticalSkeleton />
+                                        <CardVerticalSkeleton />
+                                        <CardVerticalSkeleton />
+                                        <CardVerticalSkeleton />
+                                    </div>
+                                }
                             >
                                 <div className="w-full grid grid-cols-4 gap-4">
                                     {nfts.map((nft, index) => (

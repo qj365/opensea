@@ -69,7 +69,6 @@ function Filter({ searchObj, setSearchObj, router, token, setPage, setNfts }) {
                 delete query[key];
             }
         }
-        setFiltering(true);
         router.push({
             pathname: router.pathname,
             query: {
@@ -325,7 +324,24 @@ function Filter({ searchObj, setSearchObj, router, token, setPage, setNfts }) {
                     </Accordion.Content>
                 </Accordion.Panel> */}
             </Accordion>
-            <div className="flex my-4 px-[10px]">
+            <div className="pr-4 mt-4">
+                <select
+                    value={searchObj.sort || '-createdAt'}
+                    onChange={e => {
+                        setSearchObj({
+                            ...searchObj,
+                            sort: e.target.value,
+                        });
+                    }}
+                    className="select select-bordered border-2 w-full hover:border-[#8a939b] rounded-[10px] bg-[#202225] text-white font-semibold without-ring focus:border-[#6B7280]"
+                >
+                    <option value="-price">Price high to low</option>
+                    <option value="price">Price low to high</option>
+                    <option value="createdAt">Oldest</option>
+                    <option value="-createdAt">Newest</option>
+                </select>
+            </div>
+            <div className="flex my-4 pr-[10px]">
                 <button
                     type="submit"
                     className="w-full bg-[#2081e2] text-white font-semibold text-lg h-12 rounded-xl hover:bg-[#4c505c] transition"
