@@ -324,6 +324,27 @@ const NFT_QUERY = gql`
         }
     }
 `;
+const COLLECTION_INFO = gql`
+    query GetCollectionInfoBySlug($slug: String) {
+        getCollectionInfoBySlug(slug: $slug) {
+            yourSite
+            totalVolume
+            sales
+            slug
+            royalty {
+                percentage
+            }
+            name
+            logoImage
+            floorPrice
+            featuredImage
+            description
+            category
+            bannerImage
+            _id
+        }
+    }
+`;
 
 export {
     GET_PROFILE_IMAGE,
@@ -341,4 +362,5 @@ export {
     GET_ALL_NFTS,
     GET_BEST_BID,
     NFT_QUERY,
+    COLLECTION_INFO,
 };

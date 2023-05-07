@@ -5,7 +5,6 @@ import Link from 'next/link';
 
 function CollectionList({ collection }) {
     const router = useRouter();
-    console.log(router);
     const [activeTab, setActiveTab] = useState('items');
     const tabs = [
         {

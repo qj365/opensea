@@ -206,6 +206,36 @@ function ProfileImage({ collection, token }) {
                             <ShowMore>{collection.description}</ShowMore>
                         </div>
                     )}
+                    <div className="mt-[30px] grid grid-cols-3 gap-2 w-1/4">
+                        <div className="flex flex-col">
+                            <span className="font-semibold text-white text-[20px]">
+                                {collection.totalVolume
+                                    ? collection.totalVolume + ' ETH'
+                                    : '-- ETH'}
+                            </span>
+                            <span className="text-sm text-[#8a939b]">
+                                total volume
+                            </span>
+                        </div>
+                        <div className="flex flex-col">
+                            <span className="font-semibold text-white text-[20px]">
+                                {collection.floorPrice
+                                    ? collection.floorPrice + ' ETH'
+                                    : '-- ETH'}
+                            </span>
+                            <span className="text-sm text-[#8a939b]">
+                                floor price
+                            </span>
+                        </div>
+                        <div className="flex flex-col">
+                            <span className="font-semibold text-white text-[20px]">
+                                {collection.sales ? collection.sales : '--'}
+                            </span>
+                            <span className="text-sm text-[#8a939b]">
+                                sales
+                            </span>
+                        </div>
+                    </div>
                 </div>
             </div>
 

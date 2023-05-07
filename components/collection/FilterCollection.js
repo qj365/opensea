@@ -6,51 +6,18 @@ import { GET_COLLECTIONS_FOR_DISPLAY } from '../../graphql/query';
 import Image from 'next/image';
 import { useState } from 'react';
 
-const categories = [
-    {
-        id: 2,
-        title: 'Art',
-    },
-    {
-        id: 3,
-        title: 'Collectibles',
-    },
-    {
-        id: 4,
-        title: 'Domain Names',
-    },
-    {
-        id: 5,
-        title: 'Music',
-    },
-    {
-        id: 6,
-        title: 'Photography',
-    },
-    {
-        id: 7,
-        title: 'Sports',
-    },
-];
-
-function Filter({ searchObj, setSearchObj, router, setPage, setNfts }) {
-    // const { data: collections, loading } = useQuery(
-    //     GET_COLLECTIONS_FOR_DISPLAY,
-    //     {
-    //         variables: {
-    //             query: `owner=${
-    //                 router.query.account[0] === 'account'
-    //                     ? token?.toLowerCase()
-    //                     : router.query.account[0]
-    //             }`,
-    //         },
-    //     }
-    // );
+function FilterCollection({
+    searchObj,
+    setSearchObj,
+    router,
+    token,
+    setPage,
+    setNfts,
+}) {
     const [searchCollection, setSearchCollection] = useState('');
     function handleSearch(e) {
         e.preventDefault();
-        setNfts([]);
-        setPage(1);
+
         if (
             !searchObj.minPrice &&
             !searchObj.maxPrice &&
@@ -76,6 +43,8 @@ function Filter({ searchObj, setSearchObj, router, setPage, setNfts }) {
                 ...searchObj,
             },
         });
+        setNfts([]);
+        setPage(1);
     }
 
     return (
@@ -324,7 +293,24 @@ function Filter({ searchObj, setSearchObj, router, setPage, setNfts }) {
                     </Accordion.Content>
                 </Accordion.Panel> */}
             </Accordion>
-            <div className="flex my-4 px-[10px]">
+            <div className="pr-4 mt-4">
+                <select
+                    value={searchObj.sort || '-createdAt'}
+                    onChange={e => {
+                        setSearchObj({
+                            ...searchObj,
+                            sort: e.target.value,
+                        });
+                    }}
+                    className="select select-bordered border-2 w-full hover:border-[#8a939b] rounded-[10px] bg-[#202225] text-white font-semibold without-ring focus:border-[#6B7280]"
+                >
+                    <option value="-price">Price high to low</option>
+                    <option value="price">Price low to high</option>
+                    <option value="createdAt">Oldest</option>
+                    <option value="-createdAt">Newest</option>
+                </select>
+            </div>
+            <div className="flex my-4 pr-[10px]">
                 <button
                     type="submit"
                     className="w-full bg-[#2081e2] text-white font-semibold text-lg h-12 rounded-xl hover:bg-[#4c505c] transition"
@@ -335,7 +321,7 @@ function Filter({ searchObj, setSearchObj, router, setPage, setNfts }) {
                     onClick={e => {
                         e.preventDefault();
                         setPage(1);
-                        router.push({ pathname: router.query.account[0] });
+                        router.push(`/collection/${router.query.slug}`);
                         setNfts([]);
                     }}
                     className="w-full ml-4 bg-[#2081e2] text-white font-semibold text-lg h-12 rounded-xl hover:bg-[#4c505c] transition"
@@ -347,4 +333,4 @@ function Filter({ searchObj, setSearchObj, router, setPage, setNfts }) {
     );
 }
 
-export default Filter;
+export default FilterCollection;
