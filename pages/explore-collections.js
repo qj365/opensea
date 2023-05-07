@@ -1,7 +1,4 @@
 import Link from 'next/link';
-import CardContainer from '../components/explore-collections/CardContainer';
-import Tab from '../components/explore-collections/Tab';
-import OnlyHeaderLayout from '../components/layout/OnlyHeaderLayout';
 import { useState } from 'react';
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
@@ -36,9 +33,9 @@ const categories = [
         link: '?tab=photography',
     },
     {
-        id: 'sports',
-        title: 'Sports',
-        link: '?tab=sports',
+        id: 'sport',
+        title: 'Sport',
+        link: '?tab=sport',
     },
 ];
 
@@ -91,7 +88,6 @@ export async function getServerSideProps(context) {
         },
         fetchPolicy: 'network-only',
     });
-    console.log(data);
     return {
         props: {
             tab: tab || 'art',

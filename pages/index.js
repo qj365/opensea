@@ -10,37 +10,37 @@ const categories = [
     {
         id: 0,
         name: 'Art',
-        href: '/',
+        href: '/explore-collections?tab=art',
         img: 'https://opensea.io/static/images/categories/art.png',
     },
     {
         id: 1,
-        name: 'Collectibles',
-        href: '/',
+        name: 'Gamming',
+        href: '/explore-collections?tab=gamming',
         img: 'https://opensea.io/static/images/categories/collectibles.png',
     },
     {
         id: 2,
-        name: 'Domain Names',
-        href: '/',
+        name: 'PFP',
+        href: '/explore-collections?tab=pfp',
         img: 'https://opensea.io/static/images/categories/domain-names.png',
     },
     {
         id: 3,
         name: 'Music',
-        href: '/',
+        href: '/explore-collections?tab=music',
         img: 'https://opensea.io/static/images/categories/music.png',
     },
     {
         id: 4,
         name: 'Photography',
-        href: '/',
+        href: '/explore-collections?tab=photography',
         img: 'https://opensea.io/static/images/categories/photography-category.png',
     },
     {
         id: 5,
         name: 'Sports',
-        href: '/',
+        href: '/explore-collections?tab=sport',
         img: 'https://opensea.io/static/images/categories/sports.png',
     },
 ];
@@ -69,9 +69,12 @@ export default function Home() {
                                     largest NFT marketplace
                                 </div>
                                 <div className="flex">
-                                    <button className="relative text-lg font-semibold px-12 py-4 bg-[#2181e2] rounded-lg mr-5 text-white hover:bg-[#42a0ff] cursor-pointer">
-                                        Explore
-                                    </button>
+                                    <Link href={'/explore-collections'}>
+                                        <a className="relative text-lg font-semibold px-12 py-4 bg-[#2181e2] rounded-lg mr-5 text-white hover:bg-[#42a0ff] cursor-pointer">
+                                            Explore
+                                        </a>
+                                    </Link>
+
                                     <Link href={'/assets/create'}>
                                         <a className="relative text-lg font-semibold px-12 py-4 bg-[#363840] rounded-lg mr-5 text-[#e4e8ea] hover:bg-[#4c505c] cursor-pointer">
                                             Create
