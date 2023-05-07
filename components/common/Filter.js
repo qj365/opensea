@@ -49,8 +49,7 @@ function Filter({ searchObj, setSearchObj, router, token, setPage, setNfts }) {
     const [searchCollection, setSearchCollection] = useState('');
     function handleSearch(e) {
         e.preventDefault();
-        setNfts([]);
-        setPage(1);
+
         if (
             !searchObj.minPrice &&
             !searchObj.maxPrice &&
@@ -76,6 +75,8 @@ function Filter({ searchObj, setSearchObj, router, token, setPage, setNfts }) {
                 ...searchObj,
             },
         });
+        setNfts([]);
+        setPage(1);
     }
 
     return (

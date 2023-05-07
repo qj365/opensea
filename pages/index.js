@@ -72,9 +72,11 @@ export default function Home() {
                                     <button className="relative text-lg font-semibold px-12 py-4 bg-[#2181e2] rounded-lg mr-5 text-white hover:bg-[#42a0ff] cursor-pointer">
                                         Explore
                                     </button>
-                                    <button className="relative text-lg font-semibold px-12 py-4 bg-[#363840] rounded-lg mr-5 text-[#e4e8ea] hover:bg-[#4c505c] cursor-pointer">
-                                        Create
-                                    </button>
+                                    <Link href={'/assets/create'}>
+                                        <a className="relative text-lg font-semibold px-12 py-4 bg-[#363840] rounded-lg mr-5 text-[#e4e8ea] hover:bg-[#4c505c] cursor-pointer">
+                                            Create
+                                        </a>
+                                    </Link>
                                 </div>
                             </div>
                             <div className="h-[450px] w-[450px] rounded-[3rem]">

@@ -164,7 +164,8 @@ function CreateAssetPage() {
                     setSubmittingForm(true);
                     document.body.style.overflowY = 'hidden';
                     setSubmittingForm(true);
-                    const mediaUrl = await uploadImage(nftData.media, 'nfts');
+                    // const mediaUrl = await uploadImage(nftData.media, 'nfts');
+                    const mediaUrl = await sdk.storage.upload(data);
                     const contract = await sdk.getContract(
                         nftData.collectionNft
                     );
