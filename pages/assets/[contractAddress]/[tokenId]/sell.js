@@ -32,9 +32,6 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import ClipLoader from 'react-spinners/ClipLoader';
 import { timeElapsedLabel } from '../../../../utils/formatDate';
-import { marketplaceABi } from '../../../../abi/marketplace';
-import { ethers } from 'ethers';
-import { auctionABI } from '../../../../abi/auction';
 
 const options = [
     { value: '1', label: '1 day' },

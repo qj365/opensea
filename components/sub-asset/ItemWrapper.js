@@ -667,7 +667,7 @@ function ItemWrapper({ nft, usdPrice }) {
                                             <a
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                href={`https://goerli.etherscan.io/address/${nft?.collectionNft._id}`}
+                                                href={`${process.env.NEXT_PUBLIC_ETHERSCAN_LINK}/address/${nft?.collectionNft._id}`}
                                                 className="text-[#207fe2] text-sm hover:text-[#1868b7]"
                                             >
                                                 {shortenAddress(
@@ -696,7 +696,7 @@ function ItemWrapper({ nft, usdPrice }) {
                                                 Blockchain
                                             </span>
                                             <span className="text-sm font-medium text-[#A6ADBA]">
-                                                Ethereum Goerli
+                                                Ethereum Sepolia
                                             </span>
                                         </div>
                                         <div className="flex justify-between mt-2">

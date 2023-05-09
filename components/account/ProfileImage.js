@@ -153,7 +153,7 @@ function ProfileImage({ userInfo, token }) {
                         </div>
 
                         {isOpen && (
-                            <ul className="absolute top-60 right-0 w-60 bg-[#303339] rounded-lg shadow-xl overflow-hidden">
+                            <ul className="absolute top-60 right-0 w-60 bg-[#303339] rounded-lg shadow-xl overflow-hidden z-10">
                                 {options.map((option, index) => (
                                     <li
                                         key={index}

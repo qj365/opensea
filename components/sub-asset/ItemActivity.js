@@ -237,6 +237,7 @@ function ItemActivity({ nft, address }) {
                                                         href={
                                                             process.env
                                                                 .NEXT_PUBLIC_ETHERSCAN_LINK +
+                                                            '/tx/' +
                                                             e.transactionHash
                                                         }
                                                         className="text-[15px] text-[#2081e2] hover:text-[#1868b7] inline-block max-w-full"

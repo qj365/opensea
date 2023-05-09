@@ -15,8 +15,8 @@ import {
     useNetworkMismatch,
     useNetwork,
     useSwitchChain,
+    useChainId,
 } from '@thirdweb-dev/react';
-import { ChainId } from '@thirdweb-dev/chains';
 import Image from 'next/image';
 import Router, { useRouter } from 'next/router';
 import Logo from '../../assets/icons';
@@ -55,7 +55,6 @@ function AccountSidebar() {
     const { avatar, setAvatar } = useContext(AvatarContext);
 
     const address = useAddress();
-    const isMismatched = useNetworkMismatch();
     const disconnect = useDisconnect();
     const router = useRouter();
     const sdk = useSDK();
@@ -87,12 +86,12 @@ function AccountSidebar() {
 
     const client = useApolloClient();
     const [, switchNetwork] = useNetwork();
+    const chainId = useChainId();
     useDidMountEffect(() => {
-        console.log(isMismatched);
-        if (!isMismatched && address) {
-            switchNetwork(5);
+        if (chainId !== +process.env.NEXT_PUBLIC_CHAIN_ID && switchNetwork) {
+            switchNetwork(+process.env.NEXT_PUBLIC_CHAIN_ID);
         }
-    }, [isMismatched, address]);
+    }, [chainId, switchNetwork]);
 
     useDidMountEffect(() => {
         async function login() {
@@ -156,16 +155,22 @@ function AccountSidebar() {
             setIsLoadingBalance(false);
         } catch (err) {
             console.log(err);
+            setIsLoadingBalance(false);
         }
     };
+
     useEffect(() => {
-        if (sidebarIsVisible && address && isMismatched) {
+        if (
+            sidebarIsVisible &&
+            address &&
+            chainId === +process.env.NEXT_PUBLIC_CHAIN_ID
+        ) {
             getBalance();
         }
         if (!sidebarIsVisible) {
             setShowMyWalletOptions(false);
         }
-    }, [sidebarIsVisible, address, isMismatched]);
+    }, [sidebarIsVisible, address, chainId]);
 
     const [usdBalance, setUsdBalance] = useState({
         ETH: 0,
@@ -318,7 +323,7 @@ function AccountSidebar() {
                                                 ETH
                                             </span>
                                             <span className="text-sm text-[#8a939b]">
-                                                Goerli
+                                                Sepolia
                                             </span>
                                         </div>
                                     </div>
@@ -360,7 +365,7 @@ function AccountSidebar() {
                                                 WETH
                                             </span>
                                             <span className="text-sm text-[#8a939b]">
-                                                Goerli
+                                                Sepolia
                                             </span>
                                         </div>
                                     </div>
