@@ -203,7 +203,6 @@ function CreateColelctionPage() {
                                 : undefined,
                         },
                     };
-                    console.log(collection);
                     const { data } = await createCollection({
                         variables: { input: collection },
                     });

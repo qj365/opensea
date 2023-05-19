@@ -9,6 +9,8 @@ const nextConfig = {
             'storage.googleapis.com',
             'firebasestorage.googleapis.com',
             'gateway.ipfscdn.io',
+            'cloudflare-ipfs.com',
+            'ipfs.io',
         ],
     },
 };

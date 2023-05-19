@@ -9,12 +9,12 @@ function CollectionList({ collection }) {
     const tabs = [
         {
             label: 'Items',
-            href: '/',
+            href: '',
             component: <ItemsTab collection={collection} />,
         },
         {
             label: 'Activity',
-            href: '/activity',
+            href: 'activity',
             component: '',
         },
     ];

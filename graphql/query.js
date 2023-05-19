@@ -342,6 +342,7 @@ const COLLECTION_INFO = gql`
             category
             bannerImage
             _id
+            owner
         }
     }
 `;

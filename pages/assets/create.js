@@ -28,6 +28,7 @@ import { useRouter } from 'next/router';
 import slug from 'slug';
 import ClipLoader from 'react-spinners/ClipLoader';
 import { CREATE_NFT, CREATE_EVENT } from '../../graphql/mutation';
+import { ThirdwebStorage } from '@thirdweb-dev/storage';
 
 const selectStyle = {
     control: (baseStyles, state) => ({
@@ -155,7 +156,6 @@ function CreateAssetPage() {
 
     async function handleSubmit(e) {
         e.preventDefault();
-        console.log(nftData);
         if (address && address !== Cookies.get('__user_address')) {
             window.location.href = '/login';
         } else {
@@ -164,8 +164,20 @@ function CreateAssetPage() {
                     setSubmittingForm(true);
                     document.body.style.overflowY = 'hidden';
                     setSubmittingForm(true);
-                    // const mediaUrl = await uploadImage(nftData.media, 'nfts');
-                    const mediaUrl = await sdk.storage.upload(data);
+                    const mediaUrl = await uploadImage(nftData.media, 'nfts');
+                    // const storage = new ThirdwebStorage({
+                    //     gatewayUrls: {
+                    //         'ipfs://': [
+                    //             'https://cloudflare-ipfs.com/ipfs/',
+                    //             'https://ipfs.io/ipfs/',
+                    //         ],
+                    //     },
+                    // });
+                    // const mediaUrl = await storage.upload(nftData.media, {
+                    //     alwaysUpload: true,
+                    //     uploadWithGatewayUrl: true,
+                    // });
+                    console.log(mediaUrl);
                     const contract = await sdk.getContract(
                         nftData.collectionNft
                     );
@@ -176,8 +188,6 @@ function CreateAssetPage() {
                         external_url: nftData.link,
                     };
                     const tx = await contract.erc721.mint(metadata);
-                    console.log(tx);
-
                     const { data } = await createNft({
                         variables: {
                             input: {

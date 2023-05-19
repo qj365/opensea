@@ -26,6 +26,7 @@ import {
 import { VIEWS_NFT } from '../../../../graphql/mutation';
 import { useEffect, useState } from 'react';
 import Footer from '../../../../components/layout/Footer';
+import useDidMountEffect from '../../../../utils/useDidMountEffect';
 
 function NftItem() {
     const router = useRouter();
@@ -36,7 +37,7 @@ function NftItem() {
 
     const [viewsNft] = useMutation(VIEWS_NFT);
 
-    useEffect(() => {
+    useDidMountEffect(() => {
         async function updateViews() {
             if (contractAddress && tokenId) {
                 console.log('update view+');
