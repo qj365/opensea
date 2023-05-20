@@ -343,6 +343,7 @@ const COLLECTION_INFO = gql`
             bannerImage
             _id
             owner
+            createdAt
         }
     }
 `;

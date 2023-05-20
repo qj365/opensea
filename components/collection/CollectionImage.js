@@ -137,6 +137,7 @@ function ProfileImage({ collection, token }) {
                                     <div className="h-[50%] border-r-[1px] border-[#4c505c]"></div>
                                 </>
                             )} */}
+
                             <button
                                 className="rounded-[50%] hover:bg-[#4c505c] p-3 ml-2 "
                                 onClick={() => setIsOpen(!isOpen)}
@@ -201,6 +202,23 @@ function ProfileImage({ collection, token }) {
                             {formatJoinedDate(collection.createdAt)}
                         </span>
                     </div> */}
+                    <div className="text-white mt-4">
+                        <span>Created</span>
+                        <span className="font-semibold">
+                            {formatJoinedDate(collection.createdAt, '')}
+                        </span>
+                        &nbsp;&nbsp;·&nbsp;
+                        <span>Creator earnings</span>
+                        <span className="font-semibold">
+                            {collection?.royalty?.percentage
+                                ? ` ${collection?.royalty?.percentage}%`
+                                : ' 0%'}
+                        </span>
+                        &nbsp;&nbsp;·&nbsp;
+                        <span>Chain</span>
+                        <span className="font-semibold">&nbsp;Sepolia</span>
+                    </div>
+
                     {collection.description && (
                         <div>
                             <ShowMore>{collection.description}</ShowMore>

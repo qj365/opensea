@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 import Link from 'next/link';
 import CollectedTab from './CollectedTab';
 import CreatedTab from './CreatedTab';
+import ActivityTab from './ActivityTab';
 
 function NFTList({ token }) {
     const router = useRouter();
@@ -21,7 +22,11 @@ function NFTList({ token }) {
             href: '/created',
             component: <CreatedTab token={token} />,
         },
-        { label: 'Activity', href: '/activity' },
+        {
+            label: 'Activity',
+            href: '/activity',
+            component: <ActivityTab token={token} />,
+        },
     ];
     function handleTabClick(e, tab) {
         e.preventDefault();

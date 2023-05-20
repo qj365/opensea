@@ -1,4 +1,4 @@
-function formatJoinedDate(timestamp) {
+function formatJoinedDate(timestamp, string = 'Joined') {
     const date = new Date(parseInt(timestamp, 10));
     const monthNames = [
         'January',
@@ -15,7 +15,7 @@ function formatJoinedDate(timestamp) {
         'December',
     ];
     const formattedDate =
-        'Joined ' + monthNames[date.getMonth()] + ' ' + date.getFullYear();
+        string + ' ' + monthNames[date.getMonth()] + ' ' + date.getFullYear();
     return formattedDate;
 }
 
