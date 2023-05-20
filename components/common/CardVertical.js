@@ -39,13 +39,13 @@ function CardVertical({ w = 256, h = 256, nft }) {
                                             <img
                                                 src={Icon.EthLogo.src}
                                                 alt="ETH Logo"
-                                                className="h-4 brightness-200"
+                                                className="h-4 "
                                             />
                                         ) : (
                                             <img
                                                 src={Icon.wethLogo.src}
                                                 alt="ETH Logo"
-                                                className="h-4 brightness-200"
+                                                className="h-4 "
                                             />
                                         )}
 

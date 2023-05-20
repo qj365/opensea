@@ -10,37 +10,36 @@ const categories = [
     {
         id: 'art',
         title: 'Art',
-        link: '?tab=art',
+        link: '?tab=Art',
     },
     {
         id: 'gamming',
         title: 'Gamming',
-        link: '?tab=gamming',
+        link: '?tab=Gamming',
     },
     {
         id: 'pfp',
         title: 'PFP',
-        link: '?tab=pfp',
+        link: '?tab=PFP',
     },
     {
         id: 'music',
         title: 'Music',
-        link: '?tab=music',
+        link: '?tab=Music',
     },
     {
         id: 'photography',
         title: 'Photography',
-        link: '?tab=photography',
+        link: '?tab=Photography',
     },
     {
         id: 'sport',
         title: 'Sport',
-        link: '?tab=sport',
+        link: '?tab=Sport',
     },
 ];
 
 export default function ExploreCollections({ tab: tabServer, collections }) {
-    console.log(collections);
     return (
         <div className="w-[1280px] flex flex-col items-center mx-auto">
             <div className="flex flex-col items-center">
@@ -54,7 +53,8 @@ export default function ExploreCollections({ tab: tabServer, collections }) {
                                 <Link href={category.link}>
                                     <a
                                         className={`inline-block p-4 text-base font-semibold ${
-                                            tabServer !== category.id
+                                            tabServer.toLowerCase() !==
+                                            category.id
                                                 ? 'hover:text-white transition ease-in-out duration-400'
                                                 : 'text-[#e5e8eb] border-b-[3px] border-[#2081e2]'
                                         }`}
@@ -82,9 +82,7 @@ export async function getServerSideProps(context) {
     const { data } = await client.query({
         query: GET_COLLECTIONS_FOR_DISPLAY,
         variables: {
-            query: `category=${
-                tab?.replace(/^\w/, c => c.toUpperCase()) || 'Art'
-            }`,
+            query: `category=${tab || 'Art'}`,
         },
         fetchPolicy: 'network-only',
     });

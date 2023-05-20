@@ -49,30 +49,43 @@ function Filter({ searchObj, setSearchObj, router, token, setPage, setNfts }) {
     const [searchCollection, setSearchCollection] = useState('');
     function handleSearch(e) {
         e.preventDefault();
-
-        if (
-            !searchObj.minPrice &&
-            !searchObj.maxPrice &&
-            searchObj.minPrice !== 0 &&
-            searchObj.maxPrice !== 0
-        ) {
-            delete searchObj.minPrice;
-            delete searchObj.maxPrice;
-            delete searchObj.currency;
+        const tempSearchObj = {
+            name: '',
+            collection: '',
+            currency: 'ETH',
+            minPrice: '',
+            maxPrice: '',
+            fixed: false,
+            auction: false,
+            sort: '-createdAt',
+        };
+        const querySearch = { ...searchObj };
+        const query = { ...router.query };
+        console.log(router.query);
+        if (!querySearch.minPrice) delete querySearch.minPrice;
+        if (!querySearch.maxPrice) delete querySearch.maxPrice;
+        if (!querySearch.minPrice && !querySearch.maxPrice) {
+            delete querySearch.currency;
         }
 
-        const query = { ...router.query };
-        for (const key in searchObj) {
-            if (!searchObj[key]) {
-                delete searchObj[key];
+        if (
+            (+querySearch.minPrice || +querySearch.maxPrice) &&
+            !querySearch.currency
+        ) {
+            querySearch.currency = 'ETH';
+        }
+
+        for (const key in tempSearchObj) {
+            if (key !== 'account') {
                 delete query[key];
             }
         }
+
         router.push({
             pathname: router.pathname,
             query: {
                 ...query,
-                ...searchObj,
+                ...querySearch,
             },
         });
         setNfts([]);
@@ -209,10 +222,16 @@ function Filter({ searchObj, setSearchObj, router, token, setPage, setNfts }) {
                                     type="checkbox"
                                     checked={searchObj.fixed || false}
                                     onChange={e => {
-                                        setSearchObj({
-                                            ...searchObj,
-                                            fixed: e.target.checked,
-                                        });
+                                        if (e.target.checked) {
+                                            setSearchObj({
+                                                ...searchObj,
+                                                fixed: e.target.checked,
+                                            });
+                                        } else {
+                                            const { fixed, ...tempSearchObj } =
+                                                searchObj;
+                                            setSearchObj(tempSearchObj);
+                                        }
                                     }}
                                     className="checkbox h-[24px] w-[24px] rounded-[6px] without-ring"
                                 />
@@ -223,10 +242,18 @@ function Filter({ searchObj, setSearchObj, router, token, setPage, setNfts }) {
                                     type="checkbox"
                                     checked={searchObj.auction || false}
                                     onChange={e => {
-                                        setSearchObj({
-                                            ...searchObj,
-                                            auction: e.target.checked,
-                                        });
+                                        if (e.target.checked) {
+                                            setSearchObj({
+                                                ...searchObj,
+                                                auction: e.target.checked,
+                                            });
+                                        } else {
+                                            const {
+                                                auction,
+                                                ...tempSearchObj
+                                            } = searchObj;
+                                            setSearchObj(tempSearchObj);
+                                        }
                                     }}
                                     className="checkbox  h-[24px] w-[24px] rounded-[6px] without-ring"
                                 />

@@ -4,21 +4,25 @@ import OnlyHeaderLayout from '../../components/layout/OnlyHeaderLayout';
 import { MdRefresh } from 'react-icons/md';
 import { useState, useEffect } from 'react';
 import { useLazyQuery, useQuery } from '@apollo/client';
-import { GET_ALL_NFTS, GET_COLLECTIONS_FOR_DISPLAY } from '../../graphql/query';
+import {
+    GET_ALL_NFTS,
+    GET_COLLECTIONS_FOR_DISPLAY,
+    NFT_QUERY,
+} from '../../graphql/query';
 import { useRouter } from 'next/router';
 import { useAddress } from '@thirdweb-dev/react';
 import FilterAsset from '../../components/assets/FilterAsset';
+import InfiniteScroll from 'react-infinite-scroll-component';
+import CardVerticalSkeleton from '../../components/common/CardVerticalSkeleton';
 
 export default function Assests() {
     const router = useRouter();
-    const [getAllNfts, { data, loading }] = useLazyQuery(GET_ALL_NFTS);
-    const { data: collections } = useQuery(GET_COLLECTIONS_FOR_DISPLAY, {
-        variables: {
-            query: ``,
-        },
-    });
+    const [getQueryNfts1, { data: data1, loading: loading1 }] =
+        useLazyQuery(NFT_QUERY);
+    const [getQueryNfts2, { data: data2, loading: loading2 }] =
+        useLazyQuery(NFT_QUERY);
+
     const [nfts, setNfts] = useState([]);
-    const address = useAddress();
     const [searchObj, setSearchObj] = useState({
         name: '',
         collection: '',
@@ -27,134 +31,92 @@ export default function Assests() {
         maxPrice: '',
         fixed: false,
         auction: false,
+        sort: '-createdAt',
     });
-    async function queryNFT() {
-        if (router) {
-            let query = ``;
-            const queryObj = { ...router.query };
+    const [page, setPage] = useState(1);
 
-            try {
-                await getAllNfts({
-                    variables: {
-                        query,
-                    },
-                });
-                console.log(data);
-                setNfts(data.getAllNfts);
-                if (Object.keys(router.query).length > 0) {
-                    const nfts = data.getAllNfts.filter(nft => {
-                        if (queryObj.name) {
-                            return nft.name
-                                .toLowerCase()
-                                .includes(queryObj.name.toLowerCase());
-                        }
-                        if (queryObj.collection) {
-                            return decodeURI(queryObj.collection.toLowerCase())
-                                .split(',')
-                                .includes(nft.collectionNft.name.toLowerCase());
-                        }
-                        if (queryObj.auction && queryObj.fixed) {
-                            return (
-                                nft.listing.type === 'auction' ||
-                                nft.listing.type === 'fixed'
-                            );
-                        } else if (queryObj.fixed) {
-                            return nft?.listing?.type === 'fixed';
-                        } else if (queryObj.auction) {
-                            return nft?.listing?.type === 'auction';
-                        }
-
-                        if (
-                            queryObj.currency &&
-                            queryObj.minPrice &&
-                            nft.listing
-                        ) {
-                            return (
-                                nft.listing.currency === queryObj.currency &&
-                                nft.listing.price >=
-                                    parseFloat(queryObj.minPrice)
-                            );
-                        }
-
-                        if (
-                            queryObj.currency &&
-                            queryObj.maxPrice &&
-                            nft.listing
-                        ) {
-                            return (
-                                nft.listing.currency === queryObj.currency &&
-                                nft.listing.price <=
-                                    parseFloat(queryObj.maxPrice)
-                            );
-                        }
-
-                        if (queryObj.price) {
-                            return nft.price
-                                .toLowerCase()
-                                .includes(queryObj.price.toLowerCase());
-                        }
-                    });
-                    setNfts(nfts);
-                }
-            } catch (err) {
-                console.log(err);
-            }
-        }
+    async function queryNFT1() {
+        const queryObj = { ...router.query };
+        setSearchObj({ ...queryObj });
+        const { data } = await getQueryNfts1({
+            variables: {
+                query: JSON.stringify({
+                    ...queryObj,
+                }),
+                page: page,
+            },
+        });
+        if (data?.getQueryNfts?.nfts?.length > 0)
+            setNfts([...nfts, ...data?.getQueryNfts?.nfts]);
+        setPage(page => page + 1);
+    }
+    async function queryNFT2() {
+        const queryObj = { ...router.query };
+        const { data } = await getQueryNfts2({
+            variables: {
+                query: JSON.stringify({
+                    ...queryObj,
+                }),
+                page: page,
+                limit: 4,
+            },
+        });
+        if (data?.getQueryNfts?.nfts?.length > 0)
+            setNfts([...nfts, ...data?.getQueryNfts?.nfts]);
+        setPage(page => page + 1);
     }
     useEffect(() => {
-        queryNFT();
+        queryNFT1();
     }, [router.query]);
     return (
         <>
-            {/* <div className="">
-                {<Filter /> }
-                { <Assets /> }
-                <div className="flex flex-col w-3/4">
-                    <div className="flex items-center mb-[10px]">
-                        <button className="h-12 p-3 mr-2 outline-none hover:bg-[#4c505c66] hover:rounded-[50%]">
-                            <MdRefresh className="text-white text-2xl" />
-                        </button>
-                        <p className="text-white text-base">46.608.776 items</p>
-                    </div>
-                    <div className="flex flex-wrap justify-around">
-                        <CardVertical />
-                        <CardVertical />
-                        <CardVertical />
-                        <CardVertical />
-                        <CardVertical />
-                        <CardVertical />
-                        <CardVertical />
-                        <CardVertical />
-                        <CardVertical />
-                    </div>
-                </div>
-            </div> */}
-
             <div className="flex px-[22px] pt-2">
-                <div className="flex w-full">
+                <div className="flex w-full mt-8">
                     <FilterAsset
                         searchObj={searchObj}
                         setSearchObj={setSearchObj}
                         router={router}
+                        setPage={setPage}
+                        setNfts={setNfts}
                     />
                     <div className="w-3/4 ml-4">
-                        {loading ? (
+                        {loading1 ? (
                             <div className="text-white">Loading items...</div>
                         ) : (
-                            <>
+                            <div>
                                 <div className="text-white text-base font-semibold mb-8">
-                                    {nfts.length} item
-                                    {nfts.length > 1 ? 's' : ''}
+                                    {data1?.getQueryNfts?.total} item
+                                    {data1?.getQueryNfts?.total > 1 ? 's' : ''}
                                 </div>
 
                                 {nfts.length > 0 ? (
-                                    <div className="w-full grid grid-cols-4 gap-4">
-                                        {nfts.map((nft, index) => (
-                                            <div key={index}>
-                                                <CardVertical nft={nft} />
+                                    <InfiniteScroll
+                                        className="w-full"
+                                        dataLength={nfts.length}
+                                        next={() => {
+                                            queryNFT2();
+                                        }}
+                                        hasMore={
+                                            data1?.getQueryNfts?.totalPage >
+                                            page - 1
+                                        }
+                                        loader={
+                                            <div className="w-full grid grid-cols-4 gap-4 mt-4">
+                                                <CardVerticalSkeleton />
+                                                <CardVerticalSkeleton />
+                                                <CardVerticalSkeleton />
+                                                <CardVerticalSkeleton />
                                             </div>
-                                        ))}
-                                    </div>
+                                        }
+                                    >
+                                        <div className="w-full grid grid-cols-4 gap-4">
+                                            {nfts.map((nft, index) => (
+                                                <div key={index}>
+                                                    <CardVertical nft={nft} />
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </InfiniteScroll>
                                 ) : (
                                     <div className="flex flex-col justify-center items-center w-full h-[248px] border-[1px] border-[#353840] rounded-xl">
                                         <p className="text-white text-3xl">
@@ -162,7 +124,7 @@ export default function Assests() {
                                         </p>
                                     </div>
                                 )}
-                            </>
+                            </div>
                         )}
                     </div>
                 </div>

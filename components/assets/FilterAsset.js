@@ -33,46 +33,56 @@ const categories = [
     },
 ];
 
-function FilterAsset({ searchObj, setSearchObj, router, token }) {
+function FilterAsset({ searchObj, setSearchObj, router, setPage, setNfts }) {
     const { data: collections, loading } = useQuery(
-        GET_COLLECTIONS_FOR_DISPLAY,
-        {
-            variables: {
-                query: `limit=5`,
-            },
-        }
+        GET_COLLECTIONS_FOR_DISPLAY
     );
     const [searchCollection, setSearchCollection] = useState('');
     function handleSearch(e) {
         e.preventDefault();
-        if (
-            !searchObj.minPrice &&
-            !searchObj.maxPrice &&
-            searchObj.minPrice !== 0 &&
-            searchObj.maxPrice !== 0
-        ) {
-            console.log('quang');
-            delete searchObj.minPrice;
-            delete searchObj.maxPrice;
-            delete searchObj.currency;
-        }
-        console.log('searchObj:::', searchObj);
-
+        const tempSearchObj = {
+            name: '',
+            collection: '',
+            currency: 'ETH',
+            minPrice: '',
+            maxPrice: '',
+            fixed: false,
+            auction: false,
+            sort: '-createdAt',
+        };
+        const querySearch = { ...searchObj };
         const query = { ...router.query };
-        for (const key in searchObj) {
-            if (!searchObj[key]) {
-                delete searchObj[key];
+        console.log(router.query);
+        if (!querySearch.minPrice) delete querySearch.minPrice;
+        if (!querySearch.maxPrice) delete querySearch.maxPrice;
+        if (!querySearch.minPrice && !querySearch.maxPrice) {
+            delete querySearch.currency;
+        }
+
+        if (
+            (+querySearch.minPrice || +querySearch.maxPrice) &&
+            !querySearch.currency
+        ) {
+            querySearch.currency = 'ETH';
+        }
+
+        for (const key in tempSearchObj) {
+            if (key !== 'account') {
                 delete query[key];
             }
         }
+
         router.push({
             pathname: router.pathname,
             query: {
                 ...query,
-                ...searchObj,
+                ...querySearch,
             },
         });
+        setNfts([]);
+        setPage(1);
     }
+
     return (
         <form
             onSubmit={handleSearch}
@@ -97,7 +107,6 @@ function FilterAsset({ searchObj, setSearchObj, router, token }) {
                         />
                     </Accordion.Content>
                 </Accordion.Panel>
-
                 <Accordion.Panel>
                     <Accordion.Title className="bg-transparent font-semibold text-white hover:bg-[#35384033] focus:ring-0 rounded-[10px] px-2">
                         Collections
@@ -204,10 +213,16 @@ function FilterAsset({ searchObj, setSearchObj, router, token }) {
                                     type="checkbox"
                                     checked={searchObj.fixed || false}
                                     onChange={e => {
-                                        setSearchObj({
-                                            ...searchObj,
-                                            fixed: e.target.checked,
-                                        });
+                                        if (e.target.checked) {
+                                            setSearchObj({
+                                                ...searchObj,
+                                                fixed: e.target.checked,
+                                            });
+                                        } else {
+                                            const { fixed, ...tempSearchObj } =
+                                                searchObj;
+                                            setSearchObj(tempSearchObj);
+                                        }
                                     }}
                                     className="checkbox h-[24px] w-[24px] rounded-[6px] without-ring"
                                 />
@@ -218,10 +233,18 @@ function FilterAsset({ searchObj, setSearchObj, router, token }) {
                                     type="checkbox"
                                     checked={searchObj.auction || false}
                                     onChange={e => {
-                                        setSearchObj({
-                                            ...searchObj,
-                                            auction: e.target.checked,
-                                        });
+                                        if (e.target.checked) {
+                                            setSearchObj({
+                                                ...searchObj,
+                                                auction: e.target.checked,
+                                            });
+                                        } else {
+                                            const {
+                                                auction,
+                                                ...tempSearchObj
+                                            } = searchObj;
+                                            setSearchObj(tempSearchObj);
+                                        }
                                     }}
                                     className="checkbox  h-[24px] w-[24px] rounded-[6px] without-ring"
                                 />
@@ -320,7 +343,24 @@ function FilterAsset({ searchObj, setSearchObj, router, token }) {
                     </Accordion.Content>
                 </Accordion.Panel> */}
             </Accordion>
-            <div className="flex my-4 px-[10px]">
+            <div className="pr-4 mt-4">
+                <select
+                    value={searchObj.sort || '-createdAt'}
+                    onChange={e => {
+                        setSearchObj({
+                            ...searchObj,
+                            sort: e.target.value,
+                        });
+                    }}
+                    className="select select-bordered border-2 w-full hover:border-[#8a939b] rounded-[10px] bg-[#202225] text-white font-semibold without-ring focus:border-[#6B7280]"
+                >
+                    <option value="-price">Price high to low</option>
+                    <option value="price">Price low to high</option>
+                    <option value="createdAt">Oldest</option>
+                    <option value="-createdAt">Newest</option>
+                </select>
+            </div>
+            <div className="flex my-4 pr-[10px]">
                 <button
                     type="submit"
                     className="w-full bg-[#2081e2] text-white font-semibold text-lg h-12 rounded-xl hover:bg-[#4c505c] transition"
@@ -330,7 +370,9 @@ function FilterAsset({ searchObj, setSearchObj, router, token }) {
                 <button
                     onClick={e => {
                         e.preventDefault();
-                        router.push({ pathname: '/assets' });
+                        setPage(1);
+                        router.push({ pathname: router.query.account[0] });
+                        setNfts([]);
                     }}
                     className="w-full ml-4 bg-[#2081e2] text-white font-semibold text-lg h-12 rounded-xl hover:bg-[#4c505c] transition"
                 >
