@@ -13,11 +13,11 @@ const items = [
         icon: MdAccountCircle,
         content: ProfileSetting,
     },
-    {
-        name: 'Notifications',
-        icon: MdNotifications,
-        content: NotificationSetting,
-    },
+    // {
+    //     name: 'Notifications',
+    //     icon: MdNotifications,
+    //     content: NotificationSetting,
+    // },
 ];
 function SettingsPage({ userInfo, tab }) {
     const selectedTab = items.find(

@@ -347,6 +347,61 @@ const COLLECTION_INFO = gql`
         }
     }
 `;
+const GET_EVENT_OF_USER = gql`
+    query Query($userAddress: ID, $query: String) {
+        getEventByUserAddress(userAddress: $userAddress, query: $query) {
+            eventId
+            eventType
+            eventName
+            active
+            from {
+                _id
+                username
+            }
+            to {
+                _id
+                username
+            }
+            currency
+            price
+            transactionHash
+            collectionName
+            collectionSlug
+            nftName
+            startTimestamp
+            media
+            assetContract
+            tokenId
+        }
+    }
+`;
+
+const GET_EVENT_OF_COLLECTION = gql`
+    query GetEventOfCollection($collectionId: ID, $query: String) {
+        getEventOfCollection(collectionId: $collectionId, query: $query) {
+            eventId
+            eventType
+            eventName
+            active
+            from {
+                _id
+                username
+            }
+            to {
+                _id
+                username
+            }
+            currency
+            price
+            transactionHash
+            nftName
+            startTimestamp
+            assetContract
+            tokenId
+            media
+        }
+    }
+`;
 
 export {
     GET_PROFILE_IMAGE,
@@ -365,4 +420,6 @@ export {
     GET_BEST_BID,
     NFT_QUERY,
     COLLECTION_INFO,
+    GET_EVENT_OF_USER,
+    GET_EVENT_OF_COLLECTION,
 };

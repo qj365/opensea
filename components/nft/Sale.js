@@ -153,17 +153,20 @@ function Sale({ nft, address, toggleSidebar, usdPrice, notify, sdk, bestBid }) {
                                 <span className="text-[#e5e8eb] ml-2">
                                     Sale ends{' '}
                                     {formatToUSDate(nft.listing.endTimestamp)}
-                                    {isValidDate(
-                                        new Date(
-                                            parseInt(nft?.listing?.endTimestamp)
-                                        )
-                                    ) && (
-                                        <Countdown
-                                            targetDate={
-                                                nft?.listing?.endTimestamp
-                                            }
-                                        />
-                                    )}
+                                    {nft.listing.type === 'acution' &&
+                                        isValidDate(
+                                            new Date(
+                                                parseInt(
+                                                    nft?.listing?.endTimestamp
+                                                )
+                                            )
+                                        ) && (
+                                            <Countdown
+                                                targetDate={
+                                                    nft?.listing?.endTimestamp
+                                                }
+                                            />
+                                        )}
                                 </span>
                             </div>
                             {nft.listing.type === 'fixed' ? (
@@ -277,15 +280,18 @@ function Sale({ nft, address, toggleSidebar, usdPrice, notify, sdk, bestBid }) {
                             <span className="text-[#e5e8eb] ml-2">
                                 Sale ends{' '}
                                 {formatToUSDate(nft.listing.endTimestamp)}
-                                {isValidDate(
-                                    new Date(
-                                        parseInt(nft?.listing?.endTimestamp)
-                                    )
-                                ) && (
-                                    <Countdown
-                                        targetDate={nft?.listing?.endTimestamp}
-                                    />
-                                )}
+                                {nft.listing.type === 'acution' &&
+                                    isValidDate(
+                                        new Date(
+                                            parseInt(nft?.listing?.endTimestamp)
+                                        )
+                                    ) && (
+                                        <Countdown
+                                            targetDate={
+                                                nft?.listing?.endTimestamp
+                                            }
+                                        />
+                                    )}
                             </span>
                         </div>
                         {nft.listing.type === 'fixed' ? (

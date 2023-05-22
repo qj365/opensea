@@ -52,7 +52,6 @@ function FilterAsset({ searchObj, setSearchObj, router, setPage, setNfts }) {
         };
         const querySearch = { ...searchObj };
         const query = { ...router.query };
-        console.log(router.query);
         if (!querySearch.minPrice) delete querySearch.minPrice;
         if (!querySearch.maxPrice) delete querySearch.maxPrice;
         if (!querySearch.minPrice && !querySearch.maxPrice) {
@@ -371,7 +370,7 @@ function FilterAsset({ searchObj, setSearchObj, router, setPage, setNfts }) {
                     onClick={e => {
                         e.preventDefault();
                         setPage(1);
-                        router.push({ pathname: router.query.account[0] });
+                        router.push('/assets');
                         setNfts([]);
                     }}
                     className="w-full ml-4 bg-[#2081e2] text-white font-semibold text-lg h-12 rounded-xl hover:bg-[#4c505c] transition"

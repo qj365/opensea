@@ -6,41 +6,73 @@ import { GET_COLLECTIONS_FOR_DISPLAY } from '../../graphql/query';
 import Image from 'next/image';
 import { useState } from 'react';
 
-function FilterCollection({
-    searchObj,
-    setSearchObj,
-    router,
-    token,
-    setPage,
-    setNfts,
-}) {
-    const [searchCollection, setSearchCollection] = useState('');
+const categories = [
+    {
+        id: 2,
+        title: 'Art',
+    },
+    {
+        id: 3,
+        title: 'Collectibles',
+    },
+    {
+        id: 4,
+        title: 'Domain Names',
+    },
+    {
+        id: 5,
+        title: 'Music',
+    },
+    {
+        id: 6,
+        title: 'Photography',
+    },
+    {
+        id: 7,
+        title: 'Sports',
+    },
+];
+
+function Filter({ searchObj, setSearchObj, router, token, setPage, setNfts }) {
     function handleSearch(e) {
         e.preventDefault();
-
-        if (
-            !searchObj.minPrice &&
-            !searchObj.maxPrice &&
-            searchObj.minPrice !== 0 &&
-            searchObj.maxPrice !== 0
-        ) {
-            delete searchObj.minPrice;
-            delete searchObj.maxPrice;
-            delete searchObj.currency;
+        const tempSearchObj = {
+            name: '',
+            collection: '',
+            currency: 'ETH',
+            minPrice: '',
+            maxPrice: '',
+            fixed: false,
+            auction: false,
+            sort: '-createdAt',
+        };
+        const querySearch = { ...searchObj };
+        const query = { ...router.query };
+        console.log(router.query);
+        if (!querySearch.minPrice) delete querySearch.minPrice;
+        if (!querySearch.maxPrice) delete querySearch.maxPrice;
+        if (!querySearch.minPrice && !querySearch.maxPrice) {
+            delete querySearch.currency;
         }
 
-        const query = { ...router.query };
-        for (const key in searchObj) {
-            if (!searchObj[key]) {
-                delete searchObj[key];
+        if (
+            (+querySearch.minPrice || +querySearch.maxPrice) &&
+            !querySearch.currency
+        ) {
+            querySearch.currency = 'ETH';
+        }
+
+        for (const key in tempSearchObj) {
+            if (key !== 'account') {
                 delete query[key];
             }
         }
+
         router.push({
             pathname: router.pathname,
             query: {
                 ...query,
-                ...searchObj,
+                ...querySearch,
             },
         });
         setNfts([]);
@@ -71,99 +103,6 @@ function FilterCollection({
                         />
                     </Accordion.Content>
                 </Accordion.Panel>
-                {/* <Accordion.Panel>
-                    <Accordion.Title className="bg-transparent font-semibold text-white hover:bg-[#35384033] focus:ring-0 rounded-[10px] px-2">
-                        Collections
-                    </Accordion.Title>
-                    <Accordion.Content className="px-0 py-0">
-                        <InputWithIcon
-                            inputCss="w-full"
-                            placeholder={'Search by collection'}
-                            value={searchCollection || ''}
-                            onChange={e => {
-                                setSearchCollection(e.target.value);
-                            }}
-                        />
-                        {
-                            <div>
-                                <div className="font-semibold text-xs text-[#8a939b] my-4">
-                                    COLLECTION
-                                </div>
-                                {collections?.getAllCollections
-                                    .filter(
-                                        collection =>
-                                            searchCollection.trim() === '' ||
-                                            collection.name
-                                                .toLowerCase()
-                                                .includes(
-                                                    searchCollection.toLowerCase()
-                                                )
-                                    )
-                                    .map((collection, index) => (
-                                        <button
-                                            className={`flex w-full px-[10px] items-center py-3 rounded-lg hover:bg-[#353840] my-1 ${
-                                                decodeURI(searchObj.collection)
-                                                    ?.toLowerCase()
-                                                    ?.split(',')
-                                                    .includes(
-                                                        collection.name.toLowerCase()
-                                                    ) && 'bg-[#353840]'
-                                            }`}
-                                            key={index}
-                                            onClick={e => {
-                                                e.preventDefault();
-                                                const decodedCollection =
-                                                    decodeURI(
-                                                        searchObj.collection ||
-                                                            ''
-                                                    );
-                                                const filterColelction =
-                                                    decodedCollection
-                                                        ?.toLowerCase()
-                                                        ?.split(',')
-                                                        ?.includes(
-                                                            collection.name.toLowerCase()
-                                                        )
-                                                        ? decodedCollection
-                                                              ?.toLowerCase()
-                                                              ?.split(',')
-                                                              ?.filter(
-                                                                  c =>
-                                                                      c !==
-                                                                      collection.name.toLowerCase()
-                                                              )
-                                                              ?.join(',')
-                                                        : decodedCollection
-                                                        ? decodedCollection.toLowerCase() +
-                                                          ',' +
-                                                          collection.name.toLowerCase()
-                                                        : collection.name.toLowerCase();
-                                                setSearchObj({
-                                                    ...searchObj,
-                                                    collection:
-                                                        encodeURI(
-                                                            filterColelction
-                                                        ),
-                                                });
-                                            }}
-                                        >
-                                            <div className="h-7 w-7 relative rounded-[10px] overflow-hidden ">
-                                                <Image
-                                                    src={collection.logoImage}
-                                                    alt="collection"
-                                                    layout="fill"
-                                                    objectFit="cover"
-                                                />
-                                            </div>
-                                            <div className="text-white text-sm ml-4">
-                                                {collection.name}
-                                            </div>
-                                        </button>
-                                    ))}
-                            </div>
-                        }
-                    </Accordion.Content>
-                </Accordion.Panel> */}
 
                 <Accordion.Panel>
                     <Accordion.Title className="bg-transparent font-semibold text-white hover:bg-[#35384033] focus:ring-0 rounded-[10px] px-2">
@@ -177,10 +116,16 @@ function FilterCollection({
                                     type="checkbox"
                                     checked={searchObj.fixed || false}
                                     onChange={e => {
-                                        setSearchObj({
-                                            ...searchObj,
-                                            fixed: e.target.checked,
-                                        });
+                                        if (e.target.checked) {
+                                            setSearchObj({
+                                                ...searchObj,
+                                                fixed: e.target.checked,
+                                            });
+                                        } else {
+                                            const { fixed, ...tempSearchObj } =
+                                                searchObj;
+                                            setSearchObj(tempSearchObj);
+                                        }
                                     }}
                                     className="checkbox h-[24px] w-[24px] rounded-[6px] without-ring"
                                 />
@@ -191,10 +136,18 @@ function FilterCollection({
                                     type="checkbox"
                                     checked={searchObj.auction || false}
                                     onChange={e => {
-                                        setSearchObj({
-                                            ...searchObj,
-                                            auction: e.target.checked,
-                                        });
+                                        if (e.target.checked) {
+                                            setSearchObj({
+                                                ...searchObj,
+                                                auction: e.target.checked,
+                                            });
+                                        } else {
+                                            const {
+                                                auction,
+                                                ...tempSearchObj
+                                            } = searchObj;
+                                            setSearchObj(tempSearchObj);
+                                        }
                                     }}
                                     className="checkbox  h-[24px] w-[24px] rounded-[6px] without-ring"
                                 />
@@ -333,4 +286,4 @@ function FilterCollection({
     );
 }
 
-export default FilterCollection;
+export default Filter;

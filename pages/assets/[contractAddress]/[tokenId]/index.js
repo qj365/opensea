@@ -35,9 +35,17 @@ function NftItem() {
     const sdk = useSDK();
     const { contractAddress, tokenId } = router.query;
 
-    const [viewsNft] = useMutation(VIEWS_NFT);
+    const [viewsNft] = useMutation(VIEWS_NFT, {
+        refetchQueries: {
+            query: GET_NFT_ASSET_PAGE,
+            variables: {
+                collectionNft: contractAddress.toLowerCase(),
+                tokenId: parseInt(tokenId),
+            },
+        },
+    });
 
-    useDidMountEffect(() => {
+    useEffect(() => {
         async function updateViews() {
             if (contractAddress && tokenId) {
                 console.log('update view+');
@@ -50,7 +58,7 @@ function NftItem() {
             }
         }
         updateViews();
-    }, [contractAddress, tokenId]);
+    }, []);
 
     const {
         data: nftData,

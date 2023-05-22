@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/router';
 import ItemsTab from './ItemsTab';
 import Link from 'next/link';
+import EventCollectionFilter from './EventCollectionFilter';
 
 function CollectionList({ collection }) {
     const router = useRouter();
@@ -15,7 +16,7 @@ function CollectionList({ collection }) {
         {
             label: 'Activity',
             href: 'activity',
-            component: '',
+            component: <EventCollectionFilter collection={collection} />,
         },
     ];
     function handleTabClick(e, tab) {
