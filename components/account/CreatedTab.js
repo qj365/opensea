@@ -59,6 +59,7 @@ function CreatedTab(props) {
                 }),
                 page: page,
             },
+            fetchPolicy: 'network-only',
         });
         if (data?.getQueryNfts?.nfts?.length > 0)
             setNfts([...nfts, ...data?.getQueryNfts?.nfts]);
@@ -79,6 +80,7 @@ function CreatedTab(props) {
                 page: page,
                 limit: 4,
             },
+            fetchPolicy: 'network-only',
         });
         if (data?.getQueryNfts?.nfts?.length > 0)
             setNfts([...nfts, ...data?.getQueryNfts?.nfts]);
