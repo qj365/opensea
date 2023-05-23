@@ -418,6 +418,7 @@ function ItemWrapper({ nft, usdPrice }) {
                     },
                 },
             });
+            router.reload();
         } catch (err) {
             notify('error', 'Claim NFT failed');
             setIsClaimingNFT(false);
@@ -449,6 +450,7 @@ function ItemWrapper({ nft, usdPrice }) {
                     },
                 },
             });
+            router.reload();
         } catch (err) {
             notify('error', 'Claim bid failed');
             setIsClaimingBid(false);
