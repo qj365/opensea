@@ -153,7 +153,7 @@ function Sale({ nft, address, toggleSidebar, usdPrice, notify, sdk, bestBid }) {
                                 <span className="text-[#e5e8eb] ml-2">
                                     Sale ends{' '}
                                     {formatToUSDate(nft.listing.endTimestamp)}
-                                    {nft.listing.type === 'acution' &&
+                                    {nft.listing.type === 'auction' &&
                                         isValidDate(
                                             new Date(
                                                 parseInt(
@@ -280,7 +280,7 @@ function Sale({ nft, address, toggleSidebar, usdPrice, notify, sdk, bestBid }) {
                             <span className="text-[#e5e8eb] ml-2">
                                 Sale ends{' '}
                                 {formatToUSDate(nft.listing.endTimestamp)}
-                                {nft.listing.type === 'acution' &&
+                                {nft.listing.type === 'auction' &&
                                     isValidDate(
                                         new Date(
                                             parseInt(nft?.listing?.endTimestamp)
