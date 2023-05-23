@@ -158,14 +158,21 @@ function CreateColelctionPage() {
                 try {
                     document.body.style.overflowY = 'hidden';
                     setSubmittingForm(true);
-                    const featured = await uploadImage(
-                        collectionData.featured,
-                        'collections'
-                    );
-                    const banner = await uploadImage(
-                        collectionData.banner,
-                        'collections'
-                    );
+                    let featured;
+                    if (collectionData.featured) {
+                        featured = await uploadImage(
+                            collectionData.featured,
+                            'collections'
+                        );
+                    }
+                    let banner;
+                    if (collectionData.banner) {
+                        banner = await uploadImage(
+                            collectionData.banner,
+                            'collections'
+                        );
+                    }
+
                     const logo = await uploadImage(
                         collectionData.logo,
                         'collections'

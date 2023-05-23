@@ -91,7 +91,7 @@ export default function Home() {
                                 <div className="h-20 bg-[#313338] p-4 rounded-b-lg flex items-center text-white">
                                     <img
                                         className="h-[2.25rem] rounded-full"
-                                        src="https://cloudflare-ipfs.com/ipfs/QmVECY3KEuUVr764MSNKCxYKnxYWV5zQXM8WQEAeFaJrJa/7ed181433ee09174f09a0e31b563d313.avif"
+                                        src="https://cloudflare-ipfs.com/ipfs/QmWvvdi6WCnbE9tebZQYRu9Fr1j86SEaE9J253Xw5Jm3As/7ed181433ee09174f09a0e31b563d313.jpg"
                                         alt=""
                                     />
                                     <div className="flex flex-col justify-center ml-4">
