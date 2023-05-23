@@ -238,11 +238,11 @@ function CreateAssetPage() {
                 <form onSubmit={e => handleSubmit(e)}>
                     <div className="text-white mb-6">
                         <label htmlFor="media" className="font-semibold mb-1">
-                            Image, Video, Audio, or 3D Model *
+                            Image
                         </label>
                         <p>
-                            File types supported: JPG, PNG, GIF, SVG, MP4, WEBM,
-                            MP3, WAV, OGG, GLB, GLTF. Max size: 100 MB
+                            File types supported: JPEG, PNG, GIF, TIFF, AVIF,
+                            WEBP, APNG.
                         </p>
                         <div
                             className="group mt-2 cursor-pointer border-[3px] border-dashed border-[#cccccc] rounded-[10px] h-[200px] w-[300px] flex items-center justify-center relative overflow-hidden"

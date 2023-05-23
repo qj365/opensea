@@ -91,16 +91,16 @@ export default function Home() {
                                 <div className="h-20 bg-[#313338] p-4 rounded-b-lg flex items-center text-white">
                                     <img
                                         className="h-[2.25rem] rounded-full"
-                                        src="https://lh3.googleusercontent.com/qQj55gGIWmT1EnMmGQBNUpIaj0qTyg4YZSQ2ymJVvwr_mXXjuFiHJG9d3MRgj5DVgyLa69u8Tq9ijSm_stsph8YmIJlJQ1e7n6xj=s64"
+                                        src="https://cloudflare-ipfs.com/ipfs/QmVECY3KEuUVr764MSNKCxYKnxYWV5zQXM8WQEAeFaJrJa/7ed181433ee09174f09a0e31b563d313.avif"
                                         alt=""
                                     />
                                     <div className="flex flex-col justify-center ml-4">
-                                        <div>Jolly</div>
+                                        <div>Account 1</div>
                                         <a
                                             className="text-[#1868b7]"
-                                            href="https://opensea.io/assets/0x495f947276749ce646f68ac8c248420045cb7b5e/2324922113504035910649522729980423429926362207300810036887725141691069366277"
+                                            href="https://marketplace.quangnn.tech/assets/0xaf98ea9f1c2eb2218d5304a15418267e3bb2b2f9/1"
                                         >
-                                            hola-kanola
+                                            Siren
                                         </a>
                                     </div>
                                 </div>
