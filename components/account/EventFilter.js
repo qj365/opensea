@@ -144,7 +144,9 @@ function EventFilter() {
                                     .map((collection, index) => (
                                         <button
                                             className={`flex w-full px-[10px] items-center py-3 rounded-lg hover:bg-[#353840] my-1 ${
-                                                decodeURI(searchObj.collection)
+                                                decodeURI(
+                                                    searchObj?.collection || ''
+                                                )
                                                     ?.toLowerCase()
                                                     ?.split(',')
                                                     .includes(

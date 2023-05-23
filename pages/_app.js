@@ -34,7 +34,16 @@ function MyApp({ Component, pageProps }) {
 
     return (
         <ApolloProvider client={client}>
-            <ThirdwebProvider activeChain={Sepolia}>
+            <ThirdwebProvider
+                activeChain={{
+                    ...Sepolia,
+                    rpc: [
+                        'https://ethereum-sepolia.blockpi.network/v1/rpc/26cb2aff2f8655e04b734b0d6aa45993f5771812',
+                        'https://rpc.sepolia.org',
+                        'https://eth-sepolia.public.blastapi.io',
+                    ],
+                }}
+            >
                 <ClientOnly>
                     <AvatarContextProvider>
                         <SidebarContextProvider>
