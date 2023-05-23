@@ -43,6 +43,7 @@ function CollectedTab(props) {
                 }),
                 page: page,
             },
+            cache: new InMemoryCache(),
         });
         if (data?.getQueryNfts?.nfts?.length > 0)
             setNfts([...nfts, ...data?.getQueryNfts?.nfts]);
@@ -63,6 +64,7 @@ function CollectedTab(props) {
                 page: page,
                 limit: 4,
             },
+            cache: new InMemoryCache(),
         });
         if (data?.getQueryNfts?.nfts?.length > 0)
             setNfts([...nfts, ...data?.getQueryNfts?.nfts]);

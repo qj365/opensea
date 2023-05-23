@@ -78,6 +78,7 @@ function CreateAssetPage() {
         variables: {
             query: `owner=${Cookies.get('__user_address')?.toLowerCase()}`,
         },
+        fetchPolicy: 'network-only',
     });
 
     const collections = data?.getAllCollections.map(collection => {
@@ -238,7 +239,7 @@ function CreateAssetPage() {
                 <form onSubmit={e => handleSubmit(e)}>
                     <div className="text-white mb-6">
                         <label htmlFor="media" className="font-semibold mb-1">
-                            Image
+                            Image *
                         </label>
                         <p>
                             File types supported: JPEG, PNG, GIF, TIFF, AVIF,
