@@ -124,6 +124,8 @@ function MakeOfferModal({
                         assetContractAddress: nft.collectionNft._id,
                         tokenId: nft.tokenId,
                         totalPrice: parseFloat(price),
+                        currencyContractAddress:
+                            process.env.NEXT_PUBLIC_WETH_ADDRESS,
                         endTimestamp: new Date(
                             new Date().getTime() +
                                 selectedOption.value * 60 * 60 * 1000
